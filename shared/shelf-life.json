@@ -1,28 +1,30 @@
 {
-  "_note": "อายุของ (shelf life) สำหรับแอปฉลาก shelf/ · เบสชาอ่านจาก bases.json (brew.shelf_life_h) · ของเตรียมอ่านจาก menu.json (preps.*.shelf_life_days) · ไฟล์นี้เก็บเฉพาะของที่สองไฟล์นั้นไม่มี · hours = อายุนับจากเวลาที่เตรียม/เปิด หน่วยชั่วโมง (null = ยังไม่มีตัวเลข แอปจะให้พนักงานกรอกเองทุกครั้ง) · confirmed = วันที่ Boon ยืนยัน (null = ยังไม่ยืนยัน) · ingredient = id ใน ingredients.json (ถ้าไม่ใส่ name จะใช้ชื่อจากที่นั่น)",
+  "_note": "อายุของ (shelf life) สำหรับแอปฉลาก shelf/ · เบสชาอ่านจาก bases.json (brew.shelf_life_h) · ของเตรียมอ่านจาก menu.json (preps.*.shelf_life_days) · ไฟล์นี้เก็บเฉพาะของที่สองไฟล์นั้นไม่มี · hours = อายุนับจากเวลาที่เตรียม/เปิด หน่วยชั่วโมง (null = ยังไม่มีตัวเลข แอปจะให้พนักงานกรอกเองทุกครั้ง) · confirmed = วันที่ Boon ยืนยัน (null = ยังไม่ยืนยัน) · ingredient = id ใน ingredients.json (ถ้าไม่ใส่ name จะใช้ชื่อจากที่นั่น) · source = ที่มาของตัวเลข · storage = วิธีเก็บตามฉลาก · ตัวเลขจากฉลากคืออายุสูงสุดหลังเปิดที่ผู้ผลิตระบุ (เก็บในตู้เย็น)",
   "groups": {
-    "base": { "name": "เบสชา", "verb": "ชง" },
-    "prep": { "name": "ของเตรียม", "verb": "ทำ" },
-    "topping": { "name": "ท็อปปิ้ง", "verb": "เตรียม" },
-    "opened": { "name": "เปิดแล้ว", "verb": "เปิด" },
-    "custom": { "name": "อื่นๆ", "verb": "ทำ" }
+    "base": {"name": "เบสชา", "verb": "ชง"},
+    "prep": {"name": "ของเตรียม", "verb": "ทำ"},
+    "topping": {"name": "ท็อปปิ้ง", "verb": "เตรียม"},
+    "opened": {"name": "เปิดแล้ว", "verb": "เปิด"},
+    "custom": {"name": "อื่นๆ", "verb": "ทำ"}
   },
   "toppings": [
-    { "id": "peeled_grape", "name": "องุ่นปอก", "ingredient": "it18", "hours": null, "confirmed": null },
-    { "id": "konjac_pearl", "name": "บุกไข่มุก (แกะถุงแล้ว)", "ingredient": "it17", "hours": null, "confirmed": null }
+    {"id": "peeled_grape", "name": "องุ่นปอก", "ingredient": "it18", "hours": null, "confirmed": null},
+    {"id": "konjac_pearl", "name": "บุกไข่มุก (แกะถุงแล้ว)", "ingredient": "it17", "hours": null, "confirmed": null}
   ],
   "opened": [
-    { "ingredient": "it10", "hours": null, "confirmed": null },
-    { "ingredient": "it11", "hours": null, "confirmed": null },
-    { "ingredient": "it12", "hours": null, "confirmed": null },
-    { "ingredient": "it13", "hours": null, "confirmed": null },
-    { "ingredient": "it14", "hours": null, "confirmed": null },
-    { "ingredient": "it15", "hours": null, "confirmed": null },
-    { "ingredient": "it16", "hours": null, "confirmed": null },
-    { "ingredient": "it19", "hours": null, "confirmed": null },
-    { "ingredient": "it20", "hours": null, "confirmed": null },
-    { "ingredient": "it34", "hours": null, "confirmed": null },
-    { "ingredient": "it35", "hours": null, "confirmed": null },
-    { "ingredient": "it22", "hours": null, "confirmed": null }
+    {"ingredient": "it10", "hours": 48, "confirmed": "2026-11-10", "source": "ฉลากข้างกล่อง (รูปจาก Boon 2026-11-10)", "storage": "ตู้เย็น 2–8°C"},
+    {"ingredient": "it11", "hours": 168, "confirmed": "2026-11-10", "source": "ฉลากข้างกล่อง (รูปจาก Boon 2026-11-10)", "storage": "ตู้เย็น"},
+    {"id": "aroma_red", "name": "Aroma นมข้นจืด (กล่องแดง)", "ingredient": "it12", "hours": 168, "confirmed": "2026-11-10", "source": "ฉลากข้างกล่อง (รูปจาก Boon 2026-11-10)", "storage": "ตู้เย็น", "note": "กำลังวิจัยรสชาติสำหรับชาปั่น ยังไม่ได้ใช้จริง"},
+    {"id": "aroma_yellow", "name": "Aroma นมข้นจืด (กล่องเหลือง)", "ingredient": "it12", "hours": null, "confirmed": null, "source": "ฉลากบอกแค่ให้เก็บในตู้เย็นหลังเปิด ไม่ระบุจำนวนวัน", "storage": "ตู้เย็น", "note": "กำลังวิจัยรสชาติสำหรับชาปั่น ยังไม่ได้ใช้จริง"},
+    {"ingredient": "it13", "hours": null, "confirmed": null},
+    {"ingredient": "it14", "hours": null, "confirmed": null, "note": "รูปที่ได้มาเป็นยี่ห้อ Imperial (ไม่ใช่ตัวที่ใช้) และฉลากไม่ระบุจำนวนวันหลังเปิด · รอดูฉลาก Anchor"},
+    {"ingredient": "it15", "hours": 72, "confirmed": "2026-11-10", "source": "ฉลากข้างกล่อง (รูปจาก Boon 2026-11-10)", "storage": "ตู้เย็น 2–4°C ห้ามแช่แข็ง"},
+    {"ingredient": "it16", "hours": 168, "confirmed": "2026-11-10", "source": "ฉลากข้างกล่อง (รูปจาก Boon 2026-11-10)", "storage": "ตู้เย็น ใส่ภาชนะสะอาดมีฝาปิด"},
+    {"id": "malee_coconut_water", "name": "Malee น้ำมะพร้าวน้ำหอม", "hours": 72, "confirmed": "2026-11-10", "source": "ฉลากข้างกล่อง (รูปจาก Boon 2026-11-10)", "storage": "ตู้เย็น 2–8°C", "note": "ใช้ทำชาใสน้ำมะพร้าว · ยังไม่มีใน ingredients.json"},
+    {"ingredient": "it19", "hours": null, "confirmed": null},
+    {"ingredient": "it20", "hours": null, "confirmed": null},
+    {"ingredient": "it34", "hours": null, "confirmed": null},
+    {"ingredient": "it35", "hours": null, "confirmed": null},
+    {"ingredient": "it22", "hours": null, "confirmed": null}
   ]
 }
