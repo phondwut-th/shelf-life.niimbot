@@ -1,0 +1,6 @@
+# ข้อมูลการเงินจริงของร้าน — เก็บบน Mac เท่านั้น
+fund/data/
+
+.DS_Store
+node_modules/
+.env*

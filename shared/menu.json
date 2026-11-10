@@ -1,0 +1,112 @@
+{
+  "_note": "เมนู ราคา สูตรผสม ต้นทุน · ที่มา: KACHA-ข้อมูลร้าน v1.0 (2026-10-29)",
+  "prices_thb": {
+    "clear_tea": {
+      "store": 59,
+      "delivery": 69
+    },
+    "milk_tea": {
+      "store": 69,
+      "delivery": 79
+    },
+    "grape_blend": null,
+    "cream_cheese_top": null
+  },
+  "delivery_gp_pct": 33,
+  "mix": {
+    "clear_tea": {
+      "name": "ชาใส",
+      "base_ml": 200,
+      "water_ml": 80,
+      "syrup_ml": 25,
+      "method": "เชค + น้ำแข็ง"
+    },
+    "milk_tea": {
+      "name": "ชานม",
+      "base_ml": 200,
+      "milk_mix_ml": 100,
+      "syrup_ml": 25,
+      "method": "เชค + น้ำแข็ง"
+    },
+    "grape_blend": {
+      "name": "ชาองุ่นปั่น (ม่วง/เขียว)",
+      "base": "jasmine02",
+      "base_ml": 100,
+      "synova_ml": 35,
+      "mitrphol_syrup_ml": 35,
+      "nature_taste_ml": 15,
+      "ice_g": 300,
+      "top": {
+        "peeled_grape_g": 50,
+        "konjac_pearl_g": 60,
+        "cream_cheese_g": 50
+      }
+    },
+    "cream_cheese_top_g": 50
+  },
+  "preps": {
+    "milk_mix": {
+      "name": "นมผสม",
+      "ratio": "นมสด Meiji : นมข้นจืด Carnation : ครีมเทียม = 6:3:1",
+      "shelf_life_days": "1-2"
+    },
+    "cream_cheese_foam": {
+      "name": "ครีมชีสโฟม",
+      "anchor_cream_cheese_g": 150,
+      "millac_gold_whip_ml": 150,
+      "meiji_milk_ml": 300,
+      "teapot_condensed_ml": 60,
+      "pink_salt_g": 2,
+      "yield_ml": 660,
+      "cups": 13,
+      "shelf_life_days": 1,
+      "confirmed": "2026-11-10",
+      "method": "ครีมชีส+นมสด+นมข้นหวาน+เกลือ ปั่นเหลว → ตีวิป 3 นาที → รวมตี 1.30 นาที"
+    }
+  },
+  "cost_per_cup_thb": {
+    "_excludes": "แก้ว+ฝา+หลอด 5.8 · ถุง 4 · ครีมชีส 50 ก. 7.74",
+    "tieguanyin": [
+      6.8,
+      14.3
+    ],
+    "jasmine01": [
+      7.1,
+      14.6
+    ],
+    "camellia": [
+      7.4,
+      14.9
+    ],
+    "dahongpao": [
+      7.7,
+      15.2
+    ],
+    "jasmine02": [
+      7.7,
+      15.2
+    ],
+    "khaohom": [
+      7.7,
+      15.2
+    ],
+    "osmanthus": [
+      12.2,
+      19.7
+    ],
+    "_cols": [
+      "ชาใส",
+      "ชานม"
+    ],
+    "grape_blend": {
+      "no_bag": 44.46,
+      "with_bag": 48.46
+    }
+  },
+  "expected_cups_per_day": 230,
+  "not_doing": [
+    "กาแฟ",
+    "มัทฉะ",
+    "พีช"
+  ]
+}

@@ -1,0 +1,659 @@
+<meta name="claude:viewport-fit-sides" content="cover">
+<title>กองกลาง YICHA</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<style>
+  /* layout: บัญชีกองกลางหน้าเดียว — การ์ดยอดคงเหลือบนสุด, ปุ่มเพิ่มรายการ, รายการล่าสุดโชว์รายละเอียดเต็ม */
+  :root {
+    --paper: #faf8f3; --card: #ffffff; --ink: #20261f; --muted: #6d7568; --line: #e7e3d8;
+    --tea: #1f7a54; --tea-soft: #e4f0e8; --out: #b4472e; --out-soft: #f6e6e0; --in: #1f7a54;
+    --friend: #93640f; --friend-soft: #f5ead2;  /* จ่ายจากบัญชีเพื่อน */
+    color-scheme: light;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --paper: #15120d; --card: #1e1b15; --ink: #ece7db; --muted: #9a9a8c; --line: #322d24;
+      --tea: #4bbd85; --tea-soft: #1a2a21; --out: #e0795f; --out-soft: #2c1f1a; --in: #4bbd85; --friend: #e2b55e; --friend-soft: #2e2615; color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"] {
+    --paper: #15120d; --card: #1e1b15; --ink: #ece7db; --muted: #9a9a8c; --line: #322d24;
+    --tea: #4bbd85; --tea-soft: #1a2a21; --out: #e0795f; --out-soft: #2c1f1a; --in: #4bbd85; --friend: #e2b55e; --friend-soft: #2e2615; color-scheme: dark;
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--paper); color: var(--ink);
+    font-family: 'IBM Plex Sans Thai', 'Noto Sans Thai', system-ui, sans-serif;
+    font-size: 15px; line-height: 1.5; -webkit-font-smoothing: antialiased;
+  }
+  .num { font-family: 'IBM Plex Mono', ui-monospace, monospace; font-variant-numeric: tabular-nums; }
+  .wrap {
+    max-width: 680px; margin: 0 auto;
+    padding-left: max(16px, env(safe-area-inset-left, 0px));
+    padding-right: max(16px, env(safe-area-inset-right, 0px));
+    padding-block: 22px 56px;
+    display: flex; flex-direction: column; gap: 18px;
+  }
+
+  header { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }
+  .brand { font-weight: 600; letter-spacing: .3px; display: flex; align-items: center; gap: 8px; }
+  .brand .leaf { color: var(--tea); }
+  .brand small { color: var(--muted); font-weight: 400; }
+  #themeBtn {
+    border: 1px solid var(--line); background: var(--card); color: var(--muted);
+    border-radius: 999px; padding: 5px 12px; font: inherit; font-size: 12px; cursor: pointer;
+  }
+
+  .balance-card {
+    background: var(--card); border: 1px solid var(--line); border-radius: 18px;
+    padding: 22px 24px; box-shadow: 0 1px 2px rgba(0,0,0,.03);
+  }
+  .balance-card .label { color: var(--muted); font-size: 13px; letter-spacing: .4px; }
+  .balance {
+    font-family: 'IBM Plex Mono', ui-monospace, monospace; font-variant-numeric: tabular-nums;
+    font-weight: 600; font-size: clamp(34px, 9vw, 46px); line-height: 1.1; margin: 4px 0 2px; letter-spacing: -.5px;
+  }
+  .balance.neg { color: var(--out); }
+  .bal-note { font-size: 12px; color: var(--muted); }
+  .io { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; margin-top: 16px; }
+  .io > div { min-width: 0; border: 1px solid var(--line); border-radius: 12px; padding: 10px 14px; display: flex; flex-direction: column; gap: 2px; }
+  .io span { font-size: 12px; color: var(--muted); display: flex; align-items: center; gap: 6px; }
+  .io b { font-size: 18px; font-weight: 600; }
+  .io small { font-size: 11px; color: var(--muted); }
+  .dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; flex-shrink: 0; }
+  .dot.in { background: var(--in); } .dot.out { background: var(--out); } .dot.friend { background: var(--friend); }
+  .io .vin b { color: var(--in); } .io .vout b { color: var(--out); } .io .vfriend b { color: var(--friend); }
+  @media (max-width: 520px) {
+    .io { grid-template-columns: 1fr 1fr; }
+    .io .vfriend { grid-column: 1 / -1; }
+  }
+
+  /* เลือกว่าจ่ายจากไหน */
+  .seg { display: flex; gap: 6px; flex-wrap: wrap; }
+  .seg label { position: relative; cursor: pointer; }
+  .seg input { position: absolute; opacity: 0; width: 1px; height: 1px; }
+  .seg span {
+    display: inline-block; padding: 8px 14px; border: 1px solid var(--line); border-radius: 999px;
+    font-size: 13px; color: var(--muted); background: var(--paper);
+  }
+  .seg input:checked + span { background: var(--tea-soft); color: var(--tea); border-color: var(--tea); font-weight: 600; }
+  .seg input[value="friend"]:checked + span { background: var(--friend-soft); color: var(--friend); border-color: var(--friend); }
+  .seg input:focus-visible + span { outline: 2px solid var(--tea); outline-offset: 2px; }
+
+  .actions { display: flex; gap: 10px; }
+  .btn { flex: 1; border: none; border-radius: 12px; padding: 13px 16px; font: inherit; font-weight: 600; cursor: pointer; transition: transform .08s, filter .15s; color: #fff; }
+  .btn:active { transform: translateY(1px); }
+  .btn.out { background: var(--out); }
+  .btn.in { background: var(--tea); }
+  .btn[disabled] { opacity: .5; cursor: not-allowed; }
+
+  #panel { background: var(--card); border: 1px solid var(--line); border-radius: 16px; padding: 18px; }
+  #panel h3 { margin: 0 0 14px; font-size: 16px; }
+  .fields { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .field { display: flex; flex-direction: column; gap: 5px; }
+  .field.full { grid-column: 1 / -1; }
+  label { font-size: 12px; color: var(--muted); font-weight: 500; }
+  input, select, textarea {
+    font: inherit; padding: 10px 12px; border: 1px solid var(--line); border-radius: 10px;
+    background: var(--paper); color: var(--ink); width: 100%;
+  }
+  textarea { resize: vertical; min-height: 64px; line-height: 1.45; }
+  input:focus, select:focus, textarea:focus { outline: 2px solid var(--tea); outline-offset: -1px; border-color: var(--tea); }
+  input.amt { font-family: 'IBM Plex Mono', monospace; font-variant-numeric: tabular-nums; }
+  .hint { font-size: 11px; color: var(--muted); }
+  .panel-actions { display: flex; gap: 10px; margin-top: 16px; }
+  .btn-ghost { background: transparent; color: var(--muted); border: 1px solid var(--line); flex: initial; border-radius: 12px; padding: 13px 18px; font: inherit; font-weight: 500; cursor: pointer; }
+  .btn-save { flex: 1; }
+
+  .list-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+  .list-head h2 { margin: 0; font-size: 16px; }
+  .list-head select { width: auto; padding: 7px 10px; font-size: 13px; }
+  #txlist { display: flex; flex-direction: column; gap: 1px; margin-top: 10px; }
+  .tx {
+    display: grid; grid-template-columns: auto 1fr auto; align-items: start; gap: 12px;
+    padding: 13px 4px; border-bottom: 1px solid var(--line);
+  }
+  .tx .icon { width: 34px; height: 34px; border-radius: 10px; display: grid; place-items: center; font-size: 15px; flex-shrink: 0; margin-top: 1px; }
+  .tx.expense .icon { background: var(--out-soft); }
+  .tx.topup .icon { background: var(--tea-soft); }
+  .tx .mid { min-width: 0; }
+  .tx .desc { font-weight: 500; white-space: pre-wrap; overflow-wrap: anywhere; }
+  .tx .meta { font-size: 12px; color: var(--muted); margin-top: 3px; }
+  .tx .right { display: flex; align-items: center; gap: 8px; }
+  .tx .val { font-weight: 600; white-space: nowrap; }
+  .tx.expense .val { color: var(--out); } .tx.topup .val { color: var(--in); }
+  .tx.friend .icon { background: var(--friend-soft); }
+  .tx.friend .val { color: var(--friend); }
+  .chip-f { display: inline-block; margin-left: 6px; padding: 0 8px; border-radius: 999px; font-size: 11px; font-weight: 500; background: var(--friend-soft); color: var(--friend); }
+  .tx .right { gap: 2px; }
+  .tx .val { margin-right: 6px; }
+  .edit { border: none; background: transparent; color: var(--muted); cursor: pointer; font-size: 15px; padding: 4px 6px; border-radius: 8px; opacity: .55; }
+  .edit:hover, .edit:focus-visible { opacity: 1; color: var(--tea); background: var(--tea-soft); }
+  .del { border: none; background: transparent; color: var(--muted); cursor: pointer; font-size: 15px; padding: 4px 6px; border-radius: 8px; opacity: .55; }
+  .del:hover { opacity: 1; color: var(--out); background: var(--out-soft); }
+  .del.confirm { color: #fff; background: var(--out); opacity: 1; font-size: 12px; font-weight: 600; }
+
+  /* แนบรูป */
+  .field-img .drop { position: relative; border: 1px dashed var(--line); border-radius: 10px; padding: 12px; display: flex; align-items: center; gap: 12px; flex-wrap: wrap; background: var(--paper); }
+  /* ซ่อนแบบที่มือถือยังกดผ่าน <label> ได้ (display:none ทำให้ Android บางเครื่องเปิดไม่ขึ้น) */
+  .field-img input[type=file] { position: absolute; width: 1px; height: 1px; opacity: 0; overflow: hidden; pointer-events: none; }
+  .pick-btn:focus-within, .field-img input[type=file]:focus + .pick-btn { outline: 2px solid var(--tea); }
+  .pick-btn { border: 1px solid var(--line); background: var(--card); color: var(--ink); border-radius: 9px; padding: 8px 14px; font: inherit; font-size: 13px; cursor: pointer; white-space: nowrap; }
+  .img-prev { display: none; align-items: center; gap: 10px; min-width: 0; }
+  .img-prev.on { display: flex; }
+  .img-prev img { width: 48px; height: 48px; object-fit: cover; border-radius: 8px; }
+  .img-prev .rm { border: none; background: transparent; color: var(--out); cursor: pointer; font: inherit; font-size: 13px; }
+  .img-name { font-size: 12px; color: var(--muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 140px; }
+  .thumbs { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; align-items: center; }
+  .tx .thumb { width: 58px; height: 58px; object-fit: cover; border-radius: 8px; border: 1px solid var(--line); cursor: zoom-in; display: block; }
+  .add-img {
+    display: inline-flex; align-items: center; gap: 4px; padding: 6px 12px; border: 1px dashed var(--line);
+    border-radius: 8px; color: var(--muted); font-size: 12px; cursor: pointer; user-select: none;
+  }
+  .add-img:hover { color: var(--tea); border-color: var(--tea); }
+  .add-img.busy { pointer-events: none; opacity: .6; }
+  #rowImg { position: absolute; width: 1px; height: 1px; opacity: 0; overflow: hidden; pointer-events: none; }
+  .lightbox {
+    position: fixed; inset: 0; background: rgba(0,0,0,.88); display: none; flex-direction: column; gap: 14px;
+    align-items: center; justify-content: center; z-index: 50; cursor: zoom-out;
+    padding: calc(20px + env(safe-area-inset-top, 0px)) max(20px, env(safe-area-inset-right, 0px)) calc(20px + env(safe-area-inset-bottom, 0px)) max(20px, env(safe-area-inset-left, 0px));
+  }
+  .lightbox.on { display: flex; }
+  .lightbox img { max-width: 100%; max-height: calc(100% - 64px); border-radius: 8px; }
+  .lb-del { border: 1px solid rgba(255,255,255,.35); background: transparent; color: #fff; border-radius: 999px; padding: 9px 18px; font: inherit; font-size: 13px; cursor: pointer; }
+  .lb-del.confirm { background: #c0563f; border-color: #c0563f; font-weight: 600; }
+  .toast {
+    position: fixed; left: 50%; transform: translateX(-50%); z-index: 60;
+    bottom: calc(18px + env(safe-area-inset-bottom, 0px)); max-width: calc(100% - 32px);
+    background: var(--ink); color: var(--paper); padding: 10px 16px; border-radius: 999px; font-size: 13px;
+    box-shadow: 0 4px 16px rgba(0,0,0,.18);
+  }
+
+  .empty, .loading { text-align: center; color: var(--muted); padding: 34px 16px; font-size: 14px; }
+  .empty b { color: var(--ink); display: block; margin-bottom: 4px; font-weight: 600; }
+  .banner { background: var(--out-soft); color: var(--out); border-radius: 10px; padding: 10px 14px; font-size: 13px; }
+  .foot { text-align: center; color: var(--muted); font-size: 12px; }
+
+  @media (max-width: 440px) { .fields { grid-template-columns: 1fr; } }
+</style>
+
+<div class="wrap">
+  <header>
+    <div class="brand"><span class="leaf">🫖</span> กองกลาง <small>· YICHA</small></div>
+    <button id="themeBtn" type="button">โหมดสี</button>
+  </header>
+
+  <div id="banner" hidden class="banner"></div>
+
+  <section class="balance-card">
+    <div class="label">ยอดเงินกองกลางคงเหลือ</div>
+    <div class="balance num" id="balance">—</div>
+    <div class="bal-note">เงินเติมกอง − รายจ่ายที่จ่ายจากกองกลาง</div>
+    <div class="io">
+      <div class="vin"><span><i class="dot in"></i>เงินเข้า (เติมกอง)</span><b class="num" id="totalIn">—</b></div>
+      <div class="vout"><span><i class="dot out"></i>รายจ่ายรวม</span><b class="num" id="totalOut">—</b><small class="num" id="outFund"></small></div>
+      <div class="vfriend"><span><i class="dot friend"></i>บัญชีเพื่อนจ่าย</span><b class="num" id="totalFriend">—</b><small>นับในรายจ่ายรวม ไม่หักกองกลาง</small></div>
+    </div>
+  </section>
+
+  <div class="actions">
+    <button id="btnExpense" class="btn out" type="button">− บันทึกรายจ่าย</button>
+    <button id="btnTopup" class="btn in" type="button">+ เติมเงินเข้ากอง</button>
+  </div>
+
+  <form id="panel" hidden autocomplete="off">
+    <h3 id="panelTitle">บันทึกรายจ่าย</h3>
+    <div class="fields">
+      <div class="field full" id="fDesc">
+        <label for="inDesc">รายการ / รายละเอียด</label>
+        <textarea id="inDesc" rows="2" placeholder="เช่น Shopee ชาอู่หลง 500g = 350&#10;ชามะลิ 500g = 225&#10;ค่าส่ง = 100"></textarea>
+        <span class="hint">พิมพ์หลายบรรทัดได้ ใส่รายละเอียดของที่ซื้อได้เต็มที่</span>
+      </div>
+      <div class="field">
+        <label for="inAmount">จำนวนเงิน (บาท)</label>
+        <input id="inAmount" class="amt" type="text" inputmode="decimal" placeholder="0">
+      </div>
+      <div class="field">
+        <label for="inDate">วันที่</label>
+        <input id="inDate" type="date">
+      </div>
+      <div class="field full" id="fPayer">
+        <label>จ่ายจาก</label>
+        <div class="seg" role="radiogroup" aria-label="จ่ายจาก">
+          <label><input type="radio" name="payer" id="payFund" value="fund"><span>กองกลาง</span></label>
+          <label><input type="radio" name="payer" id="payFriend" value="friend"><span>บัญชีเพื่อน</span></label>
+        </div>
+        <span class="hint">บัญชีเพื่อน: นับรวมในรายจ่ายรวม แต่ไม่หักยอดกองกลาง</span>
+      </div>
+      <div class="field full" id="fNote" hidden>
+        <label for="inNote">โน้ต (ไม่บังคับ)</label>
+        <input id="inNote" type="text" placeholder="เช่น ลงเงินหุ้นรอบ 2">
+      </div>
+      <div class="field full field-img" id="fImg" hidden>
+        <label>แนบรูป (สลิป / บิล)</label>
+        <div class="drop">
+          <input type="file" id="inImg" accept="image/*">
+          <label class="pick-btn" id="pickImg" for="inImg">📷 เลือกรูป</label>
+          <span class="hint" id="imgHint">ยังไม่ได้เลือกรูป</span>
+          <div class="img-prev" id="imgPrev"><img id="imgPrevImg" alt="ตัวอย่าง"><span class="img-name" id="imgName"></span><button type="button" class="rm" id="imgRm">เอาออก</button></div>
+        </div>
+      </div>
+    </div>
+    <div class="panel-actions">
+      <button type="submit" id="saveBtn" class="btn out btn-save">บันทึก</button>
+      <button type="button" id="cancelBtn" class="btn-ghost">ยกเลิก</button>
+    </div>
+  </form>
+
+  <section class="list">
+    <div class="list-head">
+      <h2>รายการล่าสุด</h2>
+      <select id="monthFilter"><option value="all">ทุกเดือน</option></select>
+    </div>
+    <div id="txlist"><div class="loading">กำลังโหลดข้อมูล…</div></div>
+  </section>
+
+  <div class="foot">ข้อมูลถูกบันทึกถาวรและแชร์ให้คนที่เปิดลิงก์นี้เห็นตรงกัน</div>
+</div>
+
+<div class="lightbox" id="lightbox"><img id="lightboxImg" alt="รูปเต็ม"><button type="button" class="lb-del" id="lbDel" hidden>ลบรูปนี้</button></div>
+<input type="file" id="rowImg" accept="image/*" multiple>
+<div class="toast" id="toast" hidden></div>
+
+<script>
+(function () {
+  "use strict";
+  var $ = function (id) { return document.getElementById(id); };
+  var dbNS = null, coll = null, canWrite = true, mode = "expense", txs = [], ready = false, monthSel = "all";
+  var assetsNS = null, pendingFile = null, pendingUrl = null;
+  var rowTarget = null, uploadingTx = null, lb = null, toastT = null;
+
+  // รูปของรายการ: รองรับทั้ง field เก่า img (รูปเดียว) และ imgs (หลายรูป)
+  function imgList(t) {
+    var all = (t.img ? [t.img] : []).concat(Array.isArray(t.imgs) ? t.imgs : []);
+    return all.filter(function (x, i) { return x && all.indexOf(x) === i; });
+  }
+  function findTx(id) { for (var i = 0; i < txs.length; i++) if (txs[i].id === id) return txs[i]; return null; }
+  // เขียนรายการทั้งก้อนใหม่ พร้อมรายการรูปล่าสุด (ย้าย img เก่าเข้า imgs)
+  function setImgs(t, list) {
+    var body = {};
+    for (var k in t) if (Object.prototype.hasOwnProperty.call(t, k) && k !== "id" && k !== "img") body[k] = t[k];
+    body.imgs = list.slice();
+    return coll.doc(t.id).set(body);
+  }
+  function toast(msg, ms) {
+    var el = $("toast"); el.textContent = msg; el.hidden = false;
+    clearTimeout(toastT); if (ms) toastT = setTimeout(function () { el.hidden = true; }, ms);
+  }
+
+  // theme toggle (per-viewer)
+  try { var saved = localStorage.getItem("yf-theme"); if (saved) document.documentElement.setAttribute("data-theme", saved); } catch (e) {}
+  $("themeBtn").addEventListener("click", function () {
+    var cur = document.documentElement.getAttribute("data-theme");
+    var mq = window.matchMedia("(prefers-color-scheme: dark)").matches;
+    var next = cur ? (cur === "dark" ? "light" : "dark") : (mq ? "light" : "dark");
+    document.documentElement.setAttribute("data-theme", next);
+    try { localStorage.setItem("yf-theme", next); } catch (e) {}
+  });
+
+  function fmt(n) { return (Math.round(n) || 0).toLocaleString("th-TH"); }
+  function todayTH() { return new Date().toLocaleDateString("en-CA", { timeZone: "Asia/Bangkok" }); }
+  function parseAmt(s) { var n = Number(String(s).replace(/,/g, "").trim()); return isFinite(n) ? n : NaN; }
+  function thDate(iso) {
+    if (!iso) return "";
+    var p = iso.split("-"); if (p.length !== 3) return iso;
+    var m = ["ม.ค.","ก.พ.","มี.ค.","เม.ย.","พ.ค.","มิ.ย.","ก.ค.","ส.ค.","ก.ย.","ต.ค.","พ.ย.","ธ.ค."];
+    return Number(p[2]) + " " + m[Number(p[1]) - 1] + " " + (Number(p[0]) + 543 - 2500);
+  }
+  function monthLabel(ym) {
+    var p = ym.split("-");
+    var m = ["มกราคม","กุมภาพันธ์","มีนาคม","เมษายน","พฤษภาคม","มิถุนายน","กรกฎาคม","สิงหาคม","กันยายน","ตุลาคม","พฤศจิกายน","ธันวาคม"];
+    return m[Number(p[1]) - 1] + " " + p[0];
+  }
+
+  // ---- แนบรูป ----
+  function clearImg() {
+    if (pendingUrl) { try { URL.revokeObjectURL(pendingUrl); } catch (e) {} }
+    pendingFile = null; pendingUrl = null;
+    $("imgPrev").classList.remove("on");
+    $("imgHint").hidden = false;
+    $("inImg").value = "";
+  }
+  var editId = null;  // id ของรายการที่กำลังแก้ (null = เพิ่มรายการใหม่)
+  // ช่องแนบรูปในฟอร์ม: โชว์เฉพาะคนที่อัปโหลดได้ และไม่โชว์ตอนแก้ไข (รูปจัดการที่ปุ่ม 📎 ในแต่ละรายการ)
+  function updateImgField() { $("fImg").hidden = !assetsNS || !!editId; }
+  $("imgRm").addEventListener("click", clearImg);
+  $("inImg").addEventListener("change", function () {
+    var f = this.files && this.files[0];
+    if (!f) return;
+    if (f.type.indexOf("image/") !== 0) { showBanner("เลือกได้เฉพาะไฟล์รูป"); this.value = ""; return; }
+    if (f.size > 20 * 1024 * 1024) { showBanner("รูปใหญ่เกินไป (เกิน 20MB)"); this.value = ""; return; }
+    if (pendingUrl) { try { URL.revokeObjectURL(pendingUrl); } catch (e) {} }
+    pendingFile = f; pendingUrl = URL.createObjectURL(f);
+    $("imgPrevImg").src = pendingUrl; $("imgName").textContent = f.name;
+    $("imgPrev").classList.add("on"); $("imgHint").hidden = true;
+  });
+
+  // จ่ายจากไหน: "fund" = กองกลาง, "friend" = บัญชีเพื่อน (จำค่าล่าสุดไว้ในเครื่อง)
+  function getPayer() { return $("payFriend").checked ? "friend" : "fund"; }
+  function setPayer(v) { $("payFriend").checked = v === "friend"; $("payFund").checked = v !== "friend"; }
+  function lastPayer() { try { return localStorage.getItem("yf-payer") || "friend"; } catch (e) { return "friend"; } }
+
+  function setupPanel(m) {
+    mode = m;
+    $("fPayer").hidden = m !== "expense";
+    $("fDesc").hidden = m !== "expense";
+    $("fNote").hidden = m !== "topup";
+    $("saveBtn").className = "btn btn-save " + (m === "expense" ? "out" : "in");
+    clearImg(); updateImgField();
+    $("panel").hidden = false;
+    $("panel").scrollIntoView({ behavior: "smooth", block: "nearest" });
+  }
+  function openPanel(m) {
+    editId = null;
+    $("panelTitle").textContent = m === "expense" ? "บันทึกรายจ่าย" : "เติมเงินเข้ากอง";
+    $("saveBtn").textContent = "บันทึก";
+    $("inDate").value = todayTH();
+    $("inAmount").value = ""; $("inDesc").value = ""; $("inNote").value = "";
+    setPayer(lastPayer());
+    setupPanel(m);
+    (m === "expense" ? $("inDesc") : $("inAmount")).focus();
+  }
+  function openEdit(t) {
+    if (!t) return;
+    editId = t.id;
+    var m = t.kind === "topup" ? "topup" : "expense";
+    $("panelTitle").textContent = m === "expense" ? "แก้ไขรายจ่าย" : "แก้ไขเงินเติมกอง";
+    $("saveBtn").textContent = "บันทึกการแก้ไข";
+    $("inDate").value = t.date || todayTH();
+    $("inAmount").value = t.amount != null ? String(t.amount) : "";
+    $("inDesc").value = m === "expense" ? (t.desc || "") : "";
+    $("inNote").value = m === "topup" ? (t.desc === "เติมเงินเข้ากอง" ? "" : (t.desc || "")) : "";
+    setPayer(t.payer === "friend" ? "friend" : "fund");
+    setupPanel(m);
+    (m === "expense" ? $("inDesc") : $("inAmount")).focus();
+  }
+  $("btnExpense").addEventListener("click", function () { openPanel("expense"); });
+  $("btnTopup").addEventListener("click", function () { openPanel("topup"); });
+  $("cancelBtn").addEventListener("click", function () { $("panel").hidden = true; editId = null; updateImgField(); });
+
+  $("panel").addEventListener("submit", function (e) {
+    e.preventDefault();
+    if (!coll) { showBanner("ยังเชื่อมต่อฐานข้อมูลไม่ได้ ลองรีเฟรชหน้า"); return; }
+    var amt = parseAmt($("inAmount").value);
+    if (!(amt > 0)) { $("inAmount").focus(); return; }
+
+    // ---- แก้ไขรายการเดิม: เขียนทั้งก้อนใหม่ เก็บรูป/ประเภท/เวลาสร้างไว้เหมือนเดิม ----
+    if (editId) {
+      var cur = findTx(editId);
+      if (!cur) { showBanner("ไม่พบรายการนี้แล้ว อาจถูกลบไป"); $("panel").hidden = true; editId = null; return; }
+      var body = {};
+      for (var k in cur) if (Object.prototype.hasOwnProperty.call(cur, k) && k !== "id") body[k] = cur[k];
+      body.amount = amt;
+      body.date = $("inDate").value || cur.date || todayTH();
+      body.desc = mode === "expense"
+        ? ($("inDesc").value.trim() || "(ไม่ระบุรายการ)")
+        : ($("inNote").value.trim() || "เติมเงินเข้ากอง");
+      if (mode === "expense" && getPayer() === "friend") body.payer = "friend"; else delete body.payer;
+      $("saveBtn").disabled = true;
+      coll.doc(editId).set(body).then(function () {
+        $("saveBtn").disabled = false; $("panel").hidden = true; editId = null; updateImgField();
+        toast("แก้ไขแล้ว", 2000);
+      }).catch(function (err) {
+        $("saveBtn").disabled = false;
+        showBanner(err && err.code === "invalid_argument" ? "คุณไม่มีสิทธิ์แก้ไขข้อมูลนี้" : "แก้ไขไม่สำเร็จ ลองใหม่อีกครั้ง");
+      });
+      return;
+    }
+
+    var rec = { kind: mode, amount: amt, date: $("inDate").value || todayTH(), createdAt: Date.now() };
+    if (mode === "expense") {
+      rec.desc = $("inDesc").value.trim() || "(ไม่ระบุรายการ)";
+      var payer = getPayer();
+      if (payer === "friend") rec.payer = "friend";
+      try { localStorage.setItem("yf-payer", payer); } catch (e) {}
+    } else rec.desc = $("inNote").value.trim() || "เติมเงินเข้ากอง";
+    $("saveBtn").disabled = true;
+
+    function saveRec() {
+      coll.add(rec).then(function () { $("saveBtn").disabled = false; clearImg(); $("panel").hidden = true; })
+        .catch(function (err) {
+          $("saveBtn").disabled = false;
+          showBanner(err && err.code === "invalid_argument" ? "คุณไม่มีสิทธิ์แก้ไขข้อมูลนี้" : "บันทึกไม่สำเร็จ ลองใหม่อีกครั้ง");
+        });
+    }
+
+    if (pendingFile && assetsNS) {
+      $("saveBtn").textContent = "กำลังอัปโหลดรูป…";
+      assetsNS.upload(pendingFile).then(function (res) {
+        rec.imgs = [res.id]; $("saveBtn").textContent = "บันทึก"; saveRec();
+      }).catch(function (err) {
+        $("saveBtn").disabled = false; $("saveBtn").textContent = "บันทึก";
+        var code = err && err.code;
+        showBanner(code === "too_large" ? "รูปใหญ่เกินไป (เกิน 20MB)" :
+          code === "unsupported_type" ? "ชนิดไฟล์รูปไม่รองรับ" :
+          "แนบรูปไม่สำเร็จ ลองใหม่ หรือกด 'เอาออก' แล้วบันทึกไม่มีรูป");
+      });
+    } else saveRec();
+  });
+
+  function showBanner(msg) { var b = $("banner"); b.textContent = "⚠️ " + msg; b.hidden = false; }
+
+  function render() {
+    // รายจ่ายรวม = ทุกช่องทาง · ยอดกองกลาง = เติมกอง − จ่ายจากกองกลาง (ไม่รวมที่บัญชีเพื่อนจ่าย)
+    var totalIn = 0, outFund = 0, outFriend = 0;
+    txs.forEach(function (t) {
+      if (t.kind === "topup") totalIn += t.amount;
+      else if (t.payer === "friend") outFriend += t.amount;
+      else outFund += t.amount;
+    });
+    var totalOut = outFund + outFriend;
+    var bal = totalIn - outFund;
+    $("totalFriend").textContent = fmt(outFriend) + " ฿";
+    $("outFund").textContent = outFriend ? "จากกองกลาง " + fmt(outFund) + " ฿" : "";
+    $("balance").textContent = fmt(bal) + " ฿";
+    $("balance").classList.toggle("neg", bal < 0);
+    $("totalIn").textContent = fmt(totalIn) + " ฿";
+    $("totalOut").textContent = fmt(totalOut) + " ฿";
+
+    // month filter options
+    var months = {};
+    txs.forEach(function (t) { if (t.date) months[t.date.slice(0, 7)] = true; });
+    var mkeys = Object.keys(months).sort().reverse();
+    var html = '<option value="all">ทุกเดือน</option>';
+    mkeys.forEach(function (m) { html += '<option value="' + m + '">' + esc(monthLabel(m)) + "</option>"; });
+    $("monthFilter").innerHTML = html;
+    $("monthFilter").value = (mkeys.indexOf(monthSel) >= 0 || monthSel === "all") ? monthSel : "all";
+    monthSel = $("monthFilter").value;
+
+    var rows = txs.slice().filter(function (t) { return monthSel === "all" || (t.date || "").slice(0, 7) === monthSel; });
+    rows.sort(function (a, b) {
+      if (a.date !== b.date) return (b.date || "").localeCompare(a.date || "");
+      return (b.createdAt || 0) - (a.createdAt || 0);
+    });
+    if (!rows.length) {
+      $("txlist").innerHTML = ready
+        ? '<div class="empty"><b>ยังไม่มีรายการ</b>กดปุ่มด้านบนเพื่อเพิ่มรายจ่ายหรือเติมเงินเข้ากอง</div>'
+        : '<div class="loading">กำลังโหลดข้อมูล…</div>';
+      return;
+    }
+    var out = "";
+    var canImg = canWrite && !!assetsNS;
+    rows.forEach(function (t) {
+      var isExp = t.kind !== "topup";
+      var imgs = imgList(t);
+      var thumbs = imgs.map(function (id) {
+        return '<img class="thumb" src="/_blob/' + esc(id) + '" data-full="' + esc(id) + '" data-tx="' + esc(t.id) + '" alt="รูปแนบ" loading="lazy">';
+      }).join("");
+      var addBtn = "";
+      if (canImg) {
+        var busy = uploadingTx === t.id;
+        addBtn = '<label class="add-img' + (busy ? " busy" : "") + '" for="rowImg" data-tx="' + esc(t.id) + '">' +
+          (busy ? "กำลังอัปโหลด…" : "📎 " + (imgs.length ? "เพิ่มรูป" : "แนบรูป")) + "</label>";
+      }
+      var isFr = isExp && t.payer === "friend";
+      out += '<div class="tx ' + (isExp ? (isFr ? "expense friend" : "expense") : "topup") + '">' +
+        '<div class="icon">' + (isExp ? (isFr ? "🤝" : "🧾") : "💰") + "</div>" +
+        '<div class="mid"><div class="desc">' + esc(t.desc || "") + "</div>" +
+        '<div class="meta">' + esc(thDate(t.date)) + (isFr ? ' <span class="chip-f">บัญชีเพื่อน</span>' : "") + "</div>" +
+        (thumbs || addBtn ? '<div class="thumbs">' + thumbs + addBtn + "</div>" : "") +
+        "</div>" +
+        '<div class="right"><span class="val num">' + (isExp ? "−" : "+") + fmt(t.amount) + " ฿</span>" +
+        (canWrite ? '<button class="edit" type="button" title="แก้ไข" aria-label="แก้ไข" data-id="' + esc(t.id) + '">✎</button>' +
+          '<button class="del" type="button" title="ลบ" aria-label="ลบ" data-id="' + esc(t.id) + '">✕</button>' : "") +
+        "</div></div>";
+    });
+    $("txlist").innerHTML = out;
+    Array.prototype.forEach.call($("txlist").querySelectorAll(".thumb"), function (img) {
+      img.addEventListener("error", function () { img.style.display = "none"; });
+    });
+  }
+
+  function esc(s) {
+    return String(s == null ? "" : s).replace(/[&<>"']/g, function (c) {
+      return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c];
+    });
+  }
+
+  // ไลท์บ็อกซ์ดูรูปเต็ม + ลบรูปทีละรูป
+  function closeLightbox() {
+    $("lightbox").classList.remove("on"); $("lightboxImg").src = ""; lb = null;
+    $("lbDel").classList.remove("confirm"); $("lbDel").textContent = "ลบรูปนี้";
+  }
+  function openLightbox(id, txId) {
+    if (!id) return;
+    lb = { id: id, tx: txId };
+    $("lightboxImg").src = "/_blob/" + id;
+    $("lbDel").hidden = !(canWrite && assetsNS && txId);
+    $("lbDel").classList.remove("confirm"); $("lbDel").textContent = "ลบรูปนี้";
+    $("lightbox").classList.add("on");
+  }
+  $("lightbox").addEventListener("click", closeLightbox);
+  $("lbDel").addEventListener("click", function (e) {
+    e.stopPropagation();
+    var btn = this;
+    if (!btn.classList.contains("confirm")) { btn.classList.add("confirm"); btn.textContent = "แตะอีกครั้งเพื่อยืนยันลบ"; return; }
+    var cur = lb && findTx(lb.tx), imgId = lb && lb.id;
+    if (!cur || !coll) { closeLightbox(); return; }
+    var rest = imgList(cur).filter(function (x) { return x !== imgId; });
+    btn.disabled = true;
+    setImgs(cur, rest).then(function () {
+      btn.disabled = false; closeLightbox(); toast("ลบรูปแล้ว", 2200);
+      if (assetsNS) assetsNS.delete(imgId).catch(function () {});
+    }).catch(function () { btn.disabled = false; showBanner("ลบรูปไม่สำเร็จ ลองใหม่อีกครั้ง"); });
+  });
+
+  // แนบรูปเพิ่มให้รายการที่มีอยู่แล้ว (เลือกได้หลายรูป)
+  $("rowImg").addEventListener("change", function () {
+    var files = Array.prototype.slice.call(this.files || []); this.value = "";
+    var tx = findTx(rowTarget); rowTarget = null;
+    if (!files.length || !tx || !assetsNS || !coll) return;
+    var ok = files.filter(function (f) { return f.type.indexOf("image/") === 0 && f.size <= 20 * 1024 * 1024; });
+    if (!ok.length) { showBanner("เลือกได้เฉพาะไฟล์รูป ขนาดไม่เกิน 20MB"); return; }
+    if (ok.length < files.length) toast("ข้ามไฟล์ที่ไม่ใช่รูปหรือใหญ่เกิน 20MB", 2500);
+    uploadingTx = tx.id; render();
+    var ids = [], i = 0;
+    function finish(failed) {
+      if (!ids.length) { uploadingTx = null; render(); if (failed) showBanner("แนบรูปไม่สำเร็จ ลองใหม่อีกครั้ง"); return; }
+      var cur = findTx(tx.id) || tx;
+      setImgs(cur, imgList(cur).concat(ids)).then(function () {
+        uploadingTx = null; render();
+        toast(failed ? "แนบได้ " + ids.length + " รูป บางรูปไม่สำเร็จ" : "แนบรูปแล้ว " + ids.length + " รูป", 2600);
+      }).catch(function () {
+        uploadingTx = null; render(); showBanner("บันทึกรูปไม่สำเร็จ ลองใหม่อีกครั้ง");
+        ids.forEach(function (id) { assetsNS.delete(id).catch(function () {}); });
+      });
+    }
+    (function next() {
+      if (i >= ok.length) return finish(false);
+      toast("กำลังอัปโหลดรูป " + (i + 1) + "/" + ok.length + "…");
+      assetsNS.upload(ok[i]).then(function (r) { ids.push(r.id); i++; next(); })
+        .catch(function () { finish(true); });
+    })();
+  });
+
+  $("txlist").addEventListener("click", function (e) {
+    var add = e.target.closest(".add-img");
+    if (add) { rowTarget = add.getAttribute("data-tx"); return; }  // ปล่อยให้ <label> เปิดตัวเลือกไฟล์เอง
+    var ed = e.target.closest(".edit");
+    if (ed) { openEdit(findTx(ed.getAttribute("data-id"))); return; }
+    var thumb = e.target.closest(".thumb");
+    if (thumb) { openLightbox(thumb.getAttribute("data-full"), thumb.getAttribute("data-tx")); return; }
+    var btn = e.target.closest(".del"); if (!btn) return;
+    if (!btn.classList.contains("confirm")) {
+      document.querySelectorAll(".del.confirm").forEach(function (b) { b.classList.remove("confirm"); b.textContent = "✕"; });
+      btn.classList.add("confirm"); btn.textContent = "ยืนยันลบ";
+      setTimeout(function () { if (btn.isConnected) { btn.classList.remove("confirm"); btn.textContent = "✕"; } }, 3500);
+      return;
+    }
+    var id = btn.getAttribute("data-id"), rec = null;
+    for (var i = 0; i < txs.length; i++) { if (txs[i].id === id) { rec = txs[i]; break; } }
+    if (coll && id) coll.doc(id).delete().then(function () {
+      if (rec && assetsNS) imgList(rec).forEach(function (im) { assetsNS.delete(im).catch(function () {}); });
+    }).catch(function () { showBanner("ลบไม่สำเร็จ"); });
+  });
+
+  $("monthFilter").addEventListener("change", function () { monthSel = this.value; render(); });
+
+  // สถานะโหลดแบบค้างไว้ให้อ่าน (ไม่แวบหาย)
+  function setStatus(msg) { if (!ready) $("txlist").innerHTML = '<div class="loading">' + esc(msg) + "</div>"; }
+  function showFail(msg, detail) {
+    if (ready) return;
+    $("txlist").innerHTML = '<div class="empty"><b>' + esc(msg) + "</b>" +
+      (detail ? '<div style="font-size:12px;color:var(--muted);margin:6px 0 2px;word-break:break-word">' + esc(detail) + "</div>" : "") +
+      'ลองเปิดในเบราว์เซอร์ที่ล็อกอินบัญชีเดียวกับที่สร้างแอป<br>' +
+      '<button id="retryBtn" class="btn in" style="margin-top:12px;max-width:220px">ลองใหม่</button></div>';
+    var rb = $("retryBtn"); if (rb) rb.addEventListener("click", function () { ready = false; setStatus("กำลังลองใหม่…"); connect(); });
+  }
+
+  function applySnap(snap) {
+    // d.data() เป็น object ที่ frozen — ต้องก๊อปใหม่ก่อนเติม id (ไม่งั้น throw "object is not extensible")
+    txs = snap.docs.map(function (d) {
+      var src = d.data() || {}, o = {};
+      for (var k in src) if (Object.prototype.hasOwnProperty.call(src, k)) o[k] = src[k];
+      o.id = d.id;
+      return o;
+    });
+    ready = true; render();
+  }
+
+  function connect() {
+    var slow = setTimeout(function () { if (!ready) showFail("เชื่อมต่อฐานข้อมูลช้ากว่าปกติ"); }, 8000);
+    setStatus("กำลังเชื่อมต่อฐานข้อมูล…");
+    window.claude.use("db").then(function (db) {
+      if (!db) { clearTimeout(slow); showFail("ฐานข้อมูลยังไม่พร้อม (db ไม่ถูกเปิดใช้ในมุมมองนี้)"); return; }
+      coll = db.collection("tx");
+      setStatus("เชื่อมต่อแล้ว · กำลังดึงรายการ…");
+      coll.get().then(function (snap) { clearTimeout(slow); applySnap(snap); })
+        .catch(function (err) {
+          clearTimeout(slow);
+          try { console.error("get() failed:", err); } catch (e) {}
+          var code = (err && err.code) || "unknown";
+          var detail = code + " · " + ((err && err.message) || String(err)).slice(0, 160);
+          if (code === "revoked" || code === "not_granted") { ready = true; render(); showBanner("ไม่มีสิทธิ์เข้าถึงข้อมูล — เปิดด้วยบัญชีที่สร้างแอป"); }
+          else showFail("ดึงข้อมูลไม่สำเร็จ", detail);
+        });
+      try {
+        coll.onSnapshot(function (snap) { clearTimeout(slow); applySnap(snap); },
+          function (err) { try { console.error("onSnapshot error:", err); } catch (e) {} });
+      } catch (e) {}
+    }).catch(function (err) {
+      clearTimeout(slow);
+      showFail("เชื่อมต่อฐานข้อมูลไม่สำเร็จ (" + ((err && err.code) || "use error") + ")");
+    });
+  }
+
+  function start() {
+    if (!window.claude || !window.claude.use) { ready = true; render(); showBanner("เปิดหน้านี้ผ่าน claude.ai เพื่อบันทึกข้อมูล"); return; }
+    connect();
+    window.claude.use("user").then(function (u) {
+      if (!u) return;
+      try { if (u.can && u.can("data.write") === false) { canWrite = false; $("btnExpense").disabled = true; $("btnTopup").disabled = true; render(); } } catch (e) {}
+    }).catch(function () {});
+    window.claude.use("assets").then(function (a) { assetsNS = a || null; updateImgField(); if (ready) render(); }).catch(function () {});
+  }
+  start();
+})();
+</script>

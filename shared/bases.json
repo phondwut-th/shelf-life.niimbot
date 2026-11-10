@@ -1,0 +1,126 @@
+{
+  "_note": "เบสชา 8 ตัว · ระบบชงเดียวกันทุกเบส ใบ:เบส:น้ำแข็งน็อค = 1:25:7.5 · ที่มา: KachaMD/CLAUDE.md + KACHA-ข้อมูลร้าน v1.0 (2026-10-29)",
+  "brew": {
+    "ratio": "1:25:7.5",
+    "manual": {
+      "leaf_g": 40,
+      "hot_water_ml": 700,
+      "knock_ice_g": 300,
+      "yield_ml": 1000,
+      "cups": 5
+    },
+    "pc1_machine": {
+      "leaf_g": 104,
+      "hot_water_ml": 1820,
+      "knock_ice_g": 780,
+      "yield_ml": 2600,
+      "cups": 13,
+      "confirmed": false
+    },
+    "shelf_life_h": 24,
+    "water": {
+      "tds_ppm": [
+        50,
+        80
+      ],
+      "kh_dkh_max": 2,
+      "ph": [
+        6.5,
+        7.5
+      ]
+    },
+    "shelf_life_confirmed": "2026-11-10"
+  },
+  "bases": [
+    {
+      "id": "dahongpao",
+      "name": "ต้าหงเผา",
+      "kind": "อู่หลงหินคั่ว",
+      "leaf": "Chaiwala(ต้าหงเผา)",
+      "temp_c": 95,
+      "min": 6,
+      "press_bag": true,
+      "status": "ใช้ได้",
+      "color": "#5a3a22"
+    },
+    {
+      "id": "tieguanyin",
+      "name": "ทิกวนอิม",
+      "kind": "อู่หลงใบม้วน",
+      "leaf": "mengyuan",
+      "temp_c": 95,
+      "min": 6,
+      "press_bag": true,
+      "status": "ใช้ได้",
+      "color": "#a8a046"
+    },
+    {
+      "id": "camellia",
+      "name": "คามิเลีย",
+      "kind": "อู่หลง",
+      "leaf": "Chaiwala(คามิเลีย)",
+      "temp_c": 88,
+      "min": 5,
+      "press_bag": false,
+      "status": "ปรับได้หลังชิม",
+      "color": "#e9a77a"
+    },
+    {
+      "id": "khaohom",
+      "name": "ข้าวหอม",
+      "kind": "อู่หลงใบม้วน",
+      "leaf": "TEA(ข้าวหอม)",
+      "temp_c": 95,
+      "min": 5,
+      "press_bag": false,
+      "status": "ปรับได้หลังชิม",
+      "color": "#e8dcc0"
+    },
+    {
+      "id": "jasmine01",
+      "name": "มะลิ 01",
+      "kind": "ชาเขียว",
+      "leaf": "Sisli 20 ก. + TEA(มะลิ) 20 ก.",
+      "temp_c": 70,
+      "min": 5,
+      "press_bag": false,
+      "status": "ล็อกแล้ว",
+      "color": "#b5d29a"
+    },
+    {
+      "id": "jasmine02",
+      "name": "มะลิ 02",
+      "kind": "ชาเขียว",
+      "leaf": "Chaiwala(มะลิ)",
+      "temp_c": 70,
+      "min": 5,
+      "press_bag": false,
+      "status": "ใช้ได้ · ใช้กับองุ่นปั่น",
+      "color": "#c4dca8"
+    },
+    {
+      "id": "osmanthus",
+      "name": "หอมหมื่นลี้",
+      "kind": "อู่หลง",
+      "leaf": "homglaiOsm (หอมไกล)",
+      "temp_c": 88,
+      "min": 5,
+      "press_bag": false,
+      "status": "°C ยังไม่ยืนยัน",
+      "color": "#d9a62e",
+      "rule": "ไม่ใส่แยม/ไซรัปหอมหมื่นลี้"
+    },
+    {
+      "id": "gardenia",
+      "name": "กาดิเนีย",
+      "kind": "ชาเขียวอบดอกพุด",
+      "leaf": "หอมไกล",
+      "temp_c": 70,
+      "min": 5,
+      "press_bag": false,
+      "status": "กำลังทดสอบ (ยังไม่ขาย)",
+      "color": "#f1ead6",
+      "on_sale": false
+    }
+  ]
+}
