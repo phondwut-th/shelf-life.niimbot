@@ -1,0 +1,28 @@
+{
+  "_note": "อายุของ (shelf life) สำหรับแอปฉลาก shelf/ · เบสชาอ่านจาก bases.json (brew.shelf_life_h) · ของเตรียมอ่านจาก menu.json (preps.*.shelf_life_days) · ไฟล์นี้เก็บเฉพาะของที่สองไฟล์นั้นไม่มี · hours = อายุนับจากเวลาที่เตรียม/เปิด หน่วยชั่วโมง (null = ยังไม่มีตัวเลข แอปจะให้พนักงานกรอกเองทุกครั้ง) · confirmed = วันที่ Boon ยืนยัน (null = ยังไม่ยืนยัน) · ingredient = id ใน ingredients.json (ถ้าไม่ใส่ name จะใช้ชื่อจากที่นั่น)",
+  "groups": {
+    "base": { "name": "เบสชา", "verb": "ชง" },
+    "prep": { "name": "ของเตรียม", "verb": "ทำ" },
+    "topping": { "name": "ท็อปปิ้ง", "verb": "เตรียม" },
+    "opened": { "name": "เปิดแล้ว", "verb": "เปิด" },
+    "custom": { "name": "อื่นๆ", "verb": "ทำ" }
+  },
+  "toppings": [
+    { "id": "peeled_grape", "name": "องุ่นปอก", "ingredient": "it18", "hours": null, "confirmed": null },
+    { "id": "konjac_pearl", "name": "บุกไข่มุก (แกะถุงแล้ว)", "ingredient": "it17", "hours": null, "confirmed": null }
+  ],
+  "opened": [
+    { "ingredient": "it10", "hours": null, "confirmed": null },
+    { "ingredient": "it11", "hours": null, "confirmed": null },
+    { "ingredient": "it12", "hours": null, "confirmed": null },
+    { "ingredient": "it13", "hours": null, "confirmed": null },
+    { "ingredient": "it14", "hours": null, "confirmed": null },
+    { "ingredient": "it15", "hours": null, "confirmed": null },
+    { "ingredient": "it16", "hours": null, "confirmed": null },
+    { "ingredient": "it19", "hours": null, "confirmed": null },
+    { "ingredient": "it20", "hours": null, "confirmed": null },
+    { "ingredient": "it34", "hours": null, "confirmed": null },
+    { "ingredient": "it35", "hours": null, "confirmed": null },
+    { "ingredient": "it22", "hours": null, "confirmed": null }
+  ]
+}

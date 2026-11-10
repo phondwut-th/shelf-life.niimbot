@@ -1,0 +1,525 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>ฉลากวันหมดอายุ KACHA</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap">
+<style>
+  /* layout: หน้าเดียว — เวลาที่ทำอยู่บนสุด, แตะรายการเพื่อเพิ่มฉลาก, ตัวอย่างฉลากอยู่ล่าง, แถบปุ่มปริ้นติดขอบล่าง */
+  :root {
+    --paper: #faf8f3; --card: #ffffff; --ink: #20261f; --muted: #6d7568; --line: #e7e3d8;
+    --tea: #1f7a54; --tea-soft: #e4f0e8; --warn: #93640f; --warn-soft: #f5ead2; --out: #b4472e;
+    --label: #ffffff; --label-ink: #000000;
+    color-scheme: light;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --paper: #15120d; --card: #1e1b15; --ink: #ece7db; --muted: #9a9a8c; --line: #322d24;
+      --tea: #4bbd85; --tea-soft: #1a2a21; --warn: #e2b55e; --warn-soft: #2e2615; --out: #e0795f;
+      color-scheme: dark;
+    }
+  }
+
+  * { box-sizing: border-box; }
+  [hidden] { display: none !important; }
+  body {
+    margin: 0; background: var(--paper); color: var(--ink);
+    font-family: 'IBM Plex Sans Thai', 'Noto Sans Thai', system-ui, sans-serif;
+    font-size: 16px; line-height: 1.5; -webkit-font-smoothing: antialiased;
+  }
+  .num { font-family: 'IBM Plex Mono', ui-monospace, monospace; font-variant-numeric: tabular-nums; }
+  .wrap {
+    max-width: 720px; margin: 0 auto;
+    padding-left: max(16px, env(safe-area-inset-left, 0px));
+    padding-right: max(16px, env(safe-area-inset-right, 0px));
+    padding-block: calc(18px + env(safe-area-inset-top, 0px)) calc(150px + env(safe-area-inset-bottom, 0px));
+    display: flex; flex-direction: column; gap: 22px;
+  }
+  header { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }
+  h1 { margin: 0; font-size: 18px; font-weight: 600; }
+  h1 small { color: var(--muted); font-weight: 400; font-size: 13px; margin-left: 6px; }
+  h2 { margin: 0; font-size: 14px; font-weight: 600; color: var(--muted); letter-spacing: .3px; }
+  section { display: flex; flex-direction: column; gap: 10px; }
+
+  label { font-size: 12px; color: var(--muted); font-weight: 500; }
+  input, select {
+    font: inherit; padding: 11px 12px; border: 1px solid var(--line); border-radius: 10px;
+    background: var(--card); color: var(--ink); width: 100%; min-width: 0;
+  }
+  input:focus-visible, select:focus-visible, button:focus-visible, summary:focus-visible { outline: 2px solid var(--tea); outline-offset: 1px; }
+  button { font: inherit; color: inherit; cursor: pointer; }
+
+  /* เวลาที่ทำ */
+  .when { display: grid; grid-template-columns: 1.4fr 1fr; gap: 10px; }
+  .field { display: flex; flex-direction: column; gap: 5px; min-width: 0; }
+  .field .row { display: flex; align-items: center; justify-content: space-between; gap: 8px; min-height: 20px; }
+  .chip { font-size: 11px; font-weight: 600; padding: 1px 8px; border-radius: 999px; background: var(--tea-soft); color: var(--tea); }
+  .link { border: none; background: none; padding: 0; font-size: 12px; font-weight: 600; color: var(--tea); text-decoration: underline; }
+  @media (max-width: 420px) { .when { grid-template-columns: 1fr; } }
+
+  /* รายการให้แตะ */
+  .tiles { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 8px; }
+  .tile { position: relative; display: flex; min-width: 0; }
+  .tile .add {
+    flex: 1; min-width: 0; min-height: 62px; text-align: left; padding: 9px 12px;
+    border: 1px solid var(--line); border-radius: 12px; background: var(--card);
+    display: flex; flex-direction: column; justify-content: center; gap: 2px;
+  }
+  .tile .add:active { transform: translateY(1px); }
+  .tile.on .add { border-color: var(--tea); background: var(--tea-soft); padding-right: 46px; }
+  .tile .nm { font-weight: 600; font-size: 15px; line-height: 1.3; display: flex; align-items: center; gap: 7px; overflow-wrap: anywhere; }
+  .tile .dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; border: 1px solid var(--line); }
+  .tile .sub { font-size: 12px; color: var(--muted); display: flex; flex-wrap: wrap; align-items: center; gap: 4px 6px; }
+  .badge { font-size: 11px; font-weight: 600; padding: 0 6px; border-radius: 6px; background: var(--warn-soft); color: var(--warn); white-space: nowrap; }
+  .badge.plain { background: none; border: 1px solid var(--line); color: var(--muted); }
+  .tile .cnt { position: absolute; right: 44px; top: 8px; font-size: 12px; font-weight: 600; color: var(--tea); }
+  .tile .minus {
+    position: absolute; right: 6px; top: 50%; translate: 0 -50%; width: 34px; height: 34px;
+    border: 1px solid var(--tea); border-radius: 50%; background: var(--card); color: var(--tea); font-size: 20px; line-height: 1;
+  }
+  .tile.custom .add { border-style: dashed; color: var(--muted); align-items: center; }
+
+  /* ตัวอย่างฉลาก */
+  #queue { display: flex; flex-direction: column; gap: 10px; }
+  .qcard { display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); gap: 12px; align-items: center; padding: 10px; border: 1px solid var(--line); border-radius: 14px; background: var(--card); }
+  .qcard canvas { width: 100%; height: auto; display: block; background: var(--label); border: 1px solid var(--line); border-radius: 4px; }
+  .qmeta { display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+  .qmeta b { font-size: 14px; overflow-wrap: anywhere; }
+  .need { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+  .need label { grid-column: 1 / -1; color: var(--warn); }
+  .need input, .need select, .qmeta > input { padding: 8px 10px; }
+  .qcard.missing { border-color: var(--warn); }
+  .step { display: flex; align-items: center; gap: 10px; }
+  .step button { width: 38px; height: 38px; border-radius: 50%; border: 1px solid var(--line); background: var(--paper); font-size: 20px; line-height: 1; }
+  .step span { min-width: 3ch; text-align: center; font-weight: 600; }
+  .empty { border: 1px dashed var(--line); border-radius: 14px; padding: 18px; color: var(--muted); font-size: 14px; text-align: center; }
+
+  /* ตั้งค่า */
+  details { border: 1px solid var(--line); border-radius: 14px; background: var(--card); }
+  summary { padding: 12px 14px; font-size: 14px; font-weight: 600; cursor: pointer; border-radius: 14px; }
+  .set { padding: 0 14px 14px; display: flex; flex-direction: column; gap: 12px; }
+  .seg { display: flex; gap: 6px; flex-wrap: wrap; }
+  .seg button { padding: 8px 14px; border: 1px solid var(--line); border-radius: 999px; background: var(--paper); font-size: 13px; color: var(--muted); }
+  .seg button.on { background: var(--tea-soft); color: var(--tea); border-color: var(--tea); font-weight: 600; }
+  .grid3 { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+  .help { font-size: 13px; color: var(--muted); margin: 0; }
+  .help b { color: var(--ink); font-weight: 600; }
+  .help li { margin-bottom: 4px; }
+  ol.help { padding-left: 20px; }
+
+  /* แถบปุ่มล่าง */
+  .bar {
+    position: fixed; left: 0; right: 0; bottom: 0; z-index: 5; background: var(--card); border-top: 1px solid var(--line);
+    padding: 10px max(16px, env(safe-area-inset-right, 0px)) calc(10px + env(safe-area-inset-bottom, 0px)) max(16px, env(safe-area-inset-left, 0px));
+  }
+  .bar-in { max-width: 688px; margin: 0 auto; display: flex; flex-direction: column; gap: 8px; }
+  #status { font-size: 13px; color: var(--muted); min-height: 19px; }
+  #status.warn { color: var(--warn); font-weight: 600; }
+  .btns { display: grid; grid-template-columns: auto 1fr 1.3fr; gap: 8px; }
+  .btn { border: 1px solid var(--line); border-radius: 12px; padding: 14px 12px; font-weight: 600; background: var(--paper); min-width: 0; }
+  .btn.main { background: var(--tea); border-color: var(--tea); color: var(--card); }
+  .btn:active { transform: translateY(1px); }
+  .btn[disabled] { opacity: .45; cursor: not-allowed; }
+
+  #printArea { display: none; }
+  @media print {
+    html, body { background: #fff; margin: 0; padding: 0; }
+    .wrap, .bar { display: none !important; }
+    #printArea { display: block; }
+    .pg { overflow: hidden; break-after: page; page-break-after: always; }
+    .pg:last-child { break-after: auto; page-break-after: auto; }
+    .pg img { width: 100%; height: 100%; display: block; }
+  }
+  @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+<style id="pageStyle"></style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>KACHA <small>ฉลากวันหมดอายุ</small></h1>
+  </header>
+
+  <section>
+    <div class="when">
+      <div class="field">
+        <div class="row">
+          <label for="madeAt">เวลาที่ชง / ทำ / เปิด</label>
+          <span class="chip" id="nowChip">ตอนนี้</span>
+          <button class="link" id="nowBtn" type="button" hidden>กลับเป็นตอนนี้</button>
+        </div>
+        <input type="datetime-local" id="madeAt">
+      </div>
+      <div class="field">
+        <div class="row"><label for="by">ชื่อคนทำ (ไม่ใส่ก็ได้)</label></div>
+        <input type="text" id="by" maxlength="12" autocomplete="off" placeholder="เช่น บุญ">
+      </div>
+    </div>
+  </section>
+
+  <div id="groups" style="display:flex;flex-direction:column;gap:22px">
+    <div class="empty" id="loading">กำลังโหลดข้อมูลร้าน…</div>
+  </div>
+
+  <section>
+    <h2>ตัวอย่างฉลาก</h2>
+    <div id="queue"></div>
+  </section>
+
+  <details id="settings">
+    <summary>ตั้งค่าสติกเกอร์และวิธีปริ้น</summary>
+    <div class="set">
+      <div class="field">
+        <label>ขนาดสติกเกอร์ (กว้าง × สูง)</label>
+        <div class="seg" id="sizes"></div>
+      </div>
+      <div class="grid3">
+        <div class="field"><label for="lw">กว้าง (มม.)</label><input type="number" id="lw" inputmode="decimal" min="20" max="110" step="1"></div>
+        <div class="field"><label for="lh">สูง (มม.)</label><input type="number" id="lh" inputmode="decimal" min="15" max="110" step="1"></div>
+        <div class="field"><label for="dpi">ความละเอียด</label>
+          <select id="dpi"><option value="203">203 dpi</option><option value="300">300 dpi</option></select></div>
+      </div>
+      <p class="help"><span class="badge">ยังไม่ยืนยัน</span> ยังไม่ได้ลองกับเครื่องปริ้นจริง ขนาดและวิธีปริ้นอาจต้องปรับเมื่อได้เครื่องมา</p>
+      <ol class="help">
+        <li><b>ปุ่ม "ปริ้น"</b> เปิดหน้าต่างปริ้นของมือถือ ใช้ได้เมื่อเครื่องปริ้นลงทะเบียนกับมือถือไว้แล้ว (Android ต้องลงแอป print service ของเครื่องปริ้น) ตั้งขนาดกระดาษให้เท่าสติกเกอร์ ขอบ 0</li>
+        <li><b>ปุ่ม "ส่งรูป"</b> ส่งรูปฉลากไปเปิดในแอปของเครื่องปริ้น แล้วสั่งปริ้นจากแอปนั้น (iPhone ใช้ทางนี้)</li>
+      </ol>
+    </div>
+  </details>
+</div>
+
+<div class="bar">
+  <div class="bar-in">
+    <div id="status">แตะรายการด้านบนเพื่อเพิ่มฉลาก</div>
+    <div class="btns">
+      <button class="btn" id="clearBtn" type="button" disabled>ล้าง</button>
+      <button class="btn" id="shareBtn" type="button" disabled>ส่งรูป</button>
+      <button class="btn main" id="printBtn" type="button" disabled>ปริ้น</button>
+    </div>
+  </div>
+</div>
+
+<div id="printArea"></div>
+
+<script>
+(() => {
+  'use strict';
+  const $ = id => document.getElementById(id);
+  const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  const store = {
+    get(k, d) { try { const v = localStorage.getItem('kacha-shelf:' + k); return v == null ? d : JSON.parse(v); } catch { return d; } },
+    set(k, v) { try { localStorage.setItem('kacha-shelf:' + k, JSON.stringify(v)); } catch {} },
+  };
+
+  const SIZES = [[40, 30], [50, 30], [60, 40]];            // ขนาดสติกเกอร์ที่ขายทั่วไป (มม.)
+  const FONT = '"IBM Plex Sans Thai", "Noto Sans Thai", sans-serif';
+  const DAYS = ['อา.', 'จ.', 'อ.', 'พ.', 'พฤ.', 'ศ.', 'ส.'];
+  const MONTHS = ['ม.ค.', 'ก.พ.', 'มี.ค.', 'เม.ย.', 'พ.ค.', 'มิ.ย.', 'ก.ค.', 'ส.ค.', 'ก.ย.', 'ต.ค.', 'พ.ย.', 'ธ.ค.'];
+
+  const S = {
+    groups: {}, order: [], items: new Map(),   // ข้อมูลจาก shared/
+    queue: new Map(),                          // id -> { n, hours (กรอกเองเมื่อ shared ยังไม่มีตัวเลข), val, unit }
+    customSeq: 0,
+    madeAt: null,                              // null = ใช้เวลาปัจจุบัน
+    by: store.get('by', ''),
+    cfg: Object.assign({ w: 50, h: 30, dpi: 203 }, store.get('cfg', {})),
+  };
+
+  /* ---------- โหลดข้อมูลจาก shared/ ---------- */
+  async function loadJSON(name) {
+    for (const base of ['../shared/', 'shared/']) {
+      try { const r = await fetch(base + name, { cache: 'no-cache' }); if (r.ok) return await r.json(); } catch {}
+    }
+    throw new Error(name);
+  }
+
+  function buildItems(bases, menu, ingredients, shelf) {
+    S.groups = shelf.groups;
+    const ing = new Map(ingredients.items.map(i => [i.id, i]));
+    const add = it => S.items.set(it.id, it);
+
+    for (const b of bases.bases) add({
+      id: 'base:' + b.id, group: 'base', name: b.name, color: b.color,
+      hours: bases.brew.shelf_life_h ?? null, confirmed: !!bases.brew.shelf_life_confirmed,
+      tag: b.on_sale === false ? 'ยังไม่ขาย' : '',
+    });
+    for (const [id, p] of Object.entries(menu.preps)) {
+      // shelf_life_days เป็นเลขเดียวหรือช่วง "1-2" → ใช้ค่าต่ำสุด และถือว่ายังไม่ยืนยันถ้าเป็นช่วง
+      const nums = String(p.shelf_life_days ?? '').match(/[\d.]+/g);
+      add({
+        id: 'prep:' + id, group: 'prep', name: p.name,
+        hours: nums ? Math.min(...nums.map(Number)) * 24 : null,
+        confirmed: !!p.confirmed && !!nums && nums.length === 1,
+        note: nums && nums.length > 1 ? `ช่วง ${p.shelf_life_days} วัน ใช้ค่าต่ำสุด` : '',
+      });
+    }
+    const extra = (list, group) => {
+      for (const x of list || []) {
+        const src = ing.get(x.ingredient);
+        add({ id: group + ':' + (x.id || x.ingredient), group, name: x.name || (src && src.name) || x.ingredient, hours: x.hours ?? null, confirmed: !!x.confirmed });
+      }
+    };
+    extra(shelf.toppings, 'topping');
+    extra(shelf.opened, 'opened');
+    S.order = ['base', 'prep', 'topping', 'opened'];
+  }
+
+  /* ---------- เวลาและอายุ ---------- */
+  const pad2 = n => String(n).padStart(2, '0');
+  const fmtDate = d => `${DAYS[d.getDay()]} ${d.getDate()} ${MONTHS[d.getMonth()]}`;
+  const fmtTime = d => `${pad2(d.getHours())}:${pad2(d.getMinutes())}`;
+  const fmtLocal = d => `${d.getFullYear()}-${pad2(d.getMonth() + 1)}-${pad2(d.getDate())}T${fmtTime(d)}`;
+  const fmtDur = h => (h >= 48 && h % 24 === 0) ? `${h / 24} วัน` : `${+h.toFixed(1)} ชม.`;
+  const madeDate = () => S.madeAt ? new Date(S.madeAt) : new Date();
+  const hoursOf = id => { const it = S.items.get(id); return it.hours ?? S.queue.get(id)?.hours ?? null; };
+  const total = () => [...S.queue.values()].reduce((a, q) => a + q.n, 0);
+  const missing = () => [...S.queue.keys()].filter(id => !(hoursOf(id) > 0) || !S.items.get(id).name.trim());
+
+  /* ---------- วาดฉลากลง canvas (ขาวดำล้วน สำหรับเครื่องปริ้นความร้อน) ---------- */
+  function drawLabel(cv, id) {
+    const it = S.items.get(id), g = S.groups[it.group], { w, h, dpi } = S.cfg;
+    const dpm = dpi / 25.4, W = Math.round(w * dpm), H = Math.round(h * dpm);
+    cv.width = W; cv.height = H;
+    const c = cv.getContext('2d', { willReadFrequently: true });
+    c.fillStyle = '#fff'; c.fillRect(0, 0, W, H);
+    c.textBaseline = 'alphabetic';
+    const pad = Math.round(1.5 * dpm), inW = W - pad * 2;
+
+    // ย่อขนาดตัวอักษรจนพอดีความกว้าง แล้ววางกึ่งกลางแนวตั้งของแถว
+    const put = (text, weight, maxPx, x, top, rowH, maxW, color = '#000', align = 'left') => {
+      let px = Math.round(maxPx);
+      do { c.font = `${weight} ${px}px ${FONT}`; } while (c.measureText(text).width > maxW && --px > 8);
+      const m = c.measureText(text), asc = m.actualBoundingBoxAscent, desc = m.actualBoundingBoxDescent;
+      c.fillStyle = color; c.textAlign = align;
+      c.fillText(text, x, top + (rowH - asc - desc) / 2 + asc);
+      return m.width;
+    };
+
+    const made = madeDate(), hrs = hoursOf(id);
+    const exp = hrs > 0 ? new Date(made.getTime() + hrs * 3600e3) : null;
+
+    // แถว 1: ชื่อ + ประเภท
+    const r1 = H * 0.34;
+    const tagW = put(g.name, 600, H * 0.085, W - pad, pad, H * 0.12, inW * 0.4, '#000', 'right');
+    put(it.name.trim() || '—', 700, H * 0.2, pad, pad * 0.6, r1 - pad * 0.6, inW - tagW - pad);
+
+    // แถว 2: เวลาที่ทำ + อายุ
+    const madeTxt = `${g.verb} ${fmtDate(made)} ${fmtTime(made)}` + (S.by ? ` · ${S.by}` : '');
+    const durTxt = hrs > 0 ? `อายุ ${fmtDur(hrs)}` : '';
+    c.font = `600 ${Math.round(H * 0.095)}px ${FONT}`;
+    const durW = durTxt ? c.measureText(durTxt).width : 0;
+    if (durTxt) put(durTxt, 600, H * 0.095, W - pad, r1, H * 0.2, inW * 0.4, '#000', 'right');
+    put(madeTxt, 500, H * 0.105, pad, r1, H * 0.2, inW - durW - pad);
+
+    // แถบดำ: วันเวลาหมดอายุ
+    const by = Math.round(H * 0.56), bh = H - pad - by, ip = Math.round(1.2 * dpm);
+    c.fillStyle = '#000'; c.fillRect(pad, by, inW, bh);
+    put('หมดอายุ', 600, H * 0.085, pad + ip, by + bh * 0.04, bh * 0.3, inW - ip * 2, '#fff');
+    put(exp ? `${fmtDate(exp)}  ${fmtTime(exp)}` : 'ยังไม่ได้ใส่อายุ', 700, H * 0.21, pad + ip, by + bh * 0.3, bh * 0.68, inW - ip * 2, '#fff');
+
+    // ตัดเป็นขาว/ดำล้วน ขอบตัวหนังสือจะคมเมื่อปริ้นความร้อน
+    const img = c.getImageData(0, 0, W, H), d = img.data;
+    for (let i = 0; i < d.length; i += 4) {
+      const v = (d[i] * 299 + d[i + 1] * 587 + d[i + 2] * 114) / 1000 < 150 ? 0 : 255;
+      d[i] = d[i + 1] = d[i + 2] = v; d[i + 3] = 255;
+    }
+    c.putImageData(img, 0, 0);
+    return cv;
+  }
+
+  /* ---------- หน้าจอ ---------- */
+  function renderTiles() {
+    const html = S.order.map(gid => {
+      const items = [...S.items.values()].filter(i => i.group === gid);
+      if (!items.length) return '';
+      return `<section><h2>${esc(S.groups[gid].name)}</h2><div class="tiles">` + items.map(it => {
+        const n = S.queue.get(it.id)?.n || 0;
+        const life = it.hours != null ? `<span>${esc(fmtDur(it.hours))}</span>` : '';
+        const badge = it.hours == null ? '<span class="badge">ยังไม่ตั้งอายุ</span>' : (it.confirmed ? '' : '<span class="badge">ยังไม่ยืนยัน</span>');
+        const tag = it.tag ? `<span class="badge plain">${esc(it.tag)}</span>` : '';
+        const dot = it.color ? `<span class="dot" style="background:${esc(it.color)}"></span>` : '';
+        return `<div class="tile${n ? ' on' : ''}">
+          <button class="add" type="button" data-add="${esc(it.id)}"><span class="nm">${dot}${esc(it.name)}</span><span class="sub">${life}${badge}${tag}</span></button>
+          ${n ? `<span class="cnt num">×${n}</span><button class="minus" type="button" data-sub="${esc(it.id)}" aria-label="ลด ${esc(it.name)} 1 ดวง">−</button>` : ''}
+        </div>`;
+      }).join('') + '</div></section>';
+    }).join('');
+    $('groups').innerHTML = html + `<section><h2>${esc(S.groups.custom.name)}</h2><div class="tiles"><div class="tile custom"><button class="add" type="button" data-custom="1">+ พิมพ์ชื่อเอง</button></div></div></section>`;
+  }
+
+  function renderQueue() {
+    const q = $('queue');
+    if (!S.queue.size) { q.innerHTML = '<div class="empty">ยังไม่ได้เลือกรายการ แตะรายการด้านบนเพื่อเพิ่มฉลาก แตะซ้ำเพื่อเพิ่มจำนวน</div>'; return; }
+    q.innerHTML = [...S.queue.entries()].map(([id, e]) => {
+      const it = S.items.get(id);
+      const name = it.group === 'custom'
+        ? `<input type="text" id="nm-${esc(id)}" data-name="${esc(id)}" maxlength="24" placeholder="ชื่อของ" value="${esc(it.name)}" aria-label="ชื่อของ">`
+        : `<b>${esc(it.name)}</b>`;
+      const need = it.hours == null ? `<div class="need">
+          <label for="hv-${esc(id)}">ใส่อายุ (ยังไม่มีตัวเลขยืนยัน)</label>
+          <input type="number" id="hv-${esc(id)}" data-hv="${esc(id)}" inputmode="decimal" min="0" step="0.5" placeholder="เช่น 24" value="${e.val ?? ''}">
+          <select data-hu="${esc(id)}" aria-label="หน่วย"><option value="1"${e.unit === 24 ? '' : ' selected'}>ชม.</option><option value="24"${e.unit === 24 ? ' selected' : ''}>วัน</option></select>
+        </div>` : '';
+      return `<div class="qcard" data-card="${esc(id)}"><canvas></canvas><div class="qmeta">${name}${need}
+        <div class="step"><button type="button" data-sub="${esc(id)}" aria-label="ลด 1 ดวง">−</button><span class="num">×${e.n}</span><button type="button" data-add="${esc(id)}" aria-label="เพิ่ม 1 ดวง">+</button></div>
+      </div></div>`;
+    }).join('');
+  }
+
+  function redraw() {
+    const miss = new Set(missing());
+    for (const card of document.querySelectorAll('.qcard')) {
+      drawLabel(card.querySelector('canvas'), card.dataset.card);
+      card.classList.toggle('missing', miss.has(card.dataset.card));
+    }
+    const n = total(), st = $('status');
+    st.classList.toggle('warn', miss.size > 0);
+    st.textContent = !n ? 'แตะรายการด้านบนเพื่อเพิ่มฉลาก'
+      : miss.size ? `ใส่ชื่อและอายุให้ครบก่อน (เหลือ ${miss.size} รายการ)`
+      : `${n} ดวง · สติกเกอร์ ${S.cfg.w}×${S.cfg.h} มม.`;
+    const ok = n > 0 && !miss.size;
+    $('printBtn').disabled = $('shareBtn').disabled = !ok;
+    $('printBtn').textContent = n ? `ปริ้น ${n} ดวง` : 'ปริ้น';
+    $('clearBtn').disabled = !n;
+  }
+
+  function renderAll() { renderTiles(); renderQueue(); redraw(); }
+
+  function renderSettings() {
+    const { w, h, dpi } = S.cfg;
+    $('sizes').innerHTML = SIZES.map(([a, b]) => `<button type="button" data-size="${a}x${b}" class="${a === w && b === h ? 'on' : ''}">${a}×${b} มม.</button>`).join('');
+    $('lw').value = w; $('lh').value = h; $('dpi').value = dpi;
+  }
+
+  function tick() {
+    if (S.madeAt) return;
+    const v = fmtLocal(new Date());
+    if ($('madeAt').value !== v) { $('madeAt').value = v; redraw(); }
+  }
+
+  /* ---------- ปริ้น / ส่งรูป ---------- */
+  const labelList = () => [...S.queue.entries()].flatMap(([id, e]) => Array(e.n).fill(id));
+
+  async function doPrint() {
+    const { w, h } = S.cfg, cache = new Map();
+    $('pageStyle').textContent = `@page { size: ${w}mm ${h}mm; margin: 0; } @media print { .pg { width: ${w}mm; height: ${h}mm; } }`;
+    const area = $('printArea'); area.innerHTML = '';
+    const waits = [];
+    for (const id of labelList()) {
+      if (!cache.has(id)) cache.set(id, drawLabel(document.createElement('canvas'), id).toDataURL('image/png'));
+      const pg = document.createElement('div'); pg.className = 'pg';
+      const img = new Image(); img.src = cache.get(id); img.alt = S.items.get(id).name;
+      pg.appendChild(img); area.appendChild(pg);
+      waits.push(img.decode().catch(() => {}));
+    }
+    await Promise.all(waits);
+    window.print();
+  }
+
+  async function doShare() {
+    const files = [];
+    for (const id of S.queue.keys()) {
+      const cv = drawLabel(document.createElement('canvas'), id);
+      const blob = await new Promise(r => cv.toBlob(r, 'image/png'));
+      files.push(new File([blob], `ฉลาก-${S.items.get(id).name.trim().replace(/[^\p{L}\p{M}\p{N}]+/gu, '-')}.png`, { type: 'image/png' }));
+    }
+    if (navigator.canShare && navigator.canShare({ files })) {
+      try { await navigator.share({ files }); } catch (e) { if (e.name !== 'AbortError') flash('ส่งรูปไม่สำเร็จ ลองใหม่อีกครั้ง'); }
+      return;
+    }
+    // เบราว์เซอร์ที่แชร์ไฟล์ไม่ได้ → บันทึกรูปลงเครื่องแทน
+    for (const f of files) {
+      const a = document.createElement('a'); a.href = URL.createObjectURL(f); a.download = f.name;
+      document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 5000);
+    }
+    flash(`บันทึกรูป ${files.length} ไฟล์ลงเครื่องแล้ว เปิดจากแอปเครื่องปริ้นได้เลย`);
+  }
+
+  let flashT;
+  function flash(msg) { $('status').textContent = msg; clearTimeout(flashT); flashT = setTimeout(redraw, 4000); }
+
+  /* ---------- เหตุการณ์ ---------- */
+  function addOne(id) { const e = S.queue.get(id) || { n: 0 }; e.n++; S.queue.set(id, e); }
+  function subOne(id) {
+    const e = S.queue.get(id); if (!e) return;
+    if (--e.n <= 0) { S.queue.delete(id); if (S.items.get(id).group === 'custom') S.items.delete(id); }
+  }
+
+  document.addEventListener('click', ev => {
+    const t = ev.target.closest('button'); if (!t) return;
+    if (t.dataset.add) { addOne(t.dataset.add); renderAll(); }
+    else if (t.dataset.sub) { subOne(t.dataset.sub); renderAll(); }
+    else if (t.dataset.custom) {
+      const id = 'custom:' + (++S.customSeq);
+      S.items.set(id, { id, group: 'custom', name: '', hours: null, confirmed: false });
+      addOne(id); renderAll();
+      const inp = $('nm-' + id); if (inp) { inp.focus(); inp.scrollIntoView({ block: 'center' }); }
+    }
+    else if (t.dataset.size) { const [a, b] = t.dataset.size.split('x').map(Number); setCfg({ w: a, h: b }); }
+  });
+
+  // พิมพ์ในการ์ด: อัปเดตเฉพาะรูปฉลาก ไม่สร้างการ์ดใหม่ (ช่องกรอกจะได้ไม่หลุดโฟกัส)
+  $('queue').addEventListener('input', ev => {
+    const t = ev.target;
+    if (t.dataset.name) S.items.get(t.dataset.name).name = t.value;
+    const id = t.dataset.hv || t.dataset.hu;
+    if (id) {
+      const card = t.closest('.qcard'), e = S.queue.get(id);
+      e.val = card.querySelector('[data-hv]').value;
+      e.unit = Number(card.querySelector('[data-hu]').value);
+      const v = parseFloat(e.val);
+      e.hours = v > 0 ? v * e.unit : null;
+    }
+    redraw();
+  });
+
+  $('madeAt').addEventListener('input', () => {
+    const v = $('madeAt').value;
+    S.madeAt = v ? new Date(v).getTime() : null;
+    $('nowChip').hidden = !!S.madeAt; $('nowBtn').hidden = !S.madeAt;
+    if (!S.madeAt) tick();
+    redraw();
+  });
+  $('nowBtn').addEventListener('click', () => { S.madeAt = null; $('nowChip').hidden = false; $('nowBtn').hidden = true; $('madeAt').value = ''; tick(); redraw(); });
+  $('by').value = S.by;
+  $('by').addEventListener('input', () => { S.by = $('by').value.trim(); store.set('by', S.by); redraw(); });
+
+  function setCfg(patch) {
+    Object.assign(S.cfg, patch); store.set('cfg', S.cfg); renderSettings(); redraw();
+  }
+  for (const k of ['lw', 'lh']) $(k).addEventListener('change', () => {
+    const w = Math.min(110, Math.max(20, Number($('lw').value) || S.cfg.w)), h = Math.min(110, Math.max(15, Number($('lh').value) || S.cfg.h));
+    setCfg({ w, h });
+  });
+  $('dpi').addEventListener('change', () => setCfg({ dpi: Number($('dpi').value) }));
+
+  $('clearBtn').addEventListener('click', () => {
+    for (const id of [...S.queue.keys()]) if (S.items.get(id).group === 'custom') S.items.delete(id);
+    S.queue.clear(); renderAll();
+  });
+  $('printBtn').addEventListener('click', doPrint);
+  $('shareBtn').addEventListener('click', doShare);
+
+  /* ---------- เริ่ม ---------- */
+  (async () => {
+    renderSettings(); renderQueue(); tick();
+    try {
+      const [bases, menu, ingredients, shelf] = await Promise.all(['bases.json', 'menu.json', 'ingredients.json', 'shelf-life.json'].map(loadJSON));
+      buildItems(bases, menu, ingredients, shelf);
+    } catch (e) {
+      $('groups').innerHTML = `<div class="empty">โหลดข้อมูลร้านไม่ได้ (${esc(e.message)}) ต้องเปิดหน้านี้ผ่านเว็บที่มีโฟลเดอร์ shared/ อยู่ด้วย เปิดไฟล์ตรงๆ จากเครื่องไม่ได้</div>`;
+      return;
+    }
+    // รอฟอนต์ไทยก่อนวาด ไม่งั้น canvas จะใช้ฟอนต์สำรอง
+    try { await Promise.all([500, 600, 700].map(wt => document.fonts.load(`${wt} 24px "IBM Plex Sans Thai"`, 'กขค 0123'))); } catch {}
+    renderAll();
+    setInterval(tick, 5000);
+    document.addEventListener('visibilitychange', () => { if (!document.hidden) tick(); });
+  })();
+})();
+</script>
+</body>
+</html>
