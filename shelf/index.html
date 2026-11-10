@@ -6,201 +6,242 @@
 <title>ฉลากวันหมดอายุ KACHA</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Anuphan:wght@400;500;600;700&family=IBM+Plex+Sans+Thai:wght@500;600;700&display=swap">
 <style>
-  /* layout: หน้าเดียว — เวลาที่ทำอยู่บนสุด, แตะรายการเพื่อเพิ่มฉลาก, ตัวอย่างฉลากอยู่ล่าง, แถบปุ่มปริ้นติดขอบล่าง */
+  /* layout: โปรแกรมหลังร้านสองฝั่ง — ซ้ายเลือกของ (แท็บหมวด + ปุ่มใหญ่), ขวาคือคิวปริ้นพร้อมตัวอย่างฉลากและปุ่มปริ้น · จอแคบเรียงลงมาเป็นคอลัมน์เดียว ปุ่มปริ้นติดขอบล่าง */
   :root {
-    --paper: #faf8f3; --card: #ffffff; --ink: #20261f; --muted: #6d7568; --line: #e7e3d8;
-    --tea: #1f7a54; --tea-soft: #e4f0e8; --warn: #93640f; --warn-soft: #f5ead2; --out: #b4472e;
-    --label: #ffffff; --label-ink: #000000;
+    --bg: #edf0ee; --panel: #ffffff; --ink: #15201c; --muted: #5b6964; --line: #d5dbd7; --line-strong: #aeb9b3;
+    --chrome: #14211d; --chrome-ink: #f3f6f4; --chrome-muted: #a3b3ac; --chrome-line: #31423c;
+    --accent: #1f4fd8; --accent-ink: #ffffff; --accent-soft: #e7edfd;
+    --warn: #8a5a00; --warn-soft: #fbefd0; --danger: #b3261e;
+    --liner: #efe4bf;   /* กระดาษรองม้วนสติกเกอร์ */
+    --ui: 'Anuphan', 'Noto Sans Thai', system-ui, sans-serif;
     color-scheme: light;
   }
-  @media (prefers-color-scheme: dark) {
-    :root {
-      --paper: #15120d; --card: #1e1b15; --ink: #ece7db; --muted: #9a9a8c; --line: #322d24;
-      --tea: #4bbd85; --tea-soft: #1a2a21; --warn: #e2b55e; --warn-soft: #2e2615; --out: #e0795f;
-      color-scheme: dark;
-    }
-  }
-
   * { box-sizing: border-box; }
   [hidden] { display: none !important; }
+  html, body { height: 100%; }
   body {
-    margin: 0; background: var(--paper); color: var(--ink);
-    font-family: 'IBM Plex Sans Thai', 'Noto Sans Thai', system-ui, sans-serif;
-    font-size: 16px; line-height: 1.5; -webkit-font-smoothing: antialiased;
+    margin: 0; background: var(--bg); color: var(--ink); font-family: var(--ui); font-size: 16px; line-height: 1.45;
+    -webkit-font-smoothing: antialiased; display: flex; flex-direction: column; height: 100dvh;
   }
-  .num { font-family: 'IBM Plex Mono', ui-monospace, monospace; font-variant-numeric: tabular-nums; }
-  .wrap {
-    max-width: 720px; margin: 0 auto;
-    padding-left: max(16px, env(safe-area-inset-left, 0px));
-    padding-right: max(16px, env(safe-area-inset-right, 0px));
-    padding-block: calc(18px + env(safe-area-inset-top, 0px)) calc(150px + env(safe-area-inset-bottom, 0px));
-    display: flex; flex-direction: column; gap: 22px;
+  .num { font-variant-numeric: tabular-nums; }
+  button { font: inherit; color: inherit; cursor: pointer; touch-action: manipulation; }
+  input, select { font: inherit; color: var(--ink); background: var(--panel); border: 1px solid var(--line-strong); border-radius: 8px; padding: 10px 12px; width: 100%; min-width: 0; min-height: 44px; }
+  :focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+  label, .lbl { font-size: 13px; font-weight: 600; color: var(--muted); }
+
+  /* แถบบน */
+  .top {
+    background: var(--chrome); color: var(--chrome-ink); flex-shrink: 0;
+    display: flex; align-items: center; justify-content: space-between; gap: 12px 16px; flex-wrap: wrap;
+    padding: calc(10px + env(safe-area-inset-top, 0px)) max(20px, env(safe-area-inset-right, 0px)) 10px max(20px, env(safe-area-inset-left, 0px));
   }
-  header { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }
-  h1 { margin: 0; font-size: 18px; font-weight: 600; }
-  h1 small { color: var(--muted); font-weight: 400; font-size: 13px; margin-left: 6px; }
-  h2 { margin: 0; font-size: 14px; font-weight: 600; color: var(--muted); letter-spacing: .3px; }
-  section { display: flex; flex-direction: column; gap: 10px; }
+  .brand { display: flex; align-items: baseline; gap: 10px; }
+  .brand b { font-size: 20px; font-weight: 700; letter-spacing: 1.5px; }
+  .brand span { color: var(--chrome-muted); font-size: 15px; }
+  .top-r { display: flex; align-items: center; gap: 16px; }
+  #clock { color: var(--chrome-muted); font-size: 14px; }
+  .top-btn { background: none; border: 1px solid var(--chrome-line); border-radius: 8px; padding: 8px 14px; min-height: 40px; font-size: 14px; color: var(--chrome-muted); }
+  .top-btn b { color: var(--chrome-ink); font-weight: 600; }
 
-  label { font-size: 12px; color: var(--muted); font-weight: 500; }
-  input, select {
-    font: inherit; padding: 11px 12px; border: 1px solid var(--line); border-radius: 10px;
-    background: var(--card); color: var(--ink); width: 100%; min-width: 0;
-  }
-  input:focus-visible, select:focus-visible, button:focus-visible, summary:focus-visible { outline: 2px solid var(--tea); outline-offset: 1px; }
-  button { font: inherit; color: inherit; cursor: pointer; }
+  /* โครงสองฝั่ง */
+  .app { flex: 1; min-height: 0; display: grid; grid-template-columns: minmax(0, 1fr) 380px; }
+  @media (min-width: 1150px) { .app { grid-template-columns: minmax(0, 1fr) 440px; } }
+  .catalog { overflow-y: auto; min-width: 0; padding: 0 max(20px, env(safe-area-inset-left, 0px)) 32px 20px; padding-left: max(20px, env(safe-area-inset-left, 0px)); padding-right: 20px; }
+  .side { background: var(--panel); border-left: 1px solid var(--line); display: flex; flex-direction: column; min-height: 0; min-width: 0; }
 
-  /* เวลาที่ทำ */
-  .when { display: grid; grid-template-columns: 1.4fr 1fr; gap: 10px; }
-  .field { display: flex; flex-direction: column; gap: 5px; min-width: 0; }
-  .field .row { display: flex; align-items: center; justify-content: space-between; gap: 8px; min-height: 20px; }
-  .chip { font-size: 11px; font-weight: 600; padding: 1px 8px; border-radius: 999px; background: var(--tea-soft); color: var(--tea); }
-  .link { border: none; background: none; padding: 0; font-size: 12px; font-weight: 600; color: var(--tea); text-decoration: underline; }
-  @media (max-width: 420px) { .when { grid-template-columns: 1fr; } }
+  /* ซ้าย: แท็บหมวด + ค้นหา */
+  .cat-bar { position: sticky; top: 0; z-index: 2; background: var(--bg); padding: 16px 0 12px; display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+  .tabs { display: flex; gap: 6px; flex-wrap: wrap; flex: 1 1 auto; }
+  .tabs button { border: 1px solid var(--line-strong); background: var(--panel); border-radius: 8px; padding: 9px 14px; min-height: 44px; font-weight: 600; font-size: 15px; display: flex; align-items: center; gap: 8px; }
+  .tabs button small { font-variant-numeric: tabular-nums; font-size: 12px; color: var(--muted); font-weight: 500; }
+  .tabs button.on { background: var(--ink); border-color: var(--ink); color: var(--panel); }
+  .tabs button.on small { color: var(--chrome-muted); }
+  #q { flex: 0 1 200px; }
 
-  /* รายการให้แตะ */
-  .tiles { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 8px; }
+  .grp { display: flex; flex-direction: column; gap: 10px; margin-bottom: 24px; }
+  .grp h2 { margin: 0; font-size: 14px; font-weight: 700; color: var(--muted); letter-spacing: .4px; }
+  .tiles { display: grid; grid-template-columns: repeat(auto-fill, minmax(168px, 1fr)); gap: 10px; }
   .tile { position: relative; display: flex; min-width: 0; }
   .tile .add {
-    flex: 1; min-width: 0; min-height: 62px; text-align: left; padding: 9px 12px;
-    border: 1px solid var(--line); border-radius: 12px; background: var(--card);
-    display: flex; flex-direction: column; justify-content: center; gap: 2px;
+    flex: 1; min-width: 0; min-height: 84px; text-align: left; padding: 12px 14px; background: var(--panel);
+    border: 2px solid var(--line); border-radius: 12px; display: flex; flex-direction: column; justify-content: space-between; gap: 8px;
+    transition: border-color .12s, box-shadow .12s;
   }
-  .tile .add:active { transform: translateY(1px); }
-  .tile.on .add { border-color: var(--tea); background: var(--tea-soft); padding-right: 46px; }
-  .tile .nm { font-weight: 600; font-size: 15px; line-height: 1.3; display: flex; align-items: center; gap: 7px; overflow-wrap: anywhere; }
-  .tile .dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; border: 1px solid var(--line); }
-  .tile .sub { font-size: 12px; color: var(--muted); display: flex; flex-wrap: wrap; align-items: center; gap: 4px 6px; }
-  .badge { font-size: 11px; font-weight: 600; padding: 0 6px; border-radius: 6px; background: var(--warn-soft); color: var(--warn); white-space: nowrap; }
-  .badge.plain { background: none; border: 1px solid var(--line); color: var(--muted); }
-  .tile .cnt { position: absolute; right: 44px; top: 8px; font-size: 12px; font-weight: 600; color: var(--tea); }
-  .tile .minus {
-    position: absolute; right: 6px; top: 50%; translate: 0 -50%; width: 34px; height: 34px;
-    border: 1px solid var(--tea); border-radius: 50%; background: var(--card); color: var(--tea); font-size: 20px; line-height: 1;
-  }
-  .tile.custom .add { border-style: dashed; color: var(--muted); align-items: center; }
+  @media (hover: hover) { .tile .add:hover { border-color: var(--line-strong); box-shadow: 0 2px 8px rgba(21, 32, 28, .08); } }
+  .tile .add:active { transform: scale(.985); }
+  .tile.on .add { border-color: var(--accent); background: var(--accent-soft); }
+  .tile .nm { font-size: 17px; font-weight: 600; line-height: 1.3; overflow-wrap: anywhere; }
+  .tile.on .sub { padding-right: 78px; min-height: 34px; }
+  .tile .sw { display: inline-block; width: 13px; height: 13px; border-radius: 50%; border: 1px solid var(--line-strong); margin-right: 7px; vertical-align: -1px; }
+  .tile .sub { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 8px; font-size: 13px; color: var(--muted); }
+  .tile .life { font-variant-numeric: tabular-nums; font-weight: 600; color: var(--ink); }
+  .badge { font-size: 12px; font-weight: 600; padding: 1px 7px; border-radius: 6px; background: var(--warn-soft); color: var(--warn); white-space: nowrap; }
+  .badge.plain { background: none; border: 1px solid var(--line-strong); color: var(--muted); }
+  .tq { position: absolute; bottom: 8px; right: 8px; display: flex; align-items: center; background: var(--accent); color: var(--accent-ink); border-radius: 999px; }
+  .tq button { width: 36px; height: 34px; border: none; background: none; color: inherit; font-size: 20px; line-height: 1; border-radius: 999px 0 0 999px; }
+  .tq span { min-width: 30px; padding-right: 12px; text-align: center; font-variant-numeric: tabular-nums; font-weight: 600; font-size: 15px; }
+  .tile.custom .add { border-style: dashed; border-color: var(--line-strong); color: var(--muted); justify-content: center; align-items: center; font-weight: 600; background: none; }
+  .note { border: 1px dashed var(--line-strong); border-radius: 12px; padding: 20px; color: var(--muted); text-align: center; }
 
-  /* ตัวอย่างฉลาก */
-  #queue { display: flex; flex-direction: column; gap: 10px; }
-  .qcard { display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); gap: 12px; align-items: center; padding: 10px; border: 1px solid var(--line); border-radius: 14px; background: var(--card); }
-  .qcard canvas { width: 100%; height: auto; display: block; background: var(--label); border: 1px solid var(--line); border-radius: 4px; }
+  /* ขวา: คิวปริ้น */
+  .side-head { padding: 16px 18px 14px; border-bottom: 1px solid var(--line); display: flex; flex-direction: column; gap: 12px; }
+  .side-title { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+  .side-title h2 { margin: 0; font-size: 18px; font-weight: 700; display: flex; align-items: center; gap: 10px; }
+  #totalPill { font-variant-numeric: tabular-nums; font-size: 13px; font-weight: 600; background: var(--ink); color: var(--panel); border-radius: 999px; padding: 2px 10px; }
+  .text-btn { border: none; background: none; padding: 8px 4px; font-size: 14px; font-weight: 600; color: var(--danger); text-decoration: underline; }
+  .text-btn[disabled] { color: var(--line-strong); text-decoration: none; cursor: default; }
+  .when { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 6px 12px; align-items: center; }
+  .when .lbl { grid-column: 1 / -1; }
+  .seg { display: flex; border: 1px solid var(--line-strong); border-radius: 8px; overflow: hidden; }
+  .seg button { border: none; background: var(--panel); padding: 9px 13px; min-height: 44px; font-size: 14px; font-weight: 600; color: var(--muted); }
+  .seg button + button { border-left: 1px solid var(--line-strong); }
+  .seg button.on { background: var(--ink); color: var(--panel); }
+  #madeTxt { font-size: 17px; font-weight: 600; }
+  .by { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 12px; align-items: center; }
+
+  .qlist { flex: 1; min-height: 0; overflow-y: auto; }
+  .qrow { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr); gap: 14px; align-items: center; padding: 10px 18px; border-bottom: 1px solid var(--line); }
+  .qrow.flash { animation: flash .7s ease-out; }
+  @keyframes flash { from { background: var(--accent-soft); } to { background: var(--panel); } }
+  .liner { background: var(--liner); border-radius: 6px; padding: 7px; }
+  .liner canvas { display: block; width: 100%; height: auto; background: #fff; border-radius: 4px; box-shadow: 0 1px 2px rgba(21, 32, 28, .18); }
   .qmeta { display: flex; flex-direction: column; gap: 8px; min-width: 0; }
-  .qmeta b { font-size: 14px; overflow-wrap: anywhere; }
+  .qname { font-weight: 600; overflow-wrap: anywhere; line-height: 1.3; }
   .need { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
   .need label { grid-column: 1 / -1; color: var(--warn); }
-  .need input, .need select, .qmeta > input { padding: 8px 10px; }
-  .qcard.missing { border-color: var(--warn); }
-  .step { display: flex; align-items: center; gap: 10px; }
-  .step button { width: 38px; height: 38px; border-radius: 50%; border: 1px solid var(--line); background: var(--paper); font-size: 20px; line-height: 1; }
-  .step span { min-width: 3ch; text-align: center; font-weight: 600; }
-  .empty { border: 1px dashed var(--line); border-radius: 14px; padding: 18px; color: var(--muted); font-size: 14px; text-align: center; }
+  .qrow.missing .liner { outline: 2px solid var(--warn); }
+  .step { display: flex; align-items: center; gap: 4px; }
+  .step button { width: 44px; height: 44px; border: 1px solid var(--line-strong); background: var(--panel); border-radius: 8px; font-size: 22px; line-height: 1; }
+  .step span { min-width: 34px; text-align: center; font-variant-numeric: tabular-nums; font-weight: 600; font-size: 17px; }
+  .step .rm { width: auto; border: none; background: none; margin-left: auto; padding: 0 4px; font-size: 14px; font-weight: 600; color: var(--muted); text-decoration: underline; }
+  .qempty { padding: 40px 24px; text-align: center; color: var(--muted); }
+  .qempty b { display: block; color: var(--ink); font-size: 17px; margin-bottom: 4px; }
 
-  /* ตั้งค่า */
-  details { border: 1px solid var(--line); border-radius: 14px; background: var(--card); }
-  summary { padding: 12px 14px; font-size: 14px; font-weight: 600; cursor: pointer; border-radius: 14px; }
-  .set { padding: 0 14px 14px; display: flex; flex-direction: column; gap: 12px; }
-  .seg { display: flex; gap: 6px; flex-wrap: wrap; }
-  .seg button { padding: 8px 14px; border: 1px solid var(--line); border-radius: 999px; background: var(--paper); font-size: 13px; color: var(--muted); }
-  .seg button.on { background: var(--tea-soft); color: var(--tea); border-color: var(--tea); font-weight: 600; }
-  .grid3 { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
-  .help { font-size: 13px; color: var(--muted); margin: 0; }
-  .help b { color: var(--ink); font-weight: 600; }
-  .help li { margin-bottom: 4px; }
-  ol.help { padding-left: 20px; }
-
-  /* แถบปุ่มล่าง */
-  .bar {
-    position: fixed; left: 0; right: 0; bottom: 0; z-index: 5; background: var(--card); border-top: 1px solid var(--line);
-    padding: 10px max(16px, env(safe-area-inset-right, 0px)) calc(10px + env(safe-area-inset-bottom, 0px)) max(16px, env(safe-area-inset-left, 0px));
-  }
-  .bar-in { max-width: 688px; margin: 0 auto; display: flex; flex-direction: column; gap: 8px; }
-  #status { font-size: 13px; color: var(--muted); min-height: 19px; }
+  .side-foot { border-top: 1px solid var(--line); background: var(--panel); padding: 12px 18px calc(14px + env(safe-area-inset-bottom, 0px)); display: flex; flex-direction: column; gap: 10px; }
+  #status { font-size: 14px; color: var(--muted); min-height: 20px; }
   #status.warn { color: var(--warn); font-weight: 600; }
-  .btns { display: grid; grid-template-columns: auto 1fr 1.3fr; gap: 8px; }
-  .btn { border: 1px solid var(--line); border-radius: 12px; padding: 14px 12px; font-weight: 600; background: var(--paper); min-width: 0; }
-  .btn.main { background: var(--tea); border-color: var(--tea); color: var(--card); }
-  .btn:active { transform: translateY(1px); }
-  .btn[disabled] { opacity: .45; cursor: not-allowed; }
+  .btns { display: grid; grid-template-columns: 1fr 1.6fr; gap: 10px; }
+  .btn { border: 1px solid var(--line-strong); background: var(--panel); border-radius: 10px; min-height: 56px; padding: 10px 12px; font-size: 17px; font-weight: 700; }
+  .btn.main { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+  .btn:active { transform: scale(.985); }
+  .btn[disabled] { opacity: .4; cursor: not-allowed; }
+
+  /* หน้าต่างตั้งค่า */
+  dialog { border: none; border-radius: 14px; padding: 0; width: min(520px, calc(100vw - 32px)); color: var(--ink); background: var(--panel); box-shadow: 0 20px 60px rgba(21, 32, 28, .3); }
+  dialog::backdrop { background: rgba(21, 32, 28, .5); }
+  .dlg-head { display: flex; align-items: center; justify-content: space-between; padding: 16px 20px; border-bottom: 1px solid var(--line); margin: 0; }
+  .dlg-head h2 { margin: 0; font-size: 18px; }
+  .dlg-head button { border: 1px solid var(--line-strong); background: var(--panel); border-radius: 8px; padding: 8px 16px; min-height: 44px; font-weight: 600; }
+  .set { padding: 18px 20px 22px; display: flex; flex-direction: column; gap: 16px; }
+  .field { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+  .sizes { display: flex; gap: 8px; flex-wrap: wrap; }
+  .sizes button { border: 1px solid var(--line-strong); background: var(--panel); border-radius: 8px; padding: 10px 16px; min-height: 44px; font-weight: 600; }
+  .sizes button.on { background: var(--ink); border-color: var(--ink); color: var(--panel); }
+  .grid3 { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+  .help { font-size: 14px; color: var(--muted); margin: 0; }
+  .help b { color: var(--ink); }
+  ol.help { padding-left: 20px; display: flex; flex-direction: column; gap: 6px; }
+
+  /* จอแคบ (มือถือ): คอลัมน์เดียว ปุ่มปริ้นติดขอบล่าง */
+  @media (max-width: 760px) {
+    html, body { height: auto; }
+    body { display: block; height: auto; padding-bottom: calc(150px + env(safe-area-inset-bottom, 0px)); }
+    .app { display: block; }
+    .catalog { overflow: visible; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-bottom: 8px; }
+    .cat-bar { position: static; }
+    #q { flex-basis: 100%; }
+    .tiles { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); }
+    .side { border-left: none; border-top: 1px solid var(--line); }
+    .qlist { overflow: visible; }
+    .side-foot { position: fixed; left: 0; right: 0; bottom: 0; z-index: 5; box-shadow: 0 -4px 16px rgba(21, 32, 28, .08); }
+    #clock { display: none; }
+  }
 
   #printArea { display: none; }
   @media print {
-    html, body { background: #fff; margin: 0; padding: 0; }
-    .wrap, .bar { display: none !important; }
+    html, body { background: #fff; margin: 0; padding: 0; height: auto; display: block; }
+    .top, .app, dialog { display: none !important; }
     #printArea { display: block; }
     .pg { overflow: hidden; break-after: page; page-break-after: always; }
     .pg:last-child { break-after: auto; page-break-after: auto; }
     .pg img { width: 100%; height: 100%; display: block; }
   }
-  @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+  @media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
 </style>
 <style id="pageStyle"></style>
 </head>
 <body>
-<div class="wrap">
-  <header>
-    <h1>KACHA <small>ฉลากวันหมดอายุ</small></h1>
-  </header>
+<header class="top">
+  <div class="brand"><b>KACHA</b><span>ฉลากวันหมดอายุ</span></div>
+  <div class="top-r">
+    <span class="num" id="clock"></span>
+    <button class="top-btn" id="setBtn" type="button">สติกเกอร์ <b id="sizeTxt"></b> · ตั้งค่า</button>
+  </div>
+</header>
 
-  <section>
-    <div class="when">
-      <div class="field">
-        <div class="row">
-          <label for="madeAt">เวลาที่ชง / ทำ / เปิด</label>
-          <span class="chip" id="nowChip">ตอนนี้</span>
-          <button class="link" id="nowBtn" type="button" hidden>กลับเป็นตอนนี้</button>
+<div class="app">
+  <main class="catalog">
+    <div class="cat-bar">
+      <div class="tabs" id="tabs"></div>
+      <input type="search" id="q" placeholder="ค้นหาชื่อ" aria-label="ค้นหาชื่อ" autocomplete="off">
+    </div>
+    <div id="groups"><div class="note">กำลังโหลดข้อมูลร้าน…</div></div>
+  </main>
+
+  <aside class="side">
+    <div class="side-head">
+      <div class="side-title">
+        <h2>คิวปริ้น <span id="totalPill">0 ดวง</span></h2>
+        <button class="text-btn" id="clearBtn" type="button" disabled>ล้างคิว</button>
+      </div>
+      <div class="when">
+        <span class="lbl">เวลาที่ชง / ทำ / เปิด</span>
+        <div class="seg">
+          <button type="button" id="modeNow" class="on" aria-pressed="true">ตอนนี้</button>
+          <button type="button" id="modeCustom" aria-pressed="false">กำหนดเอง</button>
         </div>
-        <input type="datetime-local" id="madeAt">
+        <div class="num" id="madeTxt"></div>
+        <input type="datetime-local" id="madeAt" aria-label="เวลาที่ชง ทำ หรือเปิด" hidden>
       </div>
-      <div class="field">
-        <div class="row"><label for="by">ชื่อคนทำ (ไม่ใส่ก็ได้)</label></div>
-        <input type="text" id="by" maxlength="12" autocomplete="off" placeholder="เช่น บุญ">
+      <div class="by">
+        <label for="by">ชื่อคนทำ</label>
+        <input type="text" id="by" list="byList" maxlength="12" autocomplete="off" placeholder="ไม่ใส่ก็ได้">
+        <datalist id="byList"></datalist>
       </div>
     </div>
-  </section>
-
-  <div id="groups" style="display:flex;flex-direction:column;gap:22px">
-    <div class="empty" id="loading">กำลังโหลดข้อมูลร้าน…</div>
-  </div>
-
-  <section>
-    <h2>ตัวอย่างฉลาก</h2>
-    <div id="queue"></div>
-  </section>
-
-  <details id="settings">
-    <summary>ตั้งค่าสติกเกอร์และวิธีปริ้น</summary>
-    <div class="set">
-      <div class="field">
-        <label>ขนาดสติกเกอร์ (กว้าง × สูง)</label>
-        <div class="seg" id="sizes"></div>
+    <div class="qlist" id="queue"></div>
+    <div class="side-foot">
+      <div id="status"></div>
+      <div class="btns">
+        <button class="btn" id="shareBtn" type="button" disabled>ส่งรูป</button>
+        <button class="btn main" id="printBtn" type="button" disabled>ปริ้น</button>
       </div>
-      <div class="grid3">
-        <div class="field"><label for="lw">กว้าง (มม.)</label><input type="number" id="lw" inputmode="decimal" min="20" max="110" step="1"></div>
-        <div class="field"><label for="lh">สูง (มม.)</label><input type="number" id="lh" inputmode="decimal" min="15" max="110" step="1"></div>
-        <div class="field"><label for="dpi">ความละเอียด</label>
-          <select id="dpi"><option value="203">203 dpi</option><option value="300">300 dpi</option></select></div>
-      </div>
-      <p class="help"><span class="badge">ยังไม่ยืนยัน</span> ยังไม่ได้ลองกับเครื่องปริ้นจริง ขนาดและวิธีปริ้นอาจต้องปรับเมื่อได้เครื่องมา</p>
-      <ol class="help">
-        <li><b>ปุ่ม "ปริ้น"</b> เปิดหน้าต่างปริ้นของมือถือ ใช้ได้เมื่อเครื่องปริ้นลงทะเบียนกับมือถือไว้แล้ว (Android ต้องลงแอป print service ของเครื่องปริ้น) ตั้งขนาดกระดาษให้เท่าสติกเกอร์ ขอบ 0</li>
-        <li><b>ปุ่ม "ส่งรูป"</b> ส่งรูปฉลากไปเปิดในแอปของเครื่องปริ้น แล้วสั่งปริ้นจากแอปนั้น (iPhone ใช้ทางนี้)</li>
-      </ol>
     </div>
-  </details>
+  </aside>
 </div>
 
-<div class="bar">
-  <div class="bar-in">
-    <div id="status">แตะรายการด้านบนเพื่อเพิ่มฉลาก</div>
-    <div class="btns">
-      <button class="btn" id="clearBtn" type="button" disabled>ล้าง</button>
-      <button class="btn" id="shareBtn" type="button" disabled>ส่งรูป</button>
-      <button class="btn main" id="printBtn" type="button" disabled>ปริ้น</button>
+<dialog id="dlg" aria-labelledby="dlgTitle">
+  <form method="dialog" class="dlg-head"><h2 id="dlgTitle">ตั้งค่าสติกเกอร์</h2><button>ปิด</button></form>
+  <div class="set">
+    <div class="field">
+      <span class="lbl">ขนาดสติกเกอร์ (กว้าง × สูง)</span>
+      <div class="sizes" id="sizes"></div>
     </div>
+    <div class="grid3">
+      <div class="field"><label for="lw">กว้าง (มม.)</label><input type="number" id="lw" inputmode="decimal" min="20" max="110" step="1"></div>
+      <div class="field"><label for="lh">สูง (มม.)</label><input type="number" id="lh" inputmode="decimal" min="15" max="110" step="1"></div>
+      <div class="field"><label for="dpi">ความละเอียด</label>
+        <select id="dpi"><option value="203">203 dpi</option><option value="300">300 dpi</option></select></div>
+    </div>
+    <p class="help"><span class="badge">ยังไม่ยืนยัน</span> ยังไม่ได้ลองกับเครื่องปริ้นจริง ขนาดและวิธีปริ้นอาจต้องปรับเมื่อได้เครื่องมา</p>
+    <ol class="help">
+      <li><b>ปุ่ม "ปริ้น"</b> (หรือกด Ctrl/⌘ + P) เปิดหน้าต่างปริ้นของเครื่อง เลือกเครื่องปริ้นสติกเกอร์ ตั้งขนาดกระดาษให้เท่าสติกเกอร์ ขอบ 0</li>
+      <li><b>ปุ่ม "ส่งรูป" / "บันทึกรูป"</b> ได้รูปฉลากไปเปิดในแอปของเครื่องปริ้น ใช้เมื่อหน้าต่างปริ้นไม่เห็นเครื่องปริ้น</li>
+    </ol>
   </div>
-</div>
+</dialog>
 
 <div id="printArea"></div>
 
@@ -215,16 +256,18 @@
   };
 
   const SIZES = [[40, 30], [50, 30], [60, 40]];            // ขนาดสติกเกอร์ที่ขายทั่วไป (มม.)
-  const FONT = '"IBM Plex Sans Thai", "Noto Sans Thai", sans-serif';
+  const FONT = '"IBM Plex Sans Thai", "Noto Sans Thai", sans-serif';   // ฟอนต์บนฉลาก
   const DAYS = ['อา.', 'จ.', 'อ.', 'พ.', 'พฤ.', 'ศ.', 'ส.'];
   const MONTHS = ['ม.ค.', 'ก.พ.', 'มี.ค.', 'เม.ย.', 'พ.ค.', 'มิ.ย.', 'ก.ค.', 'ส.ค.', 'ก.ย.', 'ต.ค.', 'พ.ย.', 'ธ.ค.'];
+  const wide = matchMedia('(min-width: 761px)');
+  const canShare = typeof navigator.canShare === 'function';
 
   const S = {
     groups: {}, order: [], items: new Map(),   // ข้อมูลจาก shared/
     queue: new Map(),                          // id -> { n, hours (กรอกเองเมื่อ shared ยังไม่มีตัวเลข), val, unit }
-    customSeq: 0,
+    customSeq: 0, tab: 'all', q: '', changed: null,
     madeAt: null,                              // null = ใช้เวลาปัจจุบัน
-    by: store.get('by', ''),
+    by: store.get('by', ''), names: store.get('names', []),
     cfg: Object.assign({ w: 50, h: 30, dpi: 203 }, store.get('cfg', {})),
   };
 
@@ -253,7 +296,6 @@
         id: 'prep:' + id, group: 'prep', name: p.name,
         hours: nums ? Math.min(...nums.map(Number)) * 24 : null,
         confirmed: !!p.confirmed && !!nums && nums.length === 1,
-        note: nums && nums.length > 1 ? `ช่วง ${p.shelf_life_days} วัน ใช้ค่าต่ำสุด` : '',
       });
     }
     const extra = (list, group) => {
@@ -330,59 +372,76 @@
     return cv;
   }
 
-  /* ---------- หน้าจอ ---------- */
-  function renderTiles() {
-    const html = S.order.map(gid => {
-      const items = [...S.items.values()].filter(i => i.group === gid);
-      if (!items.length) return '';
-      return `<section><h2>${esc(S.groups[gid].name)}</h2><div class="tiles">` + items.map(it => {
-        const n = S.queue.get(it.id)?.n || 0;
-        const life = it.hours != null ? `<span>${esc(fmtDur(it.hours))}</span>` : '';
-        const badge = it.hours == null ? '<span class="badge">ยังไม่ตั้งอายุ</span>' : (it.confirmed ? '' : '<span class="badge">ยังไม่ยืนยัน</span>');
-        const tag = it.tag ? `<span class="badge plain">${esc(it.tag)}</span>` : '';
-        const dot = it.color ? `<span class="dot" style="background:${esc(it.color)}"></span>` : '';
-        return `<div class="tile${n ? ' on' : ''}">
-          <button class="add" type="button" data-add="${esc(it.id)}"><span class="nm">${dot}${esc(it.name)}</span><span class="sub">${life}${badge}${tag}</span></button>
-          ${n ? `<span class="cnt num">×${n}</span><button class="minus" type="button" data-sub="${esc(it.id)}" aria-label="ลด ${esc(it.name)} 1 ดวง">−</button>` : ''}
-        </div>`;
-      }).join('') + '</div></section>';
-    }).join('');
-    $('groups').innerHTML = html + `<section><h2>${esc(S.groups.custom.name)}</h2><div class="tiles"><div class="tile custom"><button class="add" type="button" data-custom="1">+ พิมพ์ชื่อเอง</button></div></div></section>`;
+  /* ---------- ซ้าย: แท็บ + ปุ่มรายการ ---------- */
+  function renderTabs() {
+    const count = g => [...S.items.values()].filter(i => i.group === g).length;
+    const tabs = [['all', 'ทั้งหมด', S.order.reduce((a, g) => a + count(g), 0)], ...S.order.map(g => [g, S.groups[g].name, count(g)]), ['custom', S.groups.custom.name, null]];
+    $('tabs').innerHTML = tabs.map(([id, name, n]) =>
+      `<button type="button" data-tab="${id}" class="${S.tab === id ? 'on' : ''}" aria-pressed="${S.tab === id}">${esc(name)}${n == null ? '' : `<small>${n}</small>`}</button>`).join('');
   }
 
+  function renderTiles() {
+    const q = S.q.trim().toLowerCase();
+    let html = '';
+    for (const gid of S.order) {
+      if (S.tab !== 'all' && S.tab !== gid) continue;
+      const items = [...S.items.values()].filter(i => i.group === gid && (!q || i.name.toLowerCase().includes(q)));
+      if (!items.length) continue;
+      html += `<section class="grp"><h2>${esc(S.groups[gid].name)}</h2><div class="tiles">` + items.map(it => {
+        const n = S.queue.get(it.id)?.n || 0;
+        const life = it.hours != null ? `<span class="life">${esc(fmtDur(it.hours))}</span>` : '';
+        const badge = it.hours == null ? '<span class="badge">ยังไม่ตั้งอายุ</span>' : (it.confirmed ? '' : '<span class="badge">ยังไม่ยืนยัน</span>');
+        const tag = it.tag ? `<span class="badge plain">${esc(it.tag)}</span>` : '';
+        const sw = it.color ? `<span class="sw" style="background:${esc(it.color)}"></span>` : '';
+        return `<div class="tile${n ? ' on' : ''}">
+          <button class="add" type="button" data-add="${esc(it.id)}"><span class="nm">${sw}${esc(it.name)}</span><span class="sub">${life}${badge}${tag}</span></button>
+          ${n ? `<div class="tq"><button type="button" data-sub="${esc(it.id)}" aria-label="ลด ${esc(it.name)} 1 ดวง">−</button><span>${n}</span></div>` : ''}
+        </div>`;
+      }).join('') + '</div></section>';
+    }
+    if ((S.tab === 'all' || S.tab === 'custom') && !q)
+      html += `<section class="grp"><h2>${esc(S.groups.custom.name)}</h2><div class="tiles"><div class="tile custom"><button class="add" type="button" data-custom="1">+ พิมพ์ชื่อเอง</button></div></div></section>`;
+    $('groups').innerHTML = html || '<div class="note">ไม่พบรายการที่ค้นหา</div>';
+  }
+
+  /* ---------- ขวา: คิวปริ้น ---------- */
   function renderQueue() {
     const q = $('queue');
-    if (!S.queue.size) { q.innerHTML = '<div class="empty">ยังไม่ได้เลือกรายการ แตะรายการด้านบนเพื่อเพิ่มฉลาก แตะซ้ำเพื่อเพิ่มจำนวน</div>'; return; }
+    if (!S.queue.size) { q.innerHTML = '<div class="qempty"><b>ยังไม่มีฉลากในคิว</b>แตะรายการเพื่อเพิ่มฉลาก แตะซ้ำเพื่อเพิ่มจำนวนดวง</div>'; return; }
     q.innerHTML = [...S.queue.entries()].map(([id, e]) => {
       const it = S.items.get(id);
       const name = it.group === 'custom'
         ? `<input type="text" id="nm-${esc(id)}" data-name="${esc(id)}" maxlength="24" placeholder="ชื่อของ" value="${esc(it.name)}" aria-label="ชื่อของ">`
-        : `<b>${esc(it.name)}</b>`;
+        : `<div class="qname">${esc(it.name)}</div>`;
       const need = it.hours == null ? `<div class="need">
           <label for="hv-${esc(id)}">ใส่อายุ (ยังไม่มีตัวเลขยืนยัน)</label>
           <input type="number" id="hv-${esc(id)}" data-hv="${esc(id)}" inputmode="decimal" min="0" step="0.5" placeholder="เช่น 24" value="${e.val ?? ''}">
           <select data-hu="${esc(id)}" aria-label="หน่วย"><option value="1"${e.unit === 24 ? '' : ' selected'}>ชม.</option><option value="24"${e.unit === 24 ? ' selected' : ''}>วัน</option></select>
         </div>` : '';
-      return `<div class="qcard" data-card="${esc(id)}"><canvas></canvas><div class="qmeta">${name}${need}
-        <div class="step"><button type="button" data-sub="${esc(id)}" aria-label="ลด 1 ดวง">−</button><span class="num">×${e.n}</span><button type="button" data-add="${esc(id)}" aria-label="เพิ่ม 1 ดวง">+</button></div>
+      return `<div class="qrow${S.changed === id ? ' flash' : ''}" data-card="${esc(id)}"><div class="liner"><canvas></canvas></div><div class="qmeta">${name}${need}
+        <div class="step"><button type="button" data-sub="${esc(id)}" aria-label="ลด 1 ดวง">−</button><span>${e.n}</span><button type="button" data-add="${esc(id)}" aria-label="เพิ่ม 1 ดวง">+</button><button type="button" class="rm" data-rm="${esc(id)}">ลบ</button></div>
       </div></div>`;
     }).join('');
+    const row = S.changed && q.querySelector(`[data-card="${CSS.escape(S.changed)}"]`);
+    if (row && wide.matches) row.scrollIntoView({ block: 'nearest' });
+    S.changed = null;
   }
 
   function redraw() {
     const miss = new Set(missing());
-    for (const card of document.querySelectorAll('.qcard')) {
-      drawLabel(card.querySelector('canvas'), card.dataset.card);
-      card.classList.toggle('missing', miss.has(card.dataset.card));
+    for (const row of document.querySelectorAll('.qrow')) {
+      drawLabel(row.querySelector('canvas'), row.dataset.card);
+      row.classList.toggle('missing', miss.has(row.dataset.card));
     }
     const n = total(), st = $('status');
     st.classList.toggle('warn', miss.size > 0);
-    st.textContent = !n ? 'แตะรายการด้านบนเพื่อเพิ่มฉลาก'
-      : miss.size ? `ใส่ชื่อและอายุให้ครบก่อน (เหลือ ${miss.size} รายการ)`
-      : `${n} ดวง · สติกเกอร์ ${S.cfg.w}×${S.cfg.h} มม.`;
+    st.textContent = !n ? 'แตะรายการเพื่อเพิ่มฉลาก'
+      : miss.size ? `ใส่ชื่อและอายุให้ครบก่อนปริ้น (เหลือ ${miss.size} รายการ)`
+      : `พร้อมปริ้น ${n} ดวง · สติกเกอร์ ${S.cfg.w}×${S.cfg.h} มม.`;
     const ok = n > 0 && !miss.size;
     $('printBtn').disabled = $('shareBtn').disabled = !ok;
     $('printBtn').textContent = n ? `ปริ้น ${n} ดวง` : 'ปริ้น';
+    $('totalPill').textContent = `${n} ดวง`;
     $('clearBtn').disabled = !n;
   }
 
@@ -392,32 +451,55 @@
     const { w, h, dpi } = S.cfg;
     $('sizes').innerHTML = SIZES.map(([a, b]) => `<button type="button" data-size="${a}x${b}" class="${a === w && b === h ? 'on' : ''}">${a}×${b} มม.</button>`).join('');
     $('lw').value = w; $('lh').value = h; $('dpi').value = dpi;
+    $('sizeTxt').textContent = `${w}×${h} มม.`;
   }
 
+  function renderNames() { $('byList').innerHTML = S.names.map(n => `<option value="${esc(n)}"></option>`).join(''); }
+
+  let lastMin = '';
   function tick() {
-    if (S.madeAt) return;
-    const v = fmtLocal(new Date());
-    if ($('madeAt').value !== v) { $('madeAt').value = v; redraw(); }
+    const now = new Date(), m = fmtLocal(now);
+    if (m === lastMin) return;
+    lastMin = m;
+    $('clock').textContent = `${fmtDate(now)} ${fmtTime(now)}`;
+    if (!S.madeAt) { $('madeTxt').textContent = `${fmtDate(now)} · ${fmtTime(now)}`; redraw(); }
+  }
+
+  function setMode(custom) {
+    if (custom) { S.madeAt = S.madeAt ?? new Date(fmtLocal(new Date())).getTime(); $('madeAt').value = fmtLocal(new Date(S.madeAt)); }
+    else { S.madeAt = null; lastMin = ''; }
+    $('modeNow').classList.toggle('on', !custom); $('modeNow').setAttribute('aria-pressed', !custom);
+    $('modeCustom').classList.toggle('on', custom); $('modeCustom').setAttribute('aria-pressed', custom);
+    $('madeAt').hidden = !custom; $('madeTxt').hidden = custom;
+    if (custom) redraw(); else tick();
   }
 
   /* ---------- ปริ้น / ส่งรูป ---------- */
   const labelList = () => [...S.queue.entries()].flatMap(([id, e]) => Array(e.n).fill(id));
+  let printing = false;
 
-  async function doPrint() {
-    const { w, h } = S.cfg, cache = new Map();
+  function buildPrintArea() {
+    const { w, h } = S.cfg, cache = new Map(), imgs = [];
     $('pageStyle').textContent = `@page { size: ${w}mm ${h}mm; margin: 0; } @media print { .pg { width: ${w}mm; height: ${h}mm; } }`;
     const area = $('printArea'); area.innerHTML = '';
-    const waits = [];
     for (const id of labelList()) {
       if (!cache.has(id)) cache.set(id, drawLabel(document.createElement('canvas'), id).toDataURL('image/png'));
       const pg = document.createElement('div'); pg.className = 'pg';
       const img = new Image(); img.src = cache.get(id); img.alt = S.items.get(id).name;
-      pg.appendChild(img); area.appendChild(pg);
-      waits.push(img.decode().catch(() => {}));
+      pg.appendChild(img); area.appendChild(pg); imgs.push(img);
     }
-    await Promise.all(waits);
-    window.print();
+    return imgs;
   }
+
+  async function doPrint() {
+    if ($('printBtn').disabled) return;
+    printing = true;
+    try { await Promise.all(buildPrintArea().map(i => i.decode().catch(() => {}))); window.print(); }
+    finally { printing = false; }
+  }
+  // สั่งปริ้นจากเมนูของเบราว์เซอร์ก็ต้องได้ฉลาก ไม่ใช่หน้าจอ
+  addEventListener('beforeprint', () => { if (!printing) buildPrintArea(); });
+  addEventListener('keydown', ev => { if ((ev.ctrlKey || ev.metaKey) && ev.key.toLowerCase() === 'p') { ev.preventDefault(); doPrint(); } });
 
   async function doShare() {
     const files = [];
@@ -426,7 +508,7 @@
       const blob = await new Promise(r => cv.toBlob(r, 'image/png'));
       files.push(new File([blob], `ฉลาก-${S.items.get(id).name.trim().replace(/[^\p{L}\p{M}\p{N}]+/gu, '-')}.png`, { type: 'image/png' }));
     }
-    if (navigator.canShare && navigator.canShare({ files })) {
+    if (canShare && navigator.canShare({ files })) {
       try { await navigator.share({ files }); } catch (e) { if (e.name !== 'AbortError') flash('ส่งรูปไม่สำเร็จ ลองใหม่อีกครั้ง'); }
       return;
     }
@@ -442,80 +524,80 @@
   function flash(msg) { $('status').textContent = msg; clearTimeout(flashT); flashT = setTimeout(redraw, 4000); }
 
   /* ---------- เหตุการณ์ ---------- */
-  function addOne(id) { const e = S.queue.get(id) || { n: 0 }; e.n++; S.queue.set(id, e); }
-  function subOne(id) {
-    const e = S.queue.get(id); if (!e) return;
-    if (--e.n <= 0) { S.queue.delete(id); if (S.items.get(id).group === 'custom') S.items.delete(id); }
-  }
+  function addOne(id) { const e = S.queue.get(id) || { n: 0 }; e.n++; S.queue.set(id, e); S.changed = id; }
+  function drop(id) { S.queue.delete(id); if (S.items.get(id).group === 'custom') S.items.delete(id); }
+  function subOne(id) { const e = S.queue.get(id); if (e && --e.n <= 0) drop(id); }
 
   document.addEventListener('click', ev => {
     const t = ev.target.closest('button'); if (!t) return;
-    if (t.dataset.add) { addOne(t.dataset.add); renderAll(); }
-    else if (t.dataset.sub) { subOne(t.dataset.sub); renderAll(); }
-    else if (t.dataset.custom) {
+    const d = t.dataset;
+    if (d.add) { addOne(d.add); renderAll(); }
+    else if (d.sub) { subOne(d.sub); renderAll(); }
+    else if (d.rm) { drop(d.rm); renderAll(); }
+    else if (d.custom) {
       const id = 'custom:' + (++S.customSeq);
       S.items.set(id, { id, group: 'custom', name: '', hours: null, confirmed: false });
       addOne(id); renderAll();
       const inp = $('nm-' + id); if (inp) { inp.focus(); inp.scrollIntoView({ block: 'center' }); }
     }
-    else if (t.dataset.size) { const [a, b] = t.dataset.size.split('x').map(Number); setCfg({ w: a, h: b }); }
+    else if (d.tab) { S.tab = d.tab; renderTabs(); renderTiles(); }
+    else if (d.size) { const [a, b] = d.size.split('x').map(Number); setCfg({ w: a, h: b }); }
   });
 
-  // พิมพ์ในการ์ด: อัปเดตเฉพาะรูปฉลาก ไม่สร้างการ์ดใหม่ (ช่องกรอกจะได้ไม่หลุดโฟกัส)
+  // พิมพ์ในแถวคิว: อัปเดตเฉพาะรูปฉลาก ไม่สร้างแถวใหม่ (ช่องกรอกจะได้ไม่หลุดโฟกัส)
   $('queue').addEventListener('input', ev => {
     const t = ev.target;
     if (t.dataset.name) S.items.get(t.dataset.name).name = t.value;
     const id = t.dataset.hv || t.dataset.hu;
     if (id) {
-      const card = t.closest('.qcard'), e = S.queue.get(id);
-      e.val = card.querySelector('[data-hv]').value;
-      e.unit = Number(card.querySelector('[data-hu]').value);
+      const row = t.closest('.qrow'), e = S.queue.get(id);
+      e.val = row.querySelector('[data-hv]').value;
+      e.unit = Number(row.querySelector('[data-hu]').value);
       const v = parseFloat(e.val);
       e.hours = v > 0 ? v * e.unit : null;
     }
     redraw();
   });
 
-  $('madeAt').addEventListener('input', () => {
-    const v = $('madeAt').value;
-    S.madeAt = v ? new Date(v).getTime() : null;
-    $('nowChip').hidden = !!S.madeAt; $('nowBtn').hidden = !S.madeAt;
-    if (!S.madeAt) tick();
-    redraw();
-  });
-  $('nowBtn').addEventListener('click', () => { S.madeAt = null; $('nowChip').hidden = false; $('nowBtn').hidden = true; $('madeAt').value = ''; tick(); redraw(); });
+  $('q').addEventListener('input', () => { S.q = $('q').value; renderTiles(); });
+  $('modeNow').addEventListener('click', () => setMode(false));
+  $('modeCustom').addEventListener('click', () => setMode(true));
+  $('madeAt').addEventListener('input', () => { const v = $('madeAt').value; if (v) { S.madeAt = new Date(v).getTime(); redraw(); } });
+
   $('by').value = S.by;
   $('by').addEventListener('input', () => { S.by = $('by').value.trim(); store.set('by', S.by); redraw(); });
+  $('by').addEventListener('change', () => {   // จำชื่อที่เคยใช้ไว้ให้เลือกครั้งหน้า (เก็บในเครื่องนี้)
+    if (!S.by) return;
+    S.names = [S.by, ...S.names.filter(n => n !== S.by)].slice(0, 8); store.set('names', S.names); renderNames();
+  });
 
-  function setCfg(patch) {
-    Object.assign(S.cfg, patch); store.set('cfg', S.cfg); renderSettings(); redraw();
-  }
+  function setCfg(patch) { Object.assign(S.cfg, patch); store.set('cfg', S.cfg); renderSettings(); redraw(); }
   for (const k of ['lw', 'lh']) $(k).addEventListener('change', () => {
     const w = Math.min(110, Math.max(20, Number($('lw').value) || S.cfg.w)), h = Math.min(110, Math.max(15, Number($('lh').value) || S.cfg.h));
     setCfg({ w, h });
   });
   $('dpi').addEventListener('change', () => setCfg({ dpi: Number($('dpi').value) }));
+  $('setBtn').addEventListener('click', () => $('dlg').showModal());
+  $('dlg').addEventListener('click', ev => { if (ev.target === $('dlg')) $('dlg').close(); });
 
-  $('clearBtn').addEventListener('click', () => {
-    for (const id of [...S.queue.keys()]) if (S.items.get(id).group === 'custom') S.items.delete(id);
-    S.queue.clear(); renderAll();
-  });
+  $('clearBtn').addEventListener('click', () => { for (const id of [...S.queue.keys()]) drop(id); renderAll(); });
   $('printBtn').addEventListener('click', doPrint);
   $('shareBtn').addEventListener('click', doShare);
+  $('shareBtn').textContent = canShare ? 'ส่งรูป' : 'บันทึกรูป';
 
   /* ---------- เริ่ม ---------- */
   (async () => {
-    renderSettings(); renderQueue(); tick();
+    renderSettings(); renderNames(); renderQueue(); tick();
     try {
       const [bases, menu, ingredients, shelf] = await Promise.all(['bases.json', 'menu.json', 'ingredients.json', 'shelf-life.json'].map(loadJSON));
       buildItems(bases, menu, ingredients, shelf);
     } catch (e) {
-      $('groups').innerHTML = `<div class="empty">โหลดข้อมูลร้านไม่ได้ (${esc(e.message)}) ต้องเปิดหน้านี้ผ่านเว็บที่มีโฟลเดอร์ shared/ อยู่ด้วย เปิดไฟล์ตรงๆ จากเครื่องไม่ได้</div>`;
+      $('groups').innerHTML = `<div class="note">โหลดข้อมูลร้านไม่ได้ (${esc(e.message)}) ต้องเปิดหน้านี้ผ่านเว็บที่มีโฟลเดอร์ shared/ อยู่ด้วย เปิดไฟล์ตรงๆ จากเครื่องไม่ได้</div>`;
       return;
     }
     // รอฟอนต์ไทยก่อนวาด ไม่งั้น canvas จะใช้ฟอนต์สำรอง
     try { await Promise.all([500, 600, 700].map(wt => document.fonts.load(`${wt} 24px "IBM Plex Sans Thai"`, 'กขค 0123'))); } catch {}
-    renderAll();
+    renderTabs(); renderAll();
     setInterval(tick, 5000);
     document.addEventListener('visibilitychange', () => { if (!document.hidden) tick(); });
   })();
