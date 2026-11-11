@@ -99,7 +99,6 @@
   .seg button + button { border-left: 1px solid var(--line-strong); }
   .seg button.on { background: var(--ink); color: var(--panel); }
   #madeTxt { font-size: 17px; font-weight: 600; }
-  .by { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 12px; align-items: center; }
 
   .qlist { flex: 1; min-height: 0; overflow-y: auto; }
   .qrow { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr); gap: 14px; align-items: center; padding: 10px 18px; border-bottom: 1px solid var(--line); }
@@ -205,11 +204,6 @@
         <div class="num" id="madeTxt"></div>
         <input type="datetime-local" id="madeAt" aria-label="เวลาที่ชง ทำ หรือเปิด" hidden>
       </div>
-      <div class="by">
-        <label for="by">ชื่อคนทำ</label>
-        <input type="text" id="by" list="byList" maxlength="12" autocomplete="off" placeholder="ไม่ใส่ก็ได้">
-        <datalist id="byList"></datalist>
-      </div>
     </div>
     <div class="qlist" id="queue"></div>
     <div class="side-foot">
@@ -267,7 +261,6 @@
     queue: new Map(),                          // id -> { n, hours (กรอกเองเมื่อ shared ยังไม่มีตัวเลข), val, unit }
     customSeq: 0, tab: 'all', q: '', changed: null,
     madeAt: null,                              // null = ใช้เวลาปัจจุบัน
-    by: store.get('by', ''), names: store.get('names', []),
     cfg: Object.assign({ w: 50, h: 30, dpi: 203 }, store.get('cfg', {})),
   };
 
@@ -349,7 +342,7 @@
     put(it.name.trim() || '—', 700, H * 0.2, pad, pad * 0.6, r1 - pad * 0.6, inW - tagW - pad);
 
     // แถว 2: เวลาที่ทำ + อายุ
-    const madeTxt = `${g.verb} ${fmtDate(made)} ${fmtTime(made)}` + (S.by ? ` · ${S.by}` : '');
+    const madeTxt = `${g.verb} ${fmtDate(made)} ${fmtTime(made)}`;
     const durTxt = hrs > 0 ? `อายุ ${fmtDur(hrs)}` : '';
     c.font = `600 ${Math.round(H * 0.095)}px ${FONT}`;
     const durW = durTxt ? c.measureText(durTxt).width : 0;
@@ -453,8 +446,6 @@
     $('lw').value = w; $('lh').value = h; $('dpi').value = dpi;
     $('sizeTxt').textContent = `${w}×${h} มม.`;
   }
-
-  function renderNames() { $('byList').innerHTML = S.names.map(n => `<option value="${esc(n)}"></option>`).join(''); }
 
   let lastMin = '';
   function tick() {
@@ -564,13 +555,6 @@
   $('modeCustom').addEventListener('click', () => setMode(true));
   $('madeAt').addEventListener('input', () => { const v = $('madeAt').value; if (v) { S.madeAt = new Date(v).getTime(); redraw(); } });
 
-  $('by').value = S.by;
-  $('by').addEventListener('input', () => { S.by = $('by').value.trim(); store.set('by', S.by); redraw(); });
-  $('by').addEventListener('change', () => {   // จำชื่อที่เคยใช้ไว้ให้เลือกครั้งหน้า (เก็บในเครื่องนี้)
-    if (!S.by) return;
-    S.names = [S.by, ...S.names.filter(n => n !== S.by)].slice(0, 8); store.set('names', S.names); renderNames();
-  });
-
   function setCfg(patch) { Object.assign(S.cfg, patch); store.set('cfg', S.cfg); renderSettings(); redraw(); }
   for (const k of ['lw', 'lh']) $(k).addEventListener('change', () => {
     const w = Math.min(110, Math.max(20, Number($('lw').value) || S.cfg.w)), h = Math.min(110, Math.max(15, Number($('lh').value) || S.cfg.h));
@@ -587,7 +571,7 @@
 
   /* ---------- เริ่ม ---------- */
   (async () => {
-    renderSettings(); renderNames(); renderQueue(); tick();
+    renderSettings(); renderQueue(); tick();
     try {
       const [bases, menu, ingredients, shelf] = await Promise.all(['bases.json', 'menu.json', 'ingredients.json', 'shelf-life.json'].map(loadJSON));
       buildItems(bases, menu, ingredients, shelf);
