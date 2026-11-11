@@ -53,11 +53,13 @@
 
   /* หน้าจัดการรายการ */
   .manage { flex: 1; min-height: 0; overflow-y: auto; padding: 20px max(20px, env(safe-area-inset-right, 0px)) 40px max(20px, env(safe-area-inset-left, 0px)); }
-  .manage-in { max-width: 1040px; margin: 0 auto; display: grid; grid-template-columns: 380px minmax(0, 1fr); gap: 20px; align-items: start; }
+  .manage-in { max-width: 1040px; margin: 0 auto; display: grid; grid-template-columns: 380px minmax(0, 1fr); grid-template-rows: auto 1fr; gap: 20px; align-items: start; }
   .card { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 18px; display: flex; flex-direction: column; gap: 14px; min-width: 0; }
   .card h2 { margin: 0; font-size: 18px; }
   .card h3 { margin: 6px 0 0; font-size: 13px; font-weight: 700; color: var(--muted); letter-spacing: .4px; }
-  .m-form { position: sticky; top: 0; }
+  .m-form { grid-column: 1; grid-row: 1; }
+  .m-staff { grid-column: 1; grid-row: 2; }
+  .m-lists { grid-column: 2; grid-row: 1 / span 2; }
   .m-lists { display: flex; flex-direction: column; gap: 20px; min-width: 0; }
   .life-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
   .m-err { color: var(--danger); font-size: 14px; font-weight: 600; }
@@ -72,7 +74,7 @@
   .m-actions { display: grid; grid-template-columns: 1fr; gap: 8px; }
   .m-actions.two { grid-template-columns: auto 1fr; }
   #mExport { font-family: ui-monospace, monospace; font-size: 13px; min-height: 120px; border: 1px solid var(--line-strong); border-radius: 8px; padding: 10px; width: 100%; color: var(--ink); background: var(--bg); }
-  @media (max-width: 900px) { .manage-in { grid-template-columns: 1fr; } .m-form { position: static; } }
+  @media (max-width: 900px) { .manage-in { grid-template-columns: 1fr; grid-template-rows: none; } .m-form, .m-staff, .m-lists { grid-column: auto; grid-row: auto; } .m-staff { order: 2; } .m-lists { order: 3; } }
 
   /* โครงสองฝั่ง */
   .app { flex: 1; min-height: 0; display: grid; grid-template-columns: minmax(0, 1fr) 380px; }
@@ -132,13 +134,12 @@
   .who-row { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
   .chip-btn { border: 1px solid var(--line-strong); background: var(--panel); border-radius: 8px; padding: 9px 16px; min-height: 44px; font-weight: 600; font-size: 16px; overflow-wrap: anywhere; }
   .chip-btn.on { background: var(--ink); border-color: var(--ink); color: var(--panel); }
-  .chip-btn.del { border-color: var(--danger); color: var(--danger); }
   .ghost-btn { border: none; background: none; padding: 9px 6px; min-height: 44px; font-size: 14px; font-weight: 600; color: var(--accent); text-decoration: underline; }
   .ghost-btn.need { border: 2px dashed var(--warn); border-radius: 8px; color: var(--warn); background: var(--warn-soft); text-decoration: none; padding: 9px 16px; flex: 1; font-size: 16px; }
   .staff-grid { display: flex; flex-wrap: wrap; gap: 8px; }
   .add-row { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 8px; }
   .add-row button { border: 1px solid var(--ink); background: var(--ink); color: var(--panel); border-radius: 8px; padding: 0 18px; min-height: 44px; font-weight: 600; }
-  .dlg-foot { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; }
+  .help a { color: var(--accent); font-weight: 600; }
 
   .qlist { flex: 1; min-height: 0; overflow-y: auto; }
   .qrow { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr); gap: 14px; align-items: center; padding: 10px 18px; border-bottom: 1px solid var(--line); }
@@ -301,6 +302,20 @@
         <div id="mShared"></div>
       </section>
     </div>
+
+    <section class="card m-staff">
+      <h2>รายชื่อพนักงาน</h2>
+      <p class="help">ชื่อที่เพิ่มไว้จะให้เลือกตอนกด "เลือกคนอยู่กะวันนี้" ในหน้าปริ้นฉลาก รายชื่อเก็บอยู่ในเครื่องนี้</p>
+      <div class="field">
+        <label for="newName">เพิ่มชื่อพนักงาน</label>
+        <div class="add-row">
+          <input type="text" id="newName" maxlength="12" autocomplete="off" placeholder="ชื่อเล่น" enterkeyhint="done">
+          <button type="button" id="addNameBtn">เพิ่มชื่อ</button>
+        </div>
+      </div>
+      <div class="m-err" id="sErr" hidden></div>
+      <div class="m-rows" id="mStaff"></div>
+    </section>
   </div>
 </main>
 
@@ -330,17 +345,7 @@
   <div class="set">
     <p class="help" id="staffHint"></p>
     <div class="staff-grid" id="staffGrid"></div>
-    <div class="field">
-      <label for="newName">เพิ่มชื่อพนักงาน</label>
-      <div class="add-row">
-        <input type="text" id="newName" maxlength="12" autocomplete="off" placeholder="ชื่อเล่น" enterkeyhint="done">
-        <button type="button" id="addNameBtn">เพิ่มชื่อ</button>
-      </div>
-    </div>
-    <div class="dlg-foot">
-      <span class="help">รายชื่อเก็บอยู่ในเครื่องนี้</span>
-      <button type="button" class="ghost-btn" id="delModeBtn"></button>
-    </div>
+    <p class="help">เพิ่มหรือลบชื่อได้ที่หน้า <a href="#manage" id="toManage">จัดการรายการ</a></p>
   </div>
 </dialog>
 
@@ -371,7 +376,6 @@
     cfg: Object.assign({ w: 50, h: 30, dpi: 203 }, store.get('cfg', {})),
     staff: store.get('staff', []),             // รายชื่อพนักงานทั้งหมด (เก็บในเครื่องนี้)
     shift: null,                               // { date, on: [ชื่อคนอยู่กะวันนี้], active: ชื่อที่จะพิมพ์บนฉลาก } · ข้ามวันแล้วล้าง
-    delMode: false,
     local: store.get('items', []),             // รายการที่เพิ่มเองในเครื่องนี้ [{ id, group, name, hours }]
     edit: null, sure: null, mGroup: 'opened',
   };
@@ -623,7 +627,7 @@
     const m = location.hash === '#manage';
     $('viewPrint').hidden = m; $('viewManage').hidden = !m;
     $('navPrint').classList.toggle('on', !m); $('navManage').classList.toggle('on', m);
-    if (m) { S.sure = null; renderManage(); } else redraw();
+    if (m) { S.sure = null; renderManage(); renderStaff(); } else redraw();
   }
 
   /* ---------- คนทำ: รายชื่อพนักงาน + คนอยู่กะวันนี้ ---------- */
@@ -649,25 +653,28 @@
     $('shiftBtn').classList.toggle('need', !on.length);
   }
   function renderStaff() {
-    if (!S.staff.length) S.delMode = false;
-    $('staffHint').textContent = !S.staff.length ? 'ยังไม่มีรายชื่อ เพิ่มชื่อพนักงานด้านล่างก่อน'
-      : S.delMode ? 'แตะชื่อที่ต้องการลบออกจากรายชื่อ'
-      : 'แตะชื่อคนที่มาทำกะนี้ ชื่อจะพิมพ์อยู่บนฉลาก และล้างเองเมื่อข้ามวัน';
+    $('staffHint').textContent = S.staff.length ? 'แตะชื่อคนที่มาทำกะนี้ ชื่อจะพิมพ์อยู่บนฉลาก และล้างเองเมื่อข้ามวัน' : 'ยังไม่มีรายชื่อพนักงาน';
     $('staffGrid').innerHTML = S.staff.map(n => {
       const on = S.shift.on.includes(n);
-      return S.delMode
-        ? `<button type="button" class="chip-btn del" data-del="${esc(n)}">ลบ ${esc(n)}</button>`
-        : `<button type="button" class="chip-btn${on ? ' on' : ''}" data-staff="${esc(n)}" aria-pressed="${on}">${esc(n)}</button>`;
+      return `<button type="button" class="chip-btn${on ? ' on' : ''}" data-staff="${esc(n)}" aria-pressed="${on}">${esc(n)}</button>`;
     }).join('');
-    $('delModeBtn').textContent = S.delMode ? 'เลิกลบ' : 'ลบชื่อออกจากรายชื่อ';
-    $('delModeBtn').hidden = !S.staff.length;
+    // รายชื่อในหน้าจัดการรายการ
+    $('mStaff').innerHTML = S.staff.length ? S.staff.map(n => {
+      const sure = S.sure === 'staff:' + n;
+      return `<div class="m-row"><div class="m-main"><div class="m-name">${esc(n)}</div>${S.shift.on.includes(n) ? '<div class="m-sub"><span>อยู่กะวันนี้</span></div>' : ''}</div>
+        <button type="button" class="sm-btn danger${sure ? ' sure' : ''}" data-sdel="${esc(n)}">${sure ? 'ยืนยันลบ' : 'ลบ'}</button></div>`;
+    }).join('') : '<div class="note">ยังไม่มีรายชื่อพนักงาน</div>';
   }
   function addName() {
-    const n = $('newName').value.trim();
+    const n = $('newName').value.trim(), err = $('sErr');
+    err.hidden = true;
     if (!n) return;
-    if (!S.staff.includes(n)) S.staff.push(n);
-    if (!S.shift.on.includes(n)) S.shift.on.push(n);         // เพิ่มชื่อแล้วถือว่าอยู่กะนี้เลย
-    $('newName').value = ''; S.delMode = false; saveStaff();
+    if (S.staff.includes(n)) { err.textContent = `มีชื่อ "${n}" อยู่แล้ว`; err.hidden = false; return; }
+    S.staff.push(n); $('newName').value = ''; S.sure = null; saveStaff();
+  }
+  function deleteName(n) {
+    if (S.sure !== 'staff:' + n) { S.sure = 'staff:' + n; return renderStaff(); }   // แตะครั้งแรกถามยืนยัน
+    S.sure = null; S.staff = S.staff.filter(x => x !== n); saveStaff();
   }
 
   let lastMin = '';
@@ -759,7 +766,7 @@
     else if (d.size) { const [a, b] = d.size.split('x').map(Number); setCfg({ w: a, h: b }); }
     else if (d.who) { S.shift.active = d.who; S.shift.auto = false; saveStaff(); }
     else if (d.staff) { const on = S.shift.on, i = on.indexOf(d.staff); if (i < 0) on.push(d.staff); else on.splice(i, 1); saveStaff(); }
-    else if (d.del) { S.staff = S.staff.filter(n => n !== d.del); saveStaff(); }
+    else if (d.sdel) deleteName(d.sdel);
     else if (d.mgroup) { S.mGroup = d.mgroup; renderManage(); }
     else if (d.medit) editItem(d.medit);
     else if (d.mdel) deleteItem(d.mdel);
@@ -792,7 +799,8 @@
   });
   $('dpi').addEventListener('change', () => setCfg({ dpi: Number($('dpi').value) }));
   $('setBtn').addEventListener('click', () => $('dlg').showModal());
-  $('shiftBtn').addEventListener('click', () => { S.delMode = false; renderStaff(); $('staffDlg').showModal(); });
+  $('shiftBtn').addEventListener('click', () => { renderStaff(); $('staffDlg').showModal(); });
+  $('toManage').addEventListener('click', () => $('staffDlg').close());
   $('staffDlg').addEventListener('click', ev => { if (ev.target === $('staffDlg')) $('staffDlg').close(); });
   $('mSave').addEventListener('click', saveItem);
   $('mCancel').addEventListener('click', () => { resetForm(); renderManage(); });
@@ -801,7 +809,8 @@
   addEventListener('hashchange', route);
   $('addNameBtn').addEventListener('click', addName);
   $('newName').addEventListener('keydown', ev => { if (ev.key === 'Enter') { ev.preventDefault(); addName(); } });
-  $('delModeBtn').addEventListener('click', () => { S.delMode = !S.delMode; renderStaff(); });
+  $('newName').addEventListener('input', () => { $('sErr').hidden = true; });
+  for (const k of ['mName', 'mVal']) $(k).addEventListener('input', () => mErr(''));
   $('dlg').addEventListener('click', ev => { if (ev.target === $('dlg')) $('dlg').close(); });
 
   $('clearBtn').addEventListener('click', () => { for (const id of [...S.queue.keys()]) drop(id); renderAll(); });
