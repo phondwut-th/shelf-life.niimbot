@@ -45,6 +45,35 @@
   .top-btn { background: none; border: 1px solid var(--chrome-line); border-radius: 8px; padding: 8px 14px; min-height: 40px; font-size: 14px; color: var(--chrome-muted); }
   .top-btn b { color: var(--chrome-ink); font-weight: 600; }
 
+  .top-l { display: flex; align-items: center; gap: 12px 24px; flex-wrap: wrap; }
+  .nav { display: flex; border: 1px solid var(--chrome-line); border-radius: 8px; overflow: hidden; }
+  .nav a { display: flex; align-items: center; padding: 8px 16px; min-height: 40px; font-size: 14px; font-weight: 600; color: var(--chrome-muted); text-decoration: none; }
+  .nav a + a { border-left: 1px solid var(--chrome-line); }
+  .nav a.on { background: var(--chrome-ink); color: var(--chrome); }
+
+  /* หน้าจัดการรายการ */
+  .manage { flex: 1; min-height: 0; overflow-y: auto; padding: 20px max(20px, env(safe-area-inset-right, 0px)) 40px max(20px, env(safe-area-inset-left, 0px)); }
+  .manage-in { max-width: 1040px; margin: 0 auto; display: grid; grid-template-columns: 380px minmax(0, 1fr); gap: 20px; align-items: start; }
+  .card { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 18px; display: flex; flex-direction: column; gap: 14px; min-width: 0; }
+  .card h2 { margin: 0; font-size: 18px; }
+  .card h3 { margin: 6px 0 0; font-size: 13px; font-weight: 700; color: var(--muted); letter-spacing: .4px; }
+  .m-form { position: sticky; top: 0; }
+  .m-lists { display: flex; flex-direction: column; gap: 20px; min-width: 0; }
+  .life-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .m-err { color: var(--danger); font-size: 14px; font-weight: 600; }
+  .m-rows { display: flex; flex-direction: column; }
+  .m-row { display: flex; align-items: center; gap: 10px; padding: 10px 0; border-top: 1px solid var(--line); }
+  .m-main { flex: 1; min-width: 0; }
+  .m-name { font-weight: 600; overflow-wrap: anywhere; }
+  .m-sub { font-size: 13px; color: var(--muted); display: flex; gap: 4px 8px; flex-wrap: wrap; align-items: center; }
+  .sm-btn { border: 1px solid var(--line-strong); background: var(--panel); border-radius: 8px; padding: 8px 14px; min-height: 44px; font-weight: 600; font-size: 14px; white-space: nowrap; }
+  .sm-btn.danger { border-color: var(--danger); color: var(--danger); }
+  .sm-btn.sure { background: var(--danger); color: var(--accent-ink); }
+  .m-actions { display: grid; grid-template-columns: 1fr; gap: 8px; }
+  .m-actions.two { grid-template-columns: auto 1fr; }
+  #mExport { font-family: ui-monospace, monospace; font-size: 13px; min-height: 120px; border: 1px solid var(--line-strong); border-radius: 8px; padding: 10px; width: 100%; color: var(--ink); background: var(--bg); }
+  @media (max-width: 900px) { .manage-in { grid-template-columns: 1fr; } .m-form { position: static; } }
+
   /* โครงสองฝั่ง */
   .app { flex: 1; min-height: 0; display: grid; grid-template-columns: minmax(0, 1fr) 380px; }
   @media (min-width: 1150px) { .app { grid-template-columns: minmax(0, 1fr) 440px; } }
@@ -159,6 +188,7 @@
     html, body { height: auto; }
     body { display: block; height: auto; padding-bottom: calc(150px + env(safe-area-inset-bottom, 0px)); }
     .app { display: block; }
+    .manage { overflow: visible; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
     .catalog { overflow: visible; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-bottom: 8px; }
     .cat-bar { position: static; }
     #q { flex-basis: 100%; }
@@ -172,7 +202,7 @@
   #printArea { display: none; }
   @media print {
     html, body { background: #fff; margin: 0; padding: 0; height: auto; display: block; }
-    .top, .app, dialog { display: none !important; }
+    .top, .app, .manage, dialog { display: none !important; }
     #printArea { display: block; }
     .pg { overflow: hidden; break-after: page; page-break-after: always; }
     .pg:last-child { break-after: auto; page-break-after: auto; }
@@ -184,14 +214,17 @@
 </head>
 <body>
 <header class="top">
-  <div class="brand"><b>KACHA</b><span>ฉลากวันหมดอายุ</span></div>
+  <div class="top-l">
+    <div class="brand"><b>KACHA</b><span>ฉลากวันหมดอายุ</span></div>
+    <nav class="nav" aria-label="เลือกหน้า"><a href="#" id="navPrint" class="on">ปริ้นฉลาก</a><a href="#manage" id="navManage">จัดการรายการ</a></nav>
+  </div>
   <div class="top-r">
     <span class="num" id="clock"></span>
     <button class="top-btn" id="setBtn" type="button">สติกเกอร์ <b id="sizeTxt"></b> · ตั้งค่า</button>
   </div>
 </header>
 
-<div class="app">
+<div class="app" id="viewPrint">
   <main class="catalog">
     <div class="cat-bar">
       <div class="tabs" id="tabs"></div>
@@ -233,6 +266,43 @@
     </div>
   </aside>
 </div>
+
+<main class="manage" id="viewManage" hidden>
+  <div class="manage-in">
+    <section class="card m-form">
+      <h2 id="mTitle">เพิ่มรายการ</h2>
+      <div class="field"><label for="mName">ชื่อที่จะขึ้นบนฉลาก</label><input type="text" id="mName" maxlength="24" autocomplete="off" placeholder="เช่น นมโอ๊ต"></div>
+      <div class="field"><span class="lbl">หมวด</span><div class="sizes" id="mGroups"></div></div>
+      <div class="field">
+        <label for="mVal">อายุ นับจากเวลาที่ชง / ทำ / เปิด</label>
+        <div class="life-row">
+          <input type="number" id="mVal" inputmode="decimal" min="0" step="0.5" placeholder="เช่น 3">
+          <select id="mUnit" aria-label="หน่วย"><option value="1">ชม.</option><option value="24" selected>วัน</option></select>
+        </div>
+      </div>
+      <div class="m-err" id="mErr" hidden></div>
+      <div class="m-actions" id="mActions">
+        <button type="button" class="btn" id="mCancel" hidden>ยกเลิก</button>
+        <button type="button" class="btn main" id="mSave">เพิ่มรายการ</button>
+      </div>
+    </section>
+
+    <div class="m-lists">
+      <section class="card">
+        <h2>รายการที่เพิ่มในเครื่องนี้</h2>
+        <p class="help">รายการเหล่านี้เก็บอยู่ในเครื่องนี้เท่านั้น เครื่องอื่นจะไม่เห็น ถ้าจะใช้ทุกเครื่อง กด "คัดลอกรายการ" แล้วส่งให้คนดูแลระบบใส่ในข้อมูลกลางของร้าน</p>
+        <div class="m-rows" id="mLocal"></div>
+        <div><button type="button" class="sm-btn" id="mCopy">คัดลอกรายการ</button> <span class="help" id="mCopyMsg"></span></div>
+        <textarea id="mExport" readonly hidden aria-label="รายการที่เพิ่มในเครื่องนี้"></textarea>
+      </section>
+      <section class="card">
+        <h2>รายการจากข้อมูลกลางของร้าน</h2>
+        <p class="help">แก้จากหน้านี้ไม่ได้ ถ้าชื่อหรืออายุไม่ถูก แจ้งคนดูแลระบบ</p>
+        <div id="mShared"></div>
+      </section>
+    </div>
+  </div>
+</main>
 
 <dialog id="dlg" aria-labelledby="dlgTitle">
   <form method="dialog" class="dlg-head"><h2 id="dlgTitle">ตั้งค่าสติกเกอร์</h2><button>ปิด</button></form>
@@ -302,6 +372,8 @@
     staff: store.get('staff', []),             // รายชื่อพนักงานทั้งหมด (เก็บในเครื่องนี้)
     shift: null,                               // { date, on: [ชื่อคนอยู่กะวันนี้], active: ชื่อที่จะพิมพ์บนฉลาก } · ข้ามวันแล้วล้าง
     delMode: false,
+    local: store.get('items', []),             // รายการที่เพิ่มเองในเครื่องนี้ [{ id, group, name, hours }]
+    edit: null, sure: null, mGroup: 'opened',
   };
 
   /* ---------- โหลดข้อมูลจาก shared/ ---------- */
@@ -340,7 +412,10 @@
     extra(shelf.toppings, 'topping');
     extra(shelf.opened, 'opened');
     S.order = ['base', 'prep', 'topping', 'opened'];
+    S.local = S.local.filter(x => x && S.order.includes(x.group) && x.name && x.hours > 0);
+    S.local.forEach(addLocal);
   }
+  function addLocal(x) { S.items.set(x.id, { id: x.id, group: x.group, name: x.name, hours: x.hours, confirmed: true, local: true, tag: 'เพิ่มเอง' }); }
 
   /* ---------- เวลาและอายุ ---------- */
   const pad2 = n => String(n).padStart(2, '0');
@@ -488,6 +563,69 @@
     $('sizeTxt').textContent = `${w}×${h} มม.`;
   }
 
+  /* ---------- หน้าจัดการรายการ: เพิ่ม/แก้/ลบ รายการที่เก็บในเครื่องนี้ ---------- */
+  const lifeBadges = it => (it.hours != null ? `<span>${esc(fmtDur(it.hours))}</span>` : '<span class="badge">ยังไม่ตั้งอายุ</span>')
+    + (it.hours != null && !it.confirmed ? '<span class="badge">ยังไม่ยืนยัน</span>' : '');
+
+  function renderManage() {
+    $('mGroups').innerHTML = S.order.map(g => `<button type="button" data-mgroup="${g}" class="${S.mGroup === g ? 'on' : ''}" aria-pressed="${S.mGroup === g}">${esc(S.groups[g].name)}</button>`).join('');
+    $('mTitle').textContent = S.edit ? 'แก้ไขรายการ' : 'เพิ่มรายการ';
+    $('mSave').textContent = S.edit ? 'บันทึกการแก้ไข' : 'เพิ่มรายการ';
+    $('mCancel').hidden = !S.edit; $('mActions').classList.toggle('two', !!S.edit);
+    $('mLocal').innerHTML = S.local.length ? S.local.map(x => `<div class="m-row">
+        <div class="m-main"><div class="m-name">${esc(x.name)}</div><div class="m-sub"><span>${esc(S.groups[x.group].name)}</span><span>${esc(fmtDur(x.hours))}</span></div></div>
+        <button type="button" class="sm-btn" data-medit="${esc(x.id)}">แก้ไข</button>
+        <button type="button" class="sm-btn danger${S.sure === x.id ? ' sure' : ''}" data-mdel="${esc(x.id)}">${S.sure === x.id ? 'ยืนยันลบ' : 'ลบ'}</button>
+      </div>`).join('') : '<div class="note">ยังไม่มีรายการที่เพิ่มเอง ใช้แบบฟอร์มเพิ่มรายการได้เลย</div>';
+    $('mCopy').hidden = !S.local.length;
+    $('mShared').innerHTML = S.order.map(g => {
+      const items = [...S.items.values()].filter(i => i.group === g && !i.local);
+      return items.length ? `<h3>${esc(S.groups[g].name)}</h3><div class="m-rows">` + items.map(it =>
+        `<div class="m-row"><div class="m-main"><div class="m-name">${esc(it.name)}</div><div class="m-sub">${lifeBadges(it)}</div></div></div>`).join('') + '</div>' : '';
+    }).join('');
+  }
+
+  function mErr(msg) { $('mErr').textContent = msg; $('mErr').hidden = !msg; }
+  function resetForm() { S.edit = null; $('mName').value = ''; $('mVal').value = ''; $('mUnit').value = '24'; mErr(''); }
+  function refreshItems() { store.set('items', S.local); renderTabs(); renderAll(); renderManage(); }
+
+  function saveItem() {
+    const name = $('mName').value.trim(), v = parseFloat($('mVal').value), unit = Number($('mUnit').value);
+    if (!name) return mErr('ใส่ชื่อก่อน');
+    if (!(v > 0)) return mErr('ใส่อายุเป็นตัวเลขที่มากกว่า 0');
+    const dup = [...S.items.values()].find(i => i.id !== S.edit && i.group !== 'custom' && i.name.trim().toLowerCase() === name.toLowerCase());
+    if (dup) return mErr(`มี "${dup.name}" อยู่แล้วในหมวด${S.groups[dup.group].name}`);
+    const rec = { id: S.edit || 'local:' + Date.now().toString(36), group: S.mGroup, name, hours: v * unit };
+    S.local = S.edit ? S.local.map(x => x.id === rec.id ? rec : x) : [...S.local, rec];
+    addLocal(rec); resetForm(); refreshItems();
+  }
+  function editItem(id) {
+    const x = S.local.find(i => i.id === id); if (!x) return;
+    const days = x.hours >= 48 && x.hours % 24 === 0;
+    S.edit = id; S.sure = null; S.mGroup = x.group;
+    $('mName').value = x.name; $('mVal').value = days ? x.hours / 24 : x.hours; $('mUnit').value = days ? '24' : '1';
+    mErr(''); renderManage(); $('mName').focus(); $('mName').scrollIntoView({ block: 'center' });
+  }
+  function deleteItem(id) {
+    if (S.sure !== id) { S.sure = id; return renderManage(); }   // แตะครั้งแรกถามยืนยัน แตะครั้งที่สองถึงลบ
+    S.sure = null; S.local = S.local.filter(x => x.id !== id); S.items.delete(id); S.queue.delete(id);
+    if (S.edit === id) resetForm();
+    refreshItems();
+  }
+  async function copyItems() {
+    const ta = $('mExport');
+    ta.value = JSON.stringify(S.local.map(({ name, group, hours }) => ({ name, group, hours })), null, 2);
+    ta.hidden = false; ta.select();
+    try { await navigator.clipboard.writeText(ta.value); $('mCopyMsg').textContent = 'คัดลอกแล้ว'; }
+    catch { $('mCopyMsg').textContent = 'คัดลอกอัตโนมัติไม่ได้ เลือกข้อความด้านล่างแล้วคัดลอกเอง'; }
+  }
+  function route() {
+    const m = location.hash === '#manage';
+    $('viewPrint').hidden = m; $('viewManage').hidden = !m;
+    $('navPrint').classList.toggle('on', !m); $('navManage').classList.toggle('on', m);
+    if (m) { S.sure = null; renderManage(); } else redraw();
+  }
+
   /* ---------- คนทำ: รายชื่อพนักงาน + คนอยู่กะวันนี้ ---------- */
   const today = () => fmtLocal(new Date()).slice(0, 10);
   function loadShift() {
@@ -622,6 +760,9 @@
     else if (d.who) { S.shift.active = d.who; S.shift.auto = false; saveStaff(); }
     else if (d.staff) { const on = S.shift.on, i = on.indexOf(d.staff); if (i < 0) on.push(d.staff); else on.splice(i, 1); saveStaff(); }
     else if (d.del) { S.staff = S.staff.filter(n => n !== d.del); saveStaff(); }
+    else if (d.mgroup) { S.mGroup = d.mgroup; renderManage(); }
+    else if (d.medit) editItem(d.medit);
+    else if (d.mdel) deleteItem(d.mdel);
   });
 
   // พิมพ์ในแถวคิว: อัปเดตเฉพาะรูปฉลาก ไม่สร้างแถวใหม่ (ช่องกรอกจะได้ไม่หลุดโฟกัส)
@@ -653,6 +794,11 @@
   $('setBtn').addEventListener('click', () => $('dlg').showModal());
   $('shiftBtn').addEventListener('click', () => { S.delMode = false; renderStaff(); $('staffDlg').showModal(); });
   $('staffDlg').addEventListener('click', ev => { if (ev.target === $('staffDlg')) $('staffDlg').close(); });
+  $('mSave').addEventListener('click', saveItem);
+  $('mCancel').addEventListener('click', () => { resetForm(); renderManage(); });
+  $('mCopy').addEventListener('click', copyItems);
+  for (const k of ['mName', 'mVal']) $(k).addEventListener('keydown', ev => { if (ev.key === 'Enter') { ev.preventDefault(); saveItem(); } });
+  addEventListener('hashchange', route);
   $('addNameBtn').addEventListener('click', addName);
   $('newName').addEventListener('keydown', ev => { if (ev.key === 'Enter') { ev.preventDefault(); addName(); } });
   $('delModeBtn').addEventListener('click', () => { S.delMode = !S.delMode; renderStaff(); });
@@ -676,7 +822,7 @@
     }
     // รอฟอนต์ไทยก่อนวาด ไม่งั้น canvas จะใช้ฟอนต์สำรอง
     try { await Promise.all([500, 600, 700].map(wt => document.fonts.load(`${wt} 24px "IBM Plex Sans Thai"`, 'กขค 0123'))); } catch {}
-    renderTabs(); renderAll();
+    renderTabs(); renderAll(); route();
     setInterval(tick, 5000);
     document.addEventListener('visibilitychange', () => { if (!document.hidden) tick(); });
   })();
