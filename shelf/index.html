@@ -99,6 +99,17 @@
   .seg button + button { border-left: 1px solid var(--line-strong); }
   .seg button.on { background: var(--ink); color: var(--panel); }
   #madeTxt { font-size: 17px; font-weight: 600; }
+  .who { display: flex; flex-direction: column; gap: 6px; }
+  .who-row { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+  .chip-btn { border: 1px solid var(--line-strong); background: var(--panel); border-radius: 8px; padding: 9px 16px; min-height: 44px; font-weight: 600; font-size: 16px; overflow-wrap: anywhere; }
+  .chip-btn.on { background: var(--ink); border-color: var(--ink); color: var(--panel); }
+  .chip-btn.del { border-color: var(--danger); color: var(--danger); }
+  .ghost-btn { border: none; background: none; padding: 9px 6px; min-height: 44px; font-size: 14px; font-weight: 600; color: var(--accent); text-decoration: underline; }
+  .ghost-btn.need { border: 2px dashed var(--warn); border-radius: 8px; color: var(--warn); background: var(--warn-soft); text-decoration: none; padding: 9px 16px; flex: 1; font-size: 16px; }
+  .staff-grid { display: flex; flex-wrap: wrap; gap: 8px; }
+  .add-row { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 8px; }
+  .add-row button { border: 1px solid var(--ink); background: var(--ink); color: var(--panel); border-radius: 8px; padding: 0 18px; min-height: 44px; font-weight: 600; }
+  .dlg-foot { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; }
 
   .qlist { flex: 1; min-height: 0; overflow-y: auto; }
   .qrow { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr); gap: 14px; align-items: center; padding: 10px 18px; border-bottom: 1px solid var(--line); }
@@ -204,6 +215,13 @@
         <div class="num" id="madeTxt"></div>
         <input type="datetime-local" id="madeAt" aria-label="เวลาที่ชง ทำ หรือเปิด" hidden>
       </div>
+      <div class="who">
+        <span class="lbl">คนทำ</span>
+        <div class="who-row">
+          <span class="who-row" id="whoChips"></span>
+          <button type="button" class="ghost-btn" id="shiftBtn"></button>
+        </div>
+      </div>
     </div>
     <div class="qlist" id="queue"></div>
     <div class="side-foot">
@@ -237,6 +255,25 @@
   </div>
 </dialog>
 
+<dialog id="staffDlg" aria-labelledby="staffTitle">
+  <form method="dialog" class="dlg-head"><h2 id="staffTitle">วันนี้ใครอยู่กะ</h2><button>เสร็จ</button></form>
+  <div class="set">
+    <p class="help" id="staffHint"></p>
+    <div class="staff-grid" id="staffGrid"></div>
+    <div class="field">
+      <label for="newName">เพิ่มชื่อพนักงาน</label>
+      <div class="add-row">
+        <input type="text" id="newName" maxlength="12" autocomplete="off" placeholder="ชื่อเล่น" enterkeyhint="done">
+        <button type="button" id="addNameBtn">เพิ่มชื่อ</button>
+      </div>
+    </div>
+    <div class="dlg-foot">
+      <span class="help">รายชื่อเก็บอยู่ในเครื่องนี้</span>
+      <button type="button" class="ghost-btn" id="delModeBtn"></button>
+    </div>
+  </div>
+</dialog>
+
 <div id="printArea"></div>
 
 <script>
@@ -262,6 +299,9 @@
     customSeq: 0, tab: 'all', q: '', changed: null,
     madeAt: null,                              // null = ใช้เวลาปัจจุบัน
     cfg: Object.assign({ w: 50, h: 30, dpi: 203 }, store.get('cfg', {})),
+    staff: store.get('staff', []),             // รายชื่อพนักงานทั้งหมด (เก็บในเครื่องนี้)
+    shift: null,                               // { date, on: [ชื่อคนอยู่กะวันนี้], active: ชื่อที่จะพิมพ์บนฉลาก } · ข้ามวันแล้วล้าง
+    delMode: false,
   };
 
   /* ---------- โหลดข้อมูลจาก shared/ ---------- */
@@ -342,7 +382,7 @@
     put(it.name.trim() || '—', 700, H * 0.2, pad, pad * 0.6, r1 - pad * 0.6, inW - tagW - pad);
 
     // แถว 2: เวลาที่ทำ + อายุ
-    const madeTxt = `${g.verb} ${fmtDate(made)} ${fmtTime(made)}`;
+    const madeTxt = `${g.verb} ${fmtDate(made)} ${fmtTime(made)}` + (S.shift.active ? ` · ${S.shift.active}` : '');
     const durTxt = hrs > 0 ? `อายุ ${fmtDur(hrs)}` : '';
     c.font = `600 ${Math.round(H * 0.095)}px ${FONT}`;
     const durW = durTxt ? c.measureText(durTxt).width : 0;
@@ -427,11 +467,12 @@
       row.classList.toggle('missing', miss.has(row.dataset.card));
     }
     const n = total(), st = $('status');
-    st.classList.toggle('warn', miss.size > 0);
+    st.classList.toggle('warn', n > 0 && (miss.size > 0 || !S.shift.active));
     st.textContent = !n ? 'แตะรายการเพื่อเพิ่มฉลาก'
       : miss.size ? `ใส่ชื่อและอายุให้ครบก่อนปริ้น (เหลือ ${miss.size} รายการ)`
+      : !S.shift.active ? (S.shift.on.length ? 'แตะชื่อคนทำก่อนปริ้น' : 'เลือกคนอยู่กะวันนี้ก่อนปริ้น')
       : `พร้อมปริ้น ${n} ดวง · สติกเกอร์ ${S.cfg.w}×${S.cfg.h} มม.`;
-    const ok = n > 0 && !miss.size;
+    const ok = n > 0 && !miss.size && !!S.shift.active;
     $('printBtn').disabled = $('shareBtn').disabled = !ok;
     $('printBtn').textContent = n ? `ปริ้น ${n} ดวง` : 'ปริ้น';
     $('totalPill').textContent = `${n} ดวง`;
@@ -447,12 +488,57 @@
     $('sizeTxt').textContent = `${w}×${h} มม.`;
   }
 
+  /* ---------- คนทำ: รายชื่อพนักงาน + คนอยู่กะวันนี้ ---------- */
+  const today = () => fmtLocal(new Date()).slice(0, 10);
+  function loadShift() {
+    const s = store.get('shift', null);
+    return s && s.date === today() && Array.isArray(s.on) ? s : { date: today(), on: [], active: null };
+  }
+  function saveStaff() {
+    const sh = S.shift;
+    sh.on = sh.on.filter(n => S.staff.includes(n));
+    if (sh.on.length === 1) { sh.active = sh.on[0]; sh.auto = true; }   // อยู่คนเดียว ใส่ชื่อให้เลย
+    // อยู่หลายคน ต้องมีคนแตะเลือกเอง · ชื่อที่แอปใส่ให้ตอนอยู่คนเดียวไม่นับ
+    else if (sh.auto || !sh.on.includes(sh.active)) { sh.active = null; sh.auto = false; }
+    store.set('staff', S.staff); store.set('shift', sh);
+    renderWho(); renderStaff(); redraw();
+  }
+  function renderWho() {
+    const { on, active } = S.shift;
+    $('whoChips').innerHTML = on.map(n => `<button type="button" class="chip-btn${n === active ? ' on' : ''}" data-who="${esc(n)}" aria-pressed="${n === active}">${esc(n)}</button>`).join('');
+    $('whoChips').hidden = !on.length;
+    $('shiftBtn').textContent = on.length ? 'เปลี่ยนคนอยู่กะ' : 'เลือกคนอยู่กะวันนี้';
+    $('shiftBtn').classList.toggle('need', !on.length);
+  }
+  function renderStaff() {
+    if (!S.staff.length) S.delMode = false;
+    $('staffHint').textContent = !S.staff.length ? 'ยังไม่มีรายชื่อ เพิ่มชื่อพนักงานด้านล่างก่อน'
+      : S.delMode ? 'แตะชื่อที่ต้องการลบออกจากรายชื่อ'
+      : 'แตะชื่อคนที่มาทำกะนี้ ชื่อจะพิมพ์อยู่บนฉลาก และล้างเองเมื่อข้ามวัน';
+    $('staffGrid').innerHTML = S.staff.map(n => {
+      const on = S.shift.on.includes(n);
+      return S.delMode
+        ? `<button type="button" class="chip-btn del" data-del="${esc(n)}">ลบ ${esc(n)}</button>`
+        : `<button type="button" class="chip-btn${on ? ' on' : ''}" data-staff="${esc(n)}" aria-pressed="${on}">${esc(n)}</button>`;
+    }).join('');
+    $('delModeBtn').textContent = S.delMode ? 'เลิกลบ' : 'ลบชื่อออกจากรายชื่อ';
+    $('delModeBtn').hidden = !S.staff.length;
+  }
+  function addName() {
+    const n = $('newName').value.trim();
+    if (!n) return;
+    if (!S.staff.includes(n)) S.staff.push(n);
+    if (!S.shift.on.includes(n)) S.shift.on.push(n);         // เพิ่มชื่อแล้วถือว่าอยู่กะนี้เลย
+    $('newName').value = ''; S.delMode = false; saveStaff();
+  }
+
   let lastMin = '';
   function tick() {
     const now = new Date(), m = fmtLocal(now);
     if (m === lastMin) return;
     lastMin = m;
     $('clock').textContent = `${fmtDate(now)} ${fmtTime(now)}`;
+    if (S.shift.date !== today()) { S.shift = loadShift(); renderWho(); renderStaff(); redraw(); }
     if (!S.madeAt) { $('madeTxt').textContent = `${fmtDate(now)} · ${fmtTime(now)}`; redraw(); }
   }
 
@@ -533,6 +619,9 @@
     }
     else if (d.tab) { S.tab = d.tab; renderTabs(); renderTiles(); }
     else if (d.size) { const [a, b] = d.size.split('x').map(Number); setCfg({ w: a, h: b }); }
+    else if (d.who) { S.shift.active = d.who; S.shift.auto = false; saveStaff(); }
+    else if (d.staff) { const on = S.shift.on, i = on.indexOf(d.staff); if (i < 0) on.push(d.staff); else on.splice(i, 1); saveStaff(); }
+    else if (d.del) { S.staff = S.staff.filter(n => n !== d.del); saveStaff(); }
   });
 
   // พิมพ์ในแถวคิว: อัปเดตเฉพาะรูปฉลาก ไม่สร้างแถวใหม่ (ช่องกรอกจะได้ไม่หลุดโฟกัส)
@@ -562,6 +651,11 @@
   });
   $('dpi').addEventListener('change', () => setCfg({ dpi: Number($('dpi').value) }));
   $('setBtn').addEventListener('click', () => $('dlg').showModal());
+  $('shiftBtn').addEventListener('click', () => { S.delMode = false; renderStaff(); $('staffDlg').showModal(); });
+  $('staffDlg').addEventListener('click', ev => { if (ev.target === $('staffDlg')) $('staffDlg').close(); });
+  $('addNameBtn').addEventListener('click', addName);
+  $('newName').addEventListener('keydown', ev => { if (ev.key === 'Enter') { ev.preventDefault(); addName(); } });
+  $('delModeBtn').addEventListener('click', () => { S.delMode = !S.delMode; renderStaff(); });
   $('dlg').addEventListener('click', ev => { if (ev.target === $('dlg')) $('dlg').close(); });
 
   $('clearBtn').addEventListener('click', () => { for (const id of [...S.queue.keys()]) drop(id); renderAll(); });
@@ -571,7 +665,8 @@
 
   /* ---------- เริ่ม ---------- */
   (async () => {
-    renderSettings(); renderQueue(); tick();
+    S.shift = loadShift();
+    renderSettings(); renderWho(); renderStaff(); renderQueue(); tick();
     try {
       const [bases, menu, ingredients, shelf] = await Promise.all(['bases.json', 'menu.json', 'ingredients.json', 'shelf-life.json'].map(loadJSON));
       buildItems(bases, menu, ingredients, shelf);
