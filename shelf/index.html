@@ -76,6 +76,35 @@
   #mExport { font-family: ui-monospace, monospace; font-size: 13px; min-height: 120px; border: 1px solid var(--line-strong); border-radius: 8px; padding: 10px; width: 100%; color: var(--ink); background: var(--bg); }
   @media (max-width: 900px) { .manage-in { grid-template-columns: 1fr; grid-template-rows: none; } .m-form, .m-staff, .m-lists { grid-column: auto; grid-row: auto; } .m-staff { order: 2; } .m-lists { order: 3; } }
 
+  /* หน้าปฏิทินวันหมดอายุ */
+  .nb { display: inline-block; margin-left: 6px; min-width: 20px; padding: 0 6px; border-radius: 999px; background: var(--danger); color: var(--accent-ink); font-size: 12px; line-height: 20px; text-align: center; font-variant-numeric: tabular-nums; }
+  .cal-in { max-width: 1120px; margin: 0 auto; display: grid; grid-template-columns: minmax(340px, 460px) minmax(0, 1fr); gap: 20px; align-items: start; }
+  .cal-lists { display: flex; flex-direction: column; gap: 20px; min-width: 0; }
+  .cal-head { display: flex; align-items: center; gap: 8px; }
+  .cal-head h2 { flex: 1; text-align: center; }
+  .cal-grid { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 4px; }
+  .cal-dow { text-align: center; font-size: 12px; font-weight: 700; color: var(--muted); padding: 4px 0; }
+  .cal-day { min-height: 58px; border: 1px solid var(--line); border-radius: 8px; background: var(--panel); padding: 5px 4px; display: flex; flex-direction: column; align-items: center; gap: 3px; font-variant-numeric: tabular-nums; }
+  .cal-day .dn { font-size: 15px; font-weight: 600; }
+  .cal-day.other { background: none; border-color: transparent; }
+  .cal-day.other .dn { color: var(--line-strong); }
+  .cal-day.today { border-color: var(--ink); border-width: 2px; }
+  .cal-day.sel { background: var(--accent-soft); border-color: var(--accent); border-width: 2px; }
+  .cal-day .ct { font-size: 12px; font-weight: 700; line-height: 20px; min-width: 22px; padding: 0 6px; border-radius: 999px; background: var(--ink); color: var(--panel); }
+  .cal-day .ct.late { background: var(--danger); }
+  .cal-day .ct.soon { background: var(--warn); }
+  .cal-day .ct.done { background: none; color: var(--muted); border: 1px solid var(--line-strong); line-height: 18px; }
+  .lg-row { display: grid; grid-template-columns: 64px minmax(0, 1fr) auto; gap: 4px 12px; align-items: center; padding: 12px 0; border-top: 1px solid var(--line); }
+  .lg-time { font-size: 20px; font-weight: 700; font-variant-numeric: tabular-nums; }
+  .lg-time small { display: block; font-size: 12px; font-weight: 600; color: var(--muted); }
+  .lg-row.done .lg-time, .lg-row.done .m-name { color: var(--muted); text-decoration: line-through; }
+  .lg-acts { display: flex; gap: 6px; flex-wrap: wrap; justify-content: flex-end; }
+  .st { font-size: 12px; font-weight: 700; padding: 1px 8px; border-radius: 6px; white-space: nowrap; border: 1px solid var(--line-strong); color: var(--muted); }
+  .st.late { background: var(--danger); border-color: var(--danger); color: var(--accent-ink); }
+  .st.soon { background: var(--warn-soft); border-color: var(--warn-soft); color: var(--warn); }
+  @media (max-width: 900px) { .cal-in { grid-template-columns: 1fr; } }
+  @media (max-width: 520px) { .lg-row { grid-template-columns: 56px minmax(0, 1fr); } .lg-acts { grid-column: 1 / -1; justify-content: flex-start; } }
+
   /* โครงสองฝั่ง */
   .app { flex: 1; min-height: 0; display: grid; grid-template-columns: minmax(0, 1fr) 380px; }
   @media (min-width: 1150px) { .app { grid-template-columns: minmax(0, 1fr) 440px; } }
@@ -219,7 +248,7 @@
 <header class="top">
   <div class="top-l">
     <div class="brand"><b>KACHA</b><span>ฉลากวันหมดอายุ</span></div>
-    <nav class="nav" aria-label="เลือกหน้า"><a href="#" id="navPrint" class="on">ปริ้นฉลาก</a><a href="#manage" id="navManage">จัดการรายการ</a></nav>
+    <nav class="nav" aria-label="เลือกหน้า"><a href="#" id="navPrint" class="on">ปริ้นฉลาก</a><a href="#calendar" id="navCal">ปฏิทิน<span class="nb" id="calBadge" hidden></span></a><a href="#manage" id="navManage">จัดการรายการ</a></nav>
   </div>
   <div class="top-r">
     <span class="num" id="clock"></span>
@@ -269,6 +298,22 @@
     </div>
   </aside>
 </div>
+
+<main class="manage" id="viewCal" hidden>
+  <div class="cal-in">
+    <section class="card">
+      <div class="cal-head">
+        <button type="button" class="sm-btn" id="calPrev" aria-label="เดือนก่อน">‹</button>
+        <h2 id="calTitle"></h2>
+        <button type="button" class="sm-btn" id="calNext" aria-label="เดือนถัดไป">›</button>
+        <button type="button" class="sm-btn" id="calToday">วันนี้</button>
+      </div>
+      <div class="cal-grid" id="calGrid"></div>
+      <p class="help">ตัวเลขในแต่ละวันคือจำนวนฉลากที่หมดอายุวันนั้น สีแดงคือเลยกำหนดแล้วแต่ยังไม่ได้กดว่าทิ้งหรือใช้หมด บันทึกนี้เก็บอยู่ในเครื่องที่กดปริ้น</p>
+    </section>
+    <div class="cal-lists" id="calLists"></div>
+  </div>
+</main>
 
 <main class="manage" id="viewManage" hidden>
   <div class="manage-in">
@@ -404,6 +449,8 @@
     shift: null,                               // { date, on: [ชื่อคนอยู่กะวันนี้], active: ชื่อที่จะพิมพ์บนฉลาก } · ข้ามวันแล้วล้าง
     local: store.get('items', []),             // รายการที่เพิ่มเองในเครื่องนี้ [{ id, group, name, hours }]
     edit: null, sure: null, mGroup: 'opened', busy: false,
+    log: store.get('log', []),                 // บันทึกการปริ้น [{ k, item, name, group, made, exp, by, n, at, done }] เก็บในเครื่องนี้
+    calMonth: null, calDay: null,
   };
 
   /* ---------- โหลดข้อมูลจาก shared/ ---------- */
@@ -497,7 +544,7 @@
 
     // ช่องวันเวลาหมดอายุ: พื้นดำตัวขาว หรือ กรอบตัวดำ (ใช้ความร้อนหัวพิมพ์น้อยกว่ามาก)
     const by = Math.round(H * 0.56), bh = H - pad - by, ip = Math.round(1.2 * dpm);
-    const frame = S.cfg.bar === 'frame', ink = frame ? '#000' : '#fff';
+    const frame = S.cfg.bar !== 'solid', ink = frame ? '#000' : '#fff';
     c.fillStyle = '#000'; c.fillRect(pad, by, inW, bh);
     if (frame) { const t = Math.max(3, Math.round(0.5 * dpm)); c.fillStyle = '#fff'; c.fillRect(pad + t, by + t, inW - t * 2, bh - t * 2); }
     put('หมดอายุ', 600, H * 0.085, pad + ip, by + bh * 0.04, bh * 0.3, inW - ip * 2, ink);
@@ -604,8 +651,8 @@
     $('niimState').textContent = on ? `เชื่อมต่อแล้ว: ${N.name}${meta ? ` (รุ่น ${meta.model})` : ' (ไม่รู้จักรุ่นนี้ จะลองปริ้นแบบ B1)'}` : 'ยังไม่ได้เชื่อมต่อ กด "ปริ้น" หรือปุ่มด้านล่างเพื่อเลือกเครื่อง';
     $('niimBtn').textContent = on ? 'ตัดการเชื่อมต่อ' : 'เชื่อมต่อเครื่องปริ้น';
     $('density').value = String(S.cfg.density || 3);
-    const bar = S.cfg.bar === 'frame' ? 'frame' : 'solid';
-    $('bars').innerHTML = [['solid', 'พื้นดำ ตัวขาว'], ['frame', 'กรอบ ตัวดำ']].map(([id, name]) => `<button type="button" data-bar="${id}" class="${bar === id ? 'on' : ''}" aria-pressed="${bar === id}">${name}</button>`).join('');
+    const bar = S.cfg.bar === 'solid' ? 'solid' : 'frame';
+    $('bars').innerHTML = [['frame', 'กรอบ ตัวดำ'], ['solid', 'พื้นดำ ตัวขาว']].map(([id, name]) => `<button type="button" data-bar="${id}" class="${bar === id ? 'on' : ''}" aria-pressed="${bar === id}">${name}</button>`).join('');
   }
 
   /* ---------- หน้าจัดการรายการ: เพิ่ม/แก้/ลบ รายการที่เก็บในเครื่องนี้ ---------- */
@@ -665,10 +712,79 @@
     catch { $('mCopyMsg').textContent = 'คัดลอกอัตโนมัติไม่ได้ เลือกข้อความด้านล่างแล้วคัดลอกเอง'; }
   }
   function route() {
-    const m = location.hash === '#manage';
-    $('viewPrint').hidden = m; $('viewManage').hidden = !m;
-    $('navPrint').classList.toggle('on', !m); $('navManage').classList.toggle('on', m);
-    if (m) { S.sure = null; renderManage(); renderStaff(); } else redraw();
+    const v = location.hash === '#manage' ? 'manage' : location.hash === '#calendar' ? 'cal' : 'print';
+    $('viewPrint').hidden = v !== 'print'; $('viewManage').hidden = v !== 'manage'; $('viewCal').hidden = v !== 'cal';
+    $('navPrint').classList.toggle('on', v === 'print'); $('navManage').classList.toggle('on', v === 'manage'); $('navCal').classList.toggle('on', v === 'cal');
+    S.sure = null;
+    if (v === 'manage') { renderManage(); renderStaff(); } else if (v === 'cal') { S.calMonth = null; S.calDay = null; renderCal(); } else redraw();
+  }
+
+  /* ---------- บันทึกการปริ้น + ปฏิทินวันหมดอายุ ---------- */
+  const DOW = ['อา', 'จ', 'อ', 'พ', 'พฤ', 'ศ', 'ส'];
+  const LOG_KEEP_DAYS = 90;                                   // เก็บบันทึกย้อนหลังกี่วัน
+  const dayKey = t => fmtLocal(new Date(t)).slice(0, 10);
+  const saveLog = () => { store.set('log', S.log); renderBadge(); };
+  const overdue = () => { const now = Date.now(); return S.log.filter(x => !x.done && x.exp <= now).sort((a, b) => a.exp - b.exp); };
+
+  // เรียกทุกครั้งที่ปริ้นหรือส่งรูป · ปริ้นรายการเดิมซ้ำในนาทีเดียวกันจะไม่นับเป็นรายการใหม่
+  function logPrint() {
+    const made = madeDate().getTime(), at = Date.now(), min = Math.floor(made / 60000), by = S.shift.active || '';
+    for (const [id, e] of S.queue) {
+      const it = S.items.get(id), hrs = hoursOf(id), name = it.name.trim();
+      if (!(hrs > 0) || !name) continue;
+      const dup = S.log.find(x => x.item === id && x.name === name && Math.floor(x.made / 60000) === min && x.by === by && !x.done);
+      if (dup) { dup.n = Math.max(dup.n, e.n); dup.at = at; continue; }
+      S.log.push({ k: at.toString(36) + Math.random().toString(36).slice(2, 6), item: id, name, group: it.group, made, exp: made + hrs * 3600e3, by, n: e.n, at, done: null });
+    }
+    saveLog();
+  }
+
+  function renderBadge() {
+    const n = overdue().length;
+    $('calBadge').textContent = n; $('calBadge').hidden = !n;
+  }
+
+  function logRow(x, showDate) {
+    const now = Date.now(), exp = new Date(x.exp), made = new Date(x.made), late = !x.done && x.exp <= now;
+    const left = x.exp - now, st = x.done ? '<span class="st">ทิ้ง / ใช้หมดแล้ว</span>'
+      : late ? '<span class="st late">เลยกำหนดแล้ว</span>'
+      : left < 6 * 3600e3 ? `<span class="st soon">อีก ${left < 3600e3 ? Math.max(1, Math.round(left / 60000)) + ' นาที' : Math.round(left / 3600e3) + ' ชม.'}</span>` : '';
+    const sure = S.sure === 'log:' + x.k, g = S.groups[x.group];
+    return `<div class="lg-row${x.done ? ' done' : ''}">
+      <div class="lg-time">${fmtTime(exp)}${showDate ? `<small>${esc(fmtDate(exp))}</small>` : ''}</div>
+      <div class="m-main"><div class="m-name">${esc(x.name)}${x.n > 1 ? ` ×${x.n}` : ''}</div>
+        <div class="m-sub"><span>${esc(g ? g.verb : 'ทำ')} ${esc(fmtDate(made))} ${fmtTime(made)}${x.by ? ' · ' + esc(x.by) : ''}</span>${st}</div></div>
+      <div class="lg-acts">
+        <button type="button" class="sm-btn" data-ldone="${esc(x.k)}">${x.done ? 'ยกเลิก' : 'ทิ้ง / ใช้หมดแล้ว'}</button>
+        <button type="button" class="sm-btn danger${sure ? ' sure' : ''}" data-ldel="${esc(x.k)}">${sure ? 'ยืนยันลบ' : 'ลบบันทึก'}</button>
+      </div></div>`;
+  }
+
+  function renderCal() {
+    const now = new Date(), tKey = dayKey(now);
+    if (!S.calMonth) S.calMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+    if (!S.calDay) S.calDay = tKey;
+    const y = S.calMonth.getFullYear(), m = S.calMonth.getMonth();
+    $('calTitle').textContent = new Intl.DateTimeFormat('th-TH', { month: 'long', year: 'numeric' }).format(S.calMonth);
+    const byDay = new Map();
+    for (const x of S.log) { const k = dayKey(x.exp); if (!byDay.has(k)) byDay.set(k, []); byDay.get(k).push(x); }
+    const first = new Date(y, m, 1), weeks = Math.ceil((first.getDay() + new Date(y, m + 1, 0).getDate()) / 7);
+    let html = DOW.map(d => `<div class="cal-dow">${d}</div>`).join('');
+    for (let i = 0; i < weeks * 7; i++) {
+      const d = new Date(y, m, 1 - first.getDay() + i), k = dayKey(d), list = byDay.get(k) || [], open = list.filter(x => !x.done);
+      const late = open.some(x => x.exp <= now.getTime());
+      const ct = open.length ? `<span class="ct${late ? ' late' : k === tKey ? ' soon' : ''}">${open.length}</span>` : list.length ? `<span class="ct done">${list.length}</span>` : '';
+      html += `<button type="button" class="cal-day${d.getMonth() !== m ? ' other' : ''}${k === tKey ? ' today' : ''}${k === S.calDay ? ' sel' : ''}" data-day="${k}" aria-pressed="${k === S.calDay}"><span class="dn">${d.getDate()}</span>${ct}</button>`;
+    }
+    $('calGrid').innerHTML = html;
+
+    const late = overdue(), sel = (byDay.get(S.calDay) || []).slice().sort((a, b) => a.exp - b.exp), [sy, sm, sd] = S.calDay.split('-').map(Number);
+    const selTitle = (S.calDay === tKey ? 'วันนี้ ' : '') + fmtDate(new Date(sy, sm - 1, sd));
+    $('calLists').innerHTML =
+      (late.length ? `<section class="card"><h2>เลยกำหนดแล้ว ยังไม่ได้ทิ้ง (${late.length})</h2><div class="m-rows">${late.map(x => logRow(x, true)).join('')}</div></section>` : '')
+      + `<section class="card"><h2>หมดอายุ ${esc(selTitle)}</h2>${sel.length ? `<div class="m-rows">${sel.map(x => logRow(x, false)).join('')}</div>`
+        : `<div class="note">${S.log.length ? 'ไม่มีฉลากที่หมดอายุวันนี้' : 'ยังไม่มีบันทึก ปริ้นฉลากแล้วรายการจะมาขึ้นที่นี่เอง'}</div>`}</section>`;
+    renderBadge();
   }
 
   /* ---------- คนทำ: รายชื่อพนักงาน + คนอยู่กะวันนี้ ---------- */
@@ -725,6 +841,7 @@
     lastMin = m;
     $('clock').textContent = `${fmtDate(now)} ${fmtTime(now)}`;
     if (S.shift.date !== today()) { S.shift = loadShift(); renderWho(); renderStaff(); redraw(); }
+    if ($('viewCal').hidden) renderBadge(); else renderCal();   // สถานะเลยกำหนดเปลี่ยนตามเวลา
     if (!S.madeAt) { $('madeTxt').textContent = `${fmtDate(now)} · ${fmtTime(now)}`; redraw(); }
   }
 
@@ -800,6 +917,7 @@
         }
         await task.waitForFinished();
       } finally { await task.printEnd().catch(() => {}); }
+      logPrint();
       for (const id of [...S.queue.keys()]) drop(id);     // ปริ้นครบแล้ว ล้างคิวกันปริ้นซ้ำ
       S.busy = false; renderAll(); flash(`ปริ้นเสร็จ ${total} ดวง`);
     } catch (e) {
@@ -811,7 +929,7 @@
     if ($('printBtn').disabled) return;
     if (mode() === 'niimbot') return niimPrint();
     printing = true;
-    try { await Promise.all(buildPrintArea().map(i => i.decode().catch(() => {}))); window.print(); }
+    try { await Promise.all(buildPrintArea().map(i => i.decode().catch(() => {}))); window.print(); logPrint(); }
     finally { printing = false; }
   }
   // สั่งปริ้นจากเมนูของเบราว์เซอร์ก็ต้องได้ฉลาก ไม่ใช่หน้าจอ
@@ -826,7 +944,7 @@
       files.push(new File([blob], `ฉลาก-${S.items.get(id).name.trim().replace(/[^\p{L}\p{M}\p{N}]+/gu, '-')}.png`, { type: 'image/png' }));
     }
     if (canShare && navigator.canShare({ files })) {
-      try { await navigator.share({ files }); } catch (e) { if (e.name !== 'AbortError') flash('ส่งรูปไม่สำเร็จ ลองใหม่อีกครั้ง'); }
+      try { await navigator.share({ files }); logPrint(); } catch (e) { if (e.name !== 'AbortError') flash('ส่งรูปไม่สำเร็จ ลองใหม่อีกครั้ง'); }
       return;
     }
     // เบราว์เซอร์ที่แชร์ไฟล์ไม่ได้ → บันทึกรูปลงเครื่องแทน
@@ -834,6 +952,7 @@
       const a = document.createElement('a'); a.href = URL.createObjectURL(f); a.download = f.name;
       document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 5000);
     }
+    logPrint();
     flash(`บันทึกรูป ${files.length} ไฟล์ลงเครื่องแล้ว เปิดจากแอปเครื่องปริ้นได้เลย`);
   }
 
@@ -862,6 +981,13 @@
     else if (d.size) { const [a, b] = d.size.split('x').map(Number); setCfg({ w: a, h: b }); }
     else if (d.mode) setCfg({ mode: d.mode });
     else if (d.bar) setCfg({ bar: d.bar });
+    else if (d.day) { S.calDay = d.day; S.sure = null; const [y, m] = d.day.split('-').map(Number); S.calMonth = new Date(y, m - 1, 1); renderCal(); }
+    else if (d.ldone) { const x = S.log.find(i => i.k === d.ldone); if (x) { x.done = x.done ? null : Date.now(); S.sure = null; saveLog(); renderCal(); } }
+    else if (d.ldel) {
+      if (S.sure !== 'log:' + d.ldel) S.sure = 'log:' + d.ldel;      // แตะครั้งแรกถามยืนยัน
+      else { S.sure = null; S.log = S.log.filter(i => i.k !== d.ldel); saveLog(); }
+      renderCal();
+    }
     else if (d.who) { S.shift.active = d.who; S.shift.auto = false; saveStaff(); }
     else if (d.staff) { const on = S.shift.on, i = on.indexOf(d.staff); if (i < 0) on.push(d.staff); else on.splice(i, 1); saveStaff(); }
     else if (d.sdel) deleteName(d.sdel);
@@ -912,6 +1038,10 @@
   $('mCopy').addEventListener('click', copyItems);
   for (const k of ['mName', 'mVal']) $(k).addEventListener('keydown', ev => { if (ev.key === 'Enter') { ev.preventDefault(); saveItem(); } });
   addEventListener('hashchange', route);
+  const calMove = n => { S.calMonth = new Date(S.calMonth.getFullYear(), S.calMonth.getMonth() + n, 1); renderCal(); };
+  $('calPrev').addEventListener('click', () => calMove(-1));
+  $('calNext').addEventListener('click', () => calMove(1));
+  $('calToday').addEventListener('click', () => { S.calMonth = null; S.calDay = null; renderCal(); });
   $('addNameBtn').addEventListener('click', addName);
   $('newName').addEventListener('keydown', ev => { if (ev.key === 'Enter') { ev.preventDefault(); addName(); } });
   $('newName').addEventListener('input', () => { $('sErr').hidden = true; });
@@ -926,6 +1056,7 @@
   /* ---------- เริ่ม ---------- */
   (async () => {
     S.shift = loadShift();
+    S.log = (Array.isArray(S.log) ? S.log : []).filter(x => x && x.exp > Date.now() - LOG_KEEP_DAYS * 864e5);
     renderSettings(); renderWho(); renderStaff(); renderQueue(); tick();
     try {
       const [bases, menu, ingredients, shelf] = await Promise.all(['bases.json', 'menu.json', 'ingredients.json', 'shelf-life.json'].map(loadJSON));
