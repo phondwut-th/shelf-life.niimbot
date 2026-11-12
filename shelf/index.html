@@ -329,6 +329,10 @@
       <div class="sizes" id="modes"></div>
       <p class="help" id="modeHelp"></p>
     </div>
+    <div class="field">
+      <span class="lbl">ช่องวันหมดอายุบนฉลาก</span>
+      <div class="sizes" id="bars"></div>
+    </div>
     <div class="field" id="niimBox">
       <span class="lbl">เครื่อง Niimbot</span>
       <p class="help" id="niimState"></p>
@@ -491,11 +495,13 @@
     if (durTxt) put(durTxt, 600, H * 0.095, W - pad, r1, H * 0.2, inW * 0.4, '#000', 'right');
     put(madeTxt, 500, H * 0.105, pad, r1, H * 0.2, inW - durW - pad);
 
-    // แถบดำ: วันเวลาหมดอายุ
+    // ช่องวันเวลาหมดอายุ: พื้นดำตัวขาว หรือ กรอบตัวดำ (ใช้ความร้อนหัวพิมพ์น้อยกว่ามาก)
     const by = Math.round(H * 0.56), bh = H - pad - by, ip = Math.round(1.2 * dpm);
+    const frame = S.cfg.bar === 'frame', ink = frame ? '#000' : '#fff';
     c.fillStyle = '#000'; c.fillRect(pad, by, inW, bh);
-    put('หมดอายุ', 600, H * 0.085, pad + ip, by + bh * 0.04, bh * 0.3, inW - ip * 2, '#fff');
-    put(exp ? `${fmtDate(exp)}  ${fmtTime(exp)}` : 'ยังไม่ได้ใส่อายุ', 700, H * 0.21, pad + ip, by + bh * 0.3, bh * 0.68, inW - ip * 2, '#fff');
+    if (frame) { const t = Math.max(3, Math.round(0.5 * dpm)); c.fillStyle = '#fff'; c.fillRect(pad + t, by + t, inW - t * 2, bh - t * 2); }
+    put('หมดอายุ', 600, H * 0.085, pad + ip, by + bh * 0.04, bh * 0.3, inW - ip * 2, ink);
+    put(exp ? `${fmtDate(exp)}  ${fmtTime(exp)}` : 'ยังไม่ได้ใส่อายุ', 700, H * 0.21, pad + ip, by + bh * 0.3, bh * 0.68, inW - ip * 2, ink);
 
     // ตัดเป็นขาว/ดำล้วน ขอบตัวหนังสือจะคมเมื่อปริ้นความร้อน
     const img = c.getImageData(0, 0, W, H), d = img.data;
@@ -598,6 +604,8 @@
     $('niimState').textContent = on ? `เชื่อมต่อแล้ว: ${N.name}${meta ? ` (รุ่น ${meta.model})` : ' (ไม่รู้จักรุ่นนี้ จะลองปริ้นแบบ B1)'}` : 'ยังไม่ได้เชื่อมต่อ กด "ปริ้น" หรือปุ่มด้านล่างเพื่อเลือกเครื่อง';
     $('niimBtn').textContent = on ? 'ตัดการเชื่อมต่อ' : 'เชื่อมต่อเครื่องปริ้น';
     $('density').value = String(S.cfg.density || 3);
+    const bar = S.cfg.bar === 'frame' ? 'frame' : 'solid';
+    $('bars').innerHTML = [['solid', 'พื้นดำ ตัวขาว'], ['frame', 'กรอบ ตัวดำ']].map(([id, name]) => `<button type="button" data-bar="${id}" class="${bar === id ? 'on' : ''}" aria-pressed="${bar === id}">${name}</button>`).join('');
   }
 
   /* ---------- หน้าจัดการรายการ: เพิ่ม/แก้/ลบ รายการที่เก็บในเครื่องนี้ ---------- */
@@ -853,6 +861,7 @@
     else if (d.tab) { S.tab = d.tab; renderTabs(); renderTiles(); }
     else if (d.size) { const [a, b] = d.size.split('x').map(Number); setCfg({ w: a, h: b }); }
     else if (d.mode) setCfg({ mode: d.mode });
+    else if (d.bar) setCfg({ bar: d.bar });
     else if (d.who) { S.shift.active = d.who; S.shift.auto = false; saveStaff(); }
     else if (d.staff) { const on = S.shift.on, i = on.indexOf(d.staff); if (i < 0) on.push(d.staff); else on.splice(i, 1); saveStaff(); }
     else if (d.sdel) deleteName(d.sdel);
