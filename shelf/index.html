@@ -179,6 +179,8 @@
   .sizes { display: flex; gap: 8px; flex-wrap: wrap; }
   .sizes button { border: 1px solid var(--line-strong); background: var(--panel); border-radius: 8px; padding: 10px 16px; min-height: 44px; font-weight: 600; }
   .sizes button.on { background: var(--ink); border-color: var(--ink); color: var(--panel); }
+  .sizes button[disabled] { opacity: .45; cursor: not-allowed; }
+  #density { width: auto; }
   .grid3 { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
   .help { font-size: 14px; color: var(--muted); margin: 0; }
   .help b { color: var(--ink); }
@@ -320,8 +322,22 @@
 </main>
 
 <dialog id="dlg" aria-labelledby="dlgTitle">
-  <form method="dialog" class="dlg-head"><h2 id="dlgTitle">ตั้งค่าสติกเกอร์</h2><button>ปิด</button></form>
+  <form method="dialog" class="dlg-head"><h2 id="dlgTitle">ตั้งค่าเครื่องปริ้นและสติกเกอร์</h2><button>ปิด</button></form>
   <div class="set">
+    <div class="field">
+      <span class="lbl">วิธีปริ้น</span>
+      <div class="sizes" id="modes"></div>
+      <p class="help" id="modeHelp"></p>
+    </div>
+    <div class="field" id="niimBox">
+      <span class="lbl">เครื่อง Niimbot</span>
+      <p class="help" id="niimState"></p>
+      <div class="who-row">
+        <button type="button" class="sm-btn" id="niimBtn"></button>
+        <label for="density">ความเข้ม</label>
+        <select id="density"><option value="1">1 จางสุด</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5 เข้มสุด</option></select>
+      </div>
+    </div>
     <div class="field">
       <span class="lbl">ขนาดสติกเกอร์ (กว้าง × สูง)</span>
       <div class="sizes" id="sizes"></div>
@@ -329,13 +345,15 @@
     <div class="grid3">
       <div class="field"><label for="lw">กว้าง (มม.)</label><input type="number" id="lw" inputmode="decimal" min="20" max="110" step="1"></div>
       <div class="field"><label for="lh">สูง (มม.)</label><input type="number" id="lh" inputmode="decimal" min="15" max="110" step="1"></div>
-      <div class="field"><label for="dpi">ความละเอียด</label>
+      <div class="field"><label for="dpi">ความละเอียดรูป</label>
         <select id="dpi"><option value="203">203 dpi</option><option value="300">300 dpi</option></select></div>
     </div>
-    <p class="help"><span class="badge">ยังไม่ยืนยัน</span> ยังไม่ได้ลองกับเครื่องปริ้นจริง ขนาดและวิธีปริ้นอาจต้องปรับเมื่อได้เครื่องมา</p>
+    <p class="help"><span class="badge">ยังไม่ยืนยัน</span> ยังไม่ได้ลองกับเครื่อง Niimbot จริง ถ้าปริ้นแล้วไม่ออกหรือตำแหน่งเพี้ยน แจ้งคนดูแลระบบ</p>
     <ol class="help">
-      <li><b>ปุ่ม "ปริ้น"</b> (หรือกด Ctrl/⌘ + P) เปิดหน้าต่างปริ้นของเครื่อง เลือกเครื่องปริ้นสติกเกอร์ ตั้งขนาดกระดาษให้เท่าสติกเกอร์ ขอบ 0</li>
-      <li><b>ปุ่ม "ส่งรูป" / "บันทึกรูป"</b> ได้รูปฉลากไปเปิดในแอปของเครื่องปริ้น ใช้เมื่อหน้าต่างปริ้นไม่เห็นเครื่องปริ้น</li>
+      <li><b>Niimbot ผ่าน Bluetooth</b> ใช้ได้กับ Chrome บนคอมและมือถือ Android เปิดเครื่องปริ้นไว้ กด "ปริ้น" ครั้งแรกจะมีหน้าต่างให้เลือกเครื่อง จากนั้นฉลากออกจากเครื่องเลย</li>
+      <li><b>iPad และ iPhone</b> ต่อ Bluetooth จากหน้าเว็บไม่ได้ ให้กด "ส่งรูป" แล้วเลือกแอป NIIMBOT เพื่อปริ้น</li>
+      <li><b>หน้าต่างปริ้นของเครื่อง</b> ใช้กับเครื่องปริ้นยี่ห้ออื่นที่ลงไดรเวอร์ไว้ ตั้งขนาดกระดาษให้เท่าสติกเกอร์ ขอบ 0</li>
+      <li>หัวพิมพ์ Niimbot B1 กว้าง 48 มม. สติกเกอร์กว้าง 50 มม. จะเหลือขอบข้างละประมาณ 1 มม.</li>
     </ol>
   </div>
 </dialog>
@@ -367,6 +385,10 @@
   const MONTHS = ['ม.ค.', 'ก.พ.', 'มี.ค.', 'เม.ย.', 'พ.ค.', 'มิ.ย.', 'ก.ค.', 'ส.ค.', 'ก.ย.', 'ต.ค.', 'พ.ย.', 'ธ.ค.'];
   const wide = matchMedia('(min-width: 761px)');
   const canShare = typeof navigator.canShare === 'function';
+  const BT = !!navigator.bluetooth;                       // Web Bluetooth: Chrome บนคอม/Android มี · iPad/iPhone ไม่มี
+  const NIIM_LIB = 'vendor/niimbluelib-0.48.0.min.js';    // ไลบรารีคุยกับเครื่อง Niimbot (MIT · ดู vendor/niimbluelib-LICENSE.txt)
+  const N = { client: null, name: '' };
+  const mode = () => (BT && S.cfg.mode !== 'system') ? 'niimbot' : 'system';
 
   const S = {
     groups: {}, order: [], items: new Map(),   // ข้อมูลจาก shared/
@@ -377,7 +399,7 @@
     staff: store.get('staff', []),             // รายชื่อพนักงานทั้งหมด (เก็บในเครื่องนี้)
     shift: null,                               // { date, on: [ชื่อคนอยู่กะวันนี้], active: ชื่อที่จะพิมพ์บนฉลาก } · ข้ามวันแล้วล้าง
     local: store.get('items', []),             // รายการที่เพิ่มเองในเครื่องนี้ [{ id, group, name, hours }]
-    edit: null, sure: null, mGroup: 'opened',
+    edit: null, sure: null, mGroup: 'opened', busy: false,
   };
 
   /* ---------- โหลดข้อมูลจาก shared/ ---------- */
@@ -433,9 +455,10 @@
   const missing = () => [...S.queue.keys()].filter(id => !(hoursOf(id) > 0) || !S.items.get(id).name.trim());
 
   /* ---------- วาดฉลากลง canvas (ขาวดำล้วน สำหรับเครื่องปริ้นความร้อน) ---------- */
-  function drawLabel(cv, id) {
-    const it = S.items.get(id), g = S.groups[it.group], { w, h, dpi } = S.cfg;
-    const dpm = dpi / 25.4, W = Math.round(w * dpm), H = Math.round(h * dpm);
+  // o = { dpi, maxW, maxH } ใช้ตอนส่งเข้าเครื่องปริ้นตรงๆ (ความละเอียดและความกว้างหัวพิมพ์ของเครื่อง)
+  function drawLabel(cv, id, o = {}) {
+    const it = S.items.get(id), g = S.groups[it.group], { w, h } = S.cfg, dpi = o.dpi || S.cfg.dpi;
+    const dpm = dpi / 25.4, W = Math.min(Math.round(w * dpm), o.maxW || Infinity), H = Math.min(Math.round(h * dpm), o.maxH || Infinity);
     cv.width = W; cv.height = H;
     const c = cv.getContext('2d', { willReadFrequently: true });
     c.fillStyle = '#fff'; c.fillRect(0, 0, W, H);
@@ -552,10 +575,10 @@
       : !S.shift.active ? (S.shift.on.length ? 'แตะชื่อคนทำก่อนปริ้น' : 'เลือกคนอยู่กะวันนี้ก่อนปริ้น')
       : `พร้อมปริ้น ${n} ดวง · สติกเกอร์ ${S.cfg.w}×${S.cfg.h} มม.`;
     const ok = n > 0 && !miss.size && !!S.shift.active;
-    $('printBtn').disabled = $('shareBtn').disabled = !ok;
-    $('printBtn').textContent = n ? `ปริ้น ${n} ดวง` : 'ปริ้น';
+    $('printBtn').disabled = $('shareBtn').disabled = !ok || S.busy;
+    $('printBtn').textContent = S.busy ? 'กำลังปริ้น…' : n ? `ปริ้น ${n} ดวง` : 'ปริ้น';
     $('totalPill').textContent = `${n} ดวง`;
-    $('clearBtn').disabled = !n;
+    $('clearBtn').disabled = !n || S.busy;
   }
 
   function renderAll() { renderTiles(); renderQueue(); redraw(); }
@@ -565,6 +588,16 @@
     $('sizes').innerHTML = SIZES.map(([a, b]) => `<button type="button" data-size="${a}x${b}" class="${a === w && b === h ? 'on' : ''}">${a}×${b} มม.</button>`).join('');
     $('lw').value = w; $('lh').value = h; $('dpi').value = dpi;
     $('sizeTxt').textContent = `${w}×${h} มม.`;
+    const m = mode(), on = !!(N.client && N.client.isConnected());
+    $('modes').innerHTML = [['niimbot', 'Niimbot ผ่าน Bluetooth'], ['system', 'หน้าต่างปริ้นของเครื่อง']].map(([id, name]) =>
+      `<button type="button" data-mode="${id}" class="${m === id ? 'on' : ''}" aria-pressed="${m === id}"${id === 'niimbot' && !BT ? ' disabled' : ''}>${name}</button>`).join('');
+    $('modeHelp').textContent = BT ? '' : 'เบราว์เซอร์นี้ต่อ Bluetooth กับเครื่องปริ้นไม่ได้ (iPad และ iPhone เป็นแบบนี้ทุกเบราว์เซอร์) ให้กด "ส่งรูป" แล้วเลือกแอป NIIMBOT';
+    $('modeHelp').hidden = BT;
+    $('niimBox').hidden = m !== 'niimbot';
+    const meta = on ? N.client.getModelMetadata() : null;
+    $('niimState').textContent = on ? `เชื่อมต่อแล้ว: ${N.name}${meta ? ` (รุ่น ${meta.model})` : ' (ไม่รู้จักรุ่นนี้ จะลองปริ้นแบบ B1)'}` : 'ยังไม่ได้เชื่อมต่อ กด "ปริ้น" หรือปุ่มด้านล่างเพื่อเลือกเครื่อง';
+    $('niimBtn').textContent = on ? 'ตัดการเชื่อมต่อ' : 'เชื่อมต่อเครื่องปริ้น';
+    $('density').value = String(S.cfg.density || 3);
   }
 
   /* ---------- หน้าจัดการรายการ: เพิ่ม/แก้/ลบ รายการที่เก็บในเครื่องนี้ ---------- */
@@ -713,8 +746,62 @@
     return imgs;
   }
 
+  /* ---------- ปริ้นเข้าเครื่อง Niimbot ผ่าน Bluetooth ---------- */
+  let libP;
+  function loadNiim() {
+    return libP || (libP = new Promise((res, rej) => {
+      if (window.niimbluelib) return res();
+      const el = document.createElement('script'); el.src = NIIM_LIB;
+      el.onload = () => res();
+      el.onerror = () => { libP = null; rej(new Error('โหลดตัวสั่งปริ้นไม่ได้ เช็กอินเทอร์เน็ตแล้วลองใหม่')); };
+      document.head.appendChild(el);
+    }));
+  }
+  async function niimConnect() {
+    await loadNiim();
+    if (!N.client) {
+      N.client = new niimbluelib.NiimbotBluetoothClient();
+      N.client.on('disconnect', () => { N.name = ''; renderSettings(); });
+      N.client.on('printprogress', e => { if (S.busy) $('status').textContent = `กำลังปริ้นดวงที่ ${Math.min(e.page, e.pagesTotal)} จาก ${e.pagesTotal}`; });
+    }
+    if (!N.client.isConnected()) {
+      $('status').textContent = 'เลือกเครื่อง Niimbot ในหน้าต่างที่ขึ้นมา';
+      const info = await N.client.connect();
+      N.name = info.deviceName || 'Niimbot';
+    }
+    renderSettings();
+  }
+  const niimErr = (what, e) => e && e.name === 'NotFoundError' ? 'ยังไม่ได้เลือกเครื่องปริ้น กดอีกครั้งเพื่อเลือก' : `${what}ไม่สำเร็จ: ${(e && e.message) || e}`;
+
+  async function niimPrint() {
+    S.busy = true; redraw();
+    try {
+      await niimConnect();
+      const c = N.client, L = niimbluelib, meta = c.getModelMetadata() || {};
+      const dir = meta.printDirection || 'top', head = meta.printheadPixels || 384;   // ค่าของ B1 ถ้าเครื่องไม่บอกรุ่น
+      const entries = [...S.queue.entries()], total = entries.reduce((a, [, e]) => a + e.n, 0);
+      const density = Math.max(meta.densityMin || 1, Math.min(meta.densityMax || 5, S.cfg.density || meta.densityDefault || 3));
+      const task = c.protocol.newPrintTask(c.getPrintTaskType() || 'B1', { totalPages: total, density, labelType: L.LabelType.WithGaps, statusPollIntervalMs: 100, statusTimeoutMs: 8000 });
+      $('status').textContent = `กำลังส่งฉลาก ${total} ดวงไปที่ ${N.name}`;
+      try {
+        await task.printInit();
+        for (const [id, e] of entries) {
+          const cv = drawLabel(document.createElement('canvas'), id, Object.assign({ dpi: meta.dpi || 203 }, dir === 'top' ? { maxW: head } : { maxH: head }));
+          await task.printPage(L.ImageEncoder.encodeCanvas(cv, L.PageColorType.SingleColor, dir), e.n);
+          await task.waitForPageFinished();
+        }
+        await task.waitForFinished();
+      } finally { await task.printEnd().catch(() => {}); }
+      for (const id of [...S.queue.keys()]) drop(id);     // ปริ้นครบแล้ว ล้างคิวกันปริ้นซ้ำ
+      S.busy = false; renderAll(); flash(`ปริ้นเสร็จ ${total} ดวง`);
+    } catch (e) {
+      S.busy = false; redraw(); flash(niimErr('ปริ้น', e), 12000, true);
+    }
+  }
+
   async function doPrint() {
     if ($('printBtn').disabled) return;
+    if (mode() === 'niimbot') return niimPrint();
     printing = true;
     try { await Promise.all(buildPrintArea().map(i => i.decode().catch(() => {}))); window.print(); }
     finally { printing = false; }
@@ -743,7 +830,7 @@
   }
 
   let flashT;
-  function flash(msg) { $('status').textContent = msg; clearTimeout(flashT); flashT = setTimeout(redraw, 4000); }
+  function flash(msg, ms = 4000, warn = false) { const st = $('status'); st.textContent = msg; st.classList.toggle('warn', warn); clearTimeout(flashT); flashT = setTimeout(redraw, ms); }
 
   /* ---------- เหตุการณ์ ---------- */
   function addOne(id) { const e = S.queue.get(id) || { n: 0 }; e.n++; S.queue.set(id, e); S.changed = id; }
@@ -753,6 +840,7 @@
   document.addEventListener('click', ev => {
     const t = ev.target.closest('button'); if (!t) return;
     const d = t.dataset;
+    if (S.busy && (d.add || d.sub || d.rm || d.custom)) return;   // ระหว่างปริ้นไม่ให้แก้คิว
     if (d.add) { addOne(d.add); renderAll(); }
     else if (d.sub) { subOne(d.sub); renderAll(); }
     else if (d.rm) { drop(d.rm); renderAll(); }
@@ -764,6 +852,7 @@
     }
     else if (d.tab) { S.tab = d.tab; renderTabs(); renderTiles(); }
     else if (d.size) { const [a, b] = d.size.split('x').map(Number); setCfg({ w: a, h: b }); }
+    else if (d.mode) setCfg({ mode: d.mode });
     else if (d.who) { S.shift.active = d.who; S.shift.auto = false; saveStaff(); }
     else if (d.staff) { const on = S.shift.on, i = on.indexOf(d.staff); if (i < 0) on.push(d.staff); else on.splice(i, 1); saveStaff(); }
     else if (d.sdel) deleteName(d.sdel);
@@ -798,6 +887,13 @@
     setCfg({ w, h });
   });
   $('dpi').addEventListener('change', () => setCfg({ dpi: Number($('dpi').value) }));
+  $('density').addEventListener('change', () => setCfg({ density: Number($('density').value) }));
+  $('niimBtn').addEventListener('click', async () => {
+    try { if (N.client && N.client.isConnected()) await N.client.disconnect(); else await niimConnect(); }
+    catch (e) { $('niimState').textContent = niimErr('เชื่อมต่อ', e); return; }
+    renderSettings(); redraw();
+  });
+  if (BT) loadNiim().catch(() => {});   // โหลดไว้ก่อน ตอนกดปริ้นจะได้ขึ้นหน้าต่างเลือกเครื่องทันที
   $('setBtn').addEventListener('click', () => $('dlg').showModal());
   $('shiftBtn').addEventListener('click', () => { renderStaff(); $('staffDlg').showModal(); });
   $('toManage').addEventListener('click', () => $('staffDlg').close());
