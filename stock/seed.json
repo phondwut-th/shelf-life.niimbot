@@ -1,0 +1,62 @@
+{
+  "_note": "บิลสั่งของเปิดร้าน จากสรุปแชท 2026-11-23 · แอปนำเข้าให้ตอนยังไม่มีบิลใน db (กดปุ่มนำเข้า) · id คงที่ นำเข้าซ้ำได้ไม่ซ้อน",
+  "bills": [
+    {
+      "id": "open-chaiwala-45873",
+      "supplier": "chaiwala", "round": "เปิดร้าน พ.ย. 69", "orderDate": "2026-11-23",
+      "ref": "บิล #45873", "link": "https://lnw.me/order/chaiwala/45873?s=a72fd477",
+      "lines": [
+        {"item": "it01", "packs": 3, "price": 350},
+        {"item": "it38", "packs": 6, "price": 390},
+        {"item": "it08", "packs": 6, "price": 390},
+        {"item": "it05", "packs": 4, "price": 350}
+      ],
+      "shipping": 155, "discount": 0, "amount": 7285, "estimate": false,
+      "payments": [{"amount": 7285, "date": "2026-11-23", "time": "18:44", "method": "โอน", "ref": "Payment ID 40745", "note": "โอนกสิกรไทย บจก. ไชยวาลา (1162914711)", "slips": []}],
+      "confirmed": false, "received": false,
+      "note": "รอร้านยืนยันยอด · ค่าส่ง EMS ฿155 · หน้าบิลมีปุ่มดาวน์โหลด INVOICE / ใบเสนอราคา / ใบวางบิล"
+    },
+    {
+      "id": "open-shopee-3shops",
+      "supplier": "tea_corp", "supplierName": "Shopee รวม 3 ร้าน (Yiwulong · TEA Corporation · kaishi297.th)",
+      "round": "เปิดร้าน พ.ย. 69", "orderDate": "2026-11-23", "ref": "จ่ายรวมใน Shopee",
+      "lines": [
+        {"item": "it04", "packs": 2, "price": 410},
+        {"item": "it02", "packs": 3, "price": 295},
+        {"item": "it03", "packs": 4, "price": 349},
+        {"item": "it37", "packs": 4, "price": 335}
+      ],
+      "shipping": 161, "discount": 3238, "amount": 3600, "estimate": false,
+      "payments": [{"amount": 3600, "date": "2026-11-23", "time": "", "method": "QR พร้อมเพย์", "ref": "", "note": "", "slips": []}],
+      "confirmed": true, "received": false,
+      "note": "⚠️ ยอดรวม Shopee ฿6,677 สูงกว่าราคาในตะกร้า 3 ร้านนี้ (฿4,441) อยู่ ฿2,236 ยังไม่ได้เช็กว่าเป็นราคาก่อนลด หรือมีของอื่น (เช่น Nature Taste) รวมอยู่ · ส่วนลดสินค้า −฿2,188 · ส่วนลดโค้ด −฿1,050 · แอปมือถือลดมากกว่าในคอม"
+    },
+    {
+      "id": "open-homglai",
+      "supplier": "homglai", "round": "เปิดร้าน พ.ย. 69", "orderDate": "2026-11-23", "ref": "",
+      "lines": [
+        {"item": "it36", "packs": 4, "price": 670},
+        {"item": "it17", "packs": 15, "price": null}
+      ],
+      "shipping": 0, "discount": 0, "amount": 3280, "estimate": true,
+      "payments": [], "confirmed": false, "received": false,
+      "note": "กำลังติดต่อ LINE OA · ยังไม่ได้เช็กราคาบุก (ยอดประมาณ)"
+    },
+    {
+      "id": "open-synova",
+      "supplier": "synova", "round": "เปิดร้าน พ.ย. 69", "orderDate": "2026-11-23", "ref": "",
+      "lines": [{"item": "it19", "packs": 7, "price": 278}],
+      "shipping": 0, "discount": 0, "amount": 1946, "estimate": true,
+      "payments": [], "confirmed": false, "received": false,
+      "note": "กำลังติดต่อ LINE OA (ยอดประมาณ ยังไม่รวมค่าส่ง)"
+    },
+    {
+      "id": "open-naturetaste",
+      "supplier": "naturetaste", "round": "เปิดร้าน พ.ย. 69", "orderDate": "2026-11-23", "ref": "",
+      "lines": [{"item": "it34", "packs": 4, "price": 175}],
+      "shipping": 0, "discount": 0, "amount": 700, "estimate": true,
+      "payments": [], "confirmed": false, "received": false,
+      "note": "Shopee · ยังไม่จ่าย"
+    }
+  ]
+}

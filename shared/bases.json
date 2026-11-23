@@ -1,5 +1,5 @@
 {
-  "_note": "เบสชา 8 ตัว · ระบบชงเดียวกันทุกเบส ใบ:เบส:น้ำแข็งน็อค = 1:25:7.5 · ที่มา: KachaMD/CLAUDE.md + KACHA-ข้อมูลร้าน v1.0 (2026-10-29)",
+  "_note": "เบสชา 8 ตัว · ระบบชงเดียวกันทุกเบส ใบ:เบส:น้ำแข็งน็อค = 1:25:7.5 · batch_leaves = ใบชา (ก.) ต่อเบส 1 ล็อต manual (1,000 มล.) ใช้ id จาก ingredients.json · อัปเดต 2026-11-23 จากสรุปแชทสั่งของเปิดร้าน + สูตร v3.37",
   "brew": {
     "ratio": "1:25:7.5",
     "manual": {
@@ -36,34 +36,45 @@
       "id": "dahongpao",
       "name": "ต้าหงเผา",
       "kind": "อู่หลงหินคั่ว",
-      "leaf": "Chaiwala(ต้าหงเผา)",
+      "leaf": "Chaiwala ซิ่นหยาง ลี่ลี่เซียง ต้าหงเผา",
       "temp_c": 95,
       "min": 6,
       "press_bag": true,
       "status": "ใช้ได้",
-      "color": "#5a3a22"
+      "color": "#5a3a22",
+      "batch_leaves": {
+        "it08": 40
+      }
     },
     {
       "id": "tieguanyin",
       "name": "ทิกวนอิม",
       "kind": "อู่หลงใบม้วน",
-      "leaf": "mengyuan",
+      "leaf": "Overlord Yushan Lanyin Tieguanyin (kaishi297.th)",
       "temp_c": 95,
       "min": 6,
       "press_bag": true,
       "status": "ใช้ได้",
-      "color": "#a8a046"
+      "color": "#a8a046",
+      "batch_leaves": {
+        "it37": 40
+      }
     },
     {
       "id": "camellia",
       "name": "คามิเลีย",
       "kind": "อู่หลง",
-      "leaf": "Chaiwala(คามิเลีย)",
+      "leaf": "Chaiwala 30 ก. + Yiwulong 10 ก.",
       "temp_c": 88,
       "min": 5,
       "press_bag": false,
       "status": "ปรับได้หลังชิม",
-      "color": "#e9a77a"
+      "color": "#e9a77a",
+      "batch_leaves": {
+        "it05": 30,
+        "it04": 10
+      },
+      "recipe_set": "2026-11-23 (Boon)"
     },
     {
       "id": "khaohom",
@@ -74,29 +85,41 @@
       "min": 5,
       "press_bag": false,
       "status": "ปรับได้หลังชิม",
-      "color": "#e8dcc0"
+      "color": "#e8dcc0",
+      "batch_leaves": {
+        "it03": 40
+      }
     },
     {
       "id": "jasmine01",
-      "name": "มะลิ 01",
+      "name": "มะลิหอม",
       "kind": "ชาเขียว",
       "leaf": "Sisli 20 ก. + TEA(มะลิ) 20 ก.",
       "temp_c": 70,
       "min": 5,
       "press_bag": false,
       "status": "ล็อกแล้ว",
-      "color": "#b5d29a"
+      "color": "#b5d29a",
+      "old_name": "มะลิ 01",
+      "batch_leaves": {
+        "it01": 20,
+        "it02": 20
+      }
     },
     {
       "id": "jasmine02",
-      "name": "มะลิ 02",
+      "name": "มะลิองุ่น",
       "kind": "ชาเขียว",
-      "leaf": "Chaiwala(มะลิ)",
+      "leaf": "Chaiwala ซิ่นหยาง ลี่ลี่เซียง เขียวมะลิ",
       "temp_c": 70,
       "min": 5,
       "press_bag": false,
       "status": "ใช้ได้ · ใช้กับองุ่นปั่น",
-      "color": "#c4dca8"
+      "color": "#c4dca8",
+      "old_name": "มะลิ 02",
+      "batch_leaves": {
+        "it38": 40
+      }
     },
     {
       "id": "osmanthus",
@@ -108,7 +131,10 @@
       "press_bag": false,
       "status": "°C ยังไม่ยืนยัน",
       "color": "#d9a62e",
-      "rule": "ไม่ใส่แยม/ไซรัปหอมหมื่นลี้"
+      "rule": "ไม่ใส่แยม/ไซรัปหอมหมื่นลี้",
+      "batch_leaves": {
+        "it36": 40
+      }
     },
     {
       "id": "gardenia",
@@ -120,7 +146,8 @@
       "press_bag": false,
       "status": "กำลังทดสอบ (ยังไม่ขาย)",
       "color": "#f1ead6",
-      "on_sale": false
+      "on_sale": false,
+      "batch_leaves": {}
     }
   ]
 }

@@ -1,0 +1,83 @@
+{
+  "_note": "ร้านที่สั่งของ · lead_days = กี่วันของถึงหลังสั่ง · cycle_days = สั่งทุกกี่วัน (ใช้คิดว่าแต่ละรอบต้องซื้อเท่าไร) · ตัวเลขทั้งหมดเป็นค่าประมาณ ยังไม่ยืนยัน (2026-11-23)",
+  "default": {
+    "lead_days": 3,
+    "cycle_days": 14
+  },
+  "suppliers": [
+    {
+      "id": "chaiwala",
+      "name": "Chaiwala",
+      "channel": "เว็บ lnw.me/chaiwala",
+      "pay": "โอนกสิกรไทย บจก. ไชยวาลา",
+      "lead_days": 3,
+      "cycle_days": 30,
+      "note": "ส่ง EMS"
+    },
+    {
+      "id": "tea_corp",
+      "name": "TEA Corporation",
+      "channel": "Shopee",
+      "pay": "Shopee (QR พร้อมเพย์)",
+      "lead_days": 4,
+      "cycle_days": 30
+    },
+    {
+      "id": "yiwulong",
+      "name": "Yiwulong",
+      "channel": "Shopee",
+      "pay": "Shopee (QR พร้อมเพย์)",
+      "lead_days": 4,
+      "cycle_days": 30
+    },
+    {
+      "id": "kaishi",
+      "name": "kaishi297.th",
+      "channel": "Shopee",
+      "pay": "Shopee (QR พร้อมเพย์)",
+      "lead_days": 4,
+      "cycle_days": 30
+    },
+    {
+      "id": "naturetaste",
+      "name": "Nature Taste",
+      "channel": "Shopee",
+      "pay": "Shopee (QR พร้อมเพย์)",
+      "lead_days": 4,
+      "cycle_days": 30
+    },
+    {
+      "id": "homglai",
+      "name": "หอมไกล ชลบุรี",
+      "channel": "LINE Shopping / LINE OA",
+      "pay": "โอน",
+      "lead_days": 2,
+      "cycle_days": 30
+    },
+    {
+      "id": "synova",
+      "name": "SYNOVA",
+      "channel": "LINE OA",
+      "pay": "โอน",
+      "lead_days": 3,
+      "cycle_days": 14
+    },
+    {
+      "id": "makro",
+      "name": "Makro",
+      "channel": "หน้าร้าน / แอป Makro",
+      "pay": "เงินสด / บัตร / โอน",
+      "lead_days": 0,
+      "cycle_days": 3,
+      "note": "ของแช่เย็นรอตู้เย็นร้าน"
+    },
+    {
+      "id": "market",
+      "name": "ตลาด",
+      "channel": "ตลาดสด",
+      "pay": "เงินสด",
+      "lead_days": 0,
+      "cycle_days": 2
+    }
+  ]
+}

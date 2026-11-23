@@ -1,5 +1,5 @@
 {
-  "_note": "เมนู ราคา สูตรผสม ต้นทุน · ที่มา: KACHA-ข้อมูลร้าน v1.0 (2026-10-29)",
+  "_note": "เมนู ราคา สูตรผสม ต้นทุน · ที่มา: KACHA-ข้อมูลร้าน v1.0 (2026-10-29) · อัปเดต 2026-11-23 จากสรุปแชทสั่งของเปิดร้าน + สูตร v3.37 · items = ของที่ใช้ต่อแก้ว (id และหน่วยตาม ingredients.json) ไม่รวมใบชา (ดู bases.json batch_leaves)",
   "prices_thb": {
     "clear_tea": {
       "store": 59,
@@ -13,20 +13,141 @@
     "cream_cheese_top": null
   },
   "delivery_gp_pct": 33,
+  "menus": [
+    {
+      "id": "grape",
+      "name": "ชาองุ่นปั่น",
+      "kind": "grape_blend",
+      "base": "jasmine02",
+      "grade": "A"
+    },
+    {
+      "id": "dahongpao_milk",
+      "name": "ต้าหงเผานม",
+      "kind": "milk_tea",
+      "base": "dahongpao",
+      "grade": "A"
+    },
+    {
+      "id": "jasmine_milk",
+      "name": "มะลินม",
+      "kind": "milk_tea",
+      "base": "jasmine01",
+      "grade": "A"
+    },
+    {
+      "id": "camellia_clear",
+      "name": "คามิเลียใส",
+      "kind": "clear_tea",
+      "base": "camellia",
+      "grade": "B"
+    },
+    {
+      "id": "camellia_milk",
+      "name": "คามิเลียนม",
+      "kind": "milk_tea",
+      "base": "camellia",
+      "grade": "B"
+    },
+    {
+      "id": "jasmine_clear",
+      "name": "มะลิใส",
+      "kind": "clear_tea",
+      "base": "jasmine01",
+      "grade": "B"
+    },
+    {
+      "id": "osmanthus_clear",
+      "name": "หอมหมื่นลี้ใส",
+      "kind": "clear_tea",
+      "base": "osmanthus",
+      "grade": "B"
+    },
+    {
+      "id": "khaohom_clear",
+      "name": "ข้าวหอมใส",
+      "kind": "clear_tea",
+      "base": "khaohom",
+      "grade": "B"
+    },
+    {
+      "id": "khaohom_milk",
+      "name": "ข้าวหอมนม",
+      "kind": "milk_tea",
+      "base": "khaohom",
+      "grade": "B"
+    },
+    {
+      "id": "osmanthus_milk",
+      "name": "หอมหมื่นลี้นม",
+      "kind": "milk_tea",
+      "base": "osmanthus",
+      "grade": "C"
+    },
+    {
+      "id": "tieguanyin_milk",
+      "name": "ทิกวนอิมนม",
+      "kind": "milk_tea",
+      "base": "tieguanyin",
+      "grade": "C"
+    },
+    {
+      "id": "dahongpao_clear",
+      "name": "ต้าหงเผาใส",
+      "kind": "clear_tea",
+      "base": "dahongpao",
+      "grade": "D"
+    },
+    {
+      "id": "tieguanyin_clear",
+      "name": "ทิกวนอิมใส",
+      "kind": "clear_tea",
+      "base": "tieguanyin",
+      "grade": "D"
+    }
+  ],
+  "grade_weights": {
+    "A": 4,
+    "B": 3,
+    "C": 2,
+    "D": 1
+  },
+  "grade_note": "เกรดคาดขายดี Boon ตั้ง 2026-11-23 · คะแนน A4 B3 C2 D1 Claude ตั้ง แก้ได้",
+  "plan_default": {
+    "cups_per_day": 70,
+    "cups_presets": [
+      70,
+      150,
+      230
+    ],
+    "mode": "grade",
+    "cheese_top_share": 0.2,
+    "cheese_top_share_confirmed": false,
+    "safety_days": 2,
+    "_note": "70 แก้ว/วัน = ขั้นต่ำไม่ขาดทุน (ใช้คิดยอดสั่งเดือนเปิดร้าน) · สัดส่วนแก้วที่ใส่ท็อปครีมชีส 20% เป็นค่าสมมติ"
+  },
   "mix": {
     "clear_tea": {
       "name": "ชาใส",
       "base_ml": 200,
       "water_ml": 80,
-      "syrup_ml": 25,
-      "method": "เชค + น้ำแข็ง"
+      "syrup_ml": 30,
+      "method": "เชค + น้ำแข็ง",
+      "syrup_confirmed": false,
+      "_syrup_note": "สูตร v3.37 บอกว่าไซรัปชาใสคิดตามกลุ่มเบส แต่ยังไม่มีตัวเลขแยก · ใช้มิตรผล 30 มล. ไปก่อน",
+      "items": {
+        "it22": 30
+      }
     },
     "milk_tea": {
       "name": "ชานม",
       "base_ml": 200,
       "milk_mix_ml": 100,
-      "syrup_ml": 25,
-      "method": "เชค + น้ำแข็ง"
+      "syrup_ml": 30,
+      "method": "เชค + น้ำแข็ง",
+      "items": {
+        "it22": 30
+      }
     },
     "grape_blend": {
       "name": "ชาองุ่นปั่น (ม่วง/เขียว)",
@@ -38,72 +159,112 @@
       "ice_g": 300,
       "top": {
         "peeled_grape_g": 50,
-        "konjac_pearl_g": 60,
+        "konjac_pearl_g": 50,
         "cream_cheese_g": 50
-      }
+      },
+      "_konjac_note": "สรุปแชท 23 พ.ย.: เนื้อบุก ~400 ก./ถุง ≈ 8 แก้ว/ถุง → 50 ก./แก้ว (เดิม 60 ก.) ยังไม่ยืนยัน",
+      "items": {
+        "it19": 35,
+        "it22": 35,
+        "it34": 15,
+        "it18": 50,
+        "it17": 50
+      },
+      "cream_cheese_cups": 1
     },
-    "cream_cheese_top_g": 50
+    "cream_cheese_top_g": 50,
+    "packaging_per_cup": {
+      "it26": 1,
+      "it30": 1
+    },
+    "_packaging_note": "ฟิล์มซีลใช้ทุกเมนู (ไม่ใช้ฝาโดม) แต่ยังไม่รู้ว่า 1 ม้วนซีลได้กี่แก้ว จึงยังไม่คิดอัตโนมัติ"
   },
   "preps": {
     "milk_mix": {
       "name": "นมผสม",
       "ratio": "นมสด Meiji : นมข้นจืด Carnation : ครีมเทียม = 6:3:1",
-      "shelf_life_days": "1-2"
+      "shelf_life_days": "1-2",
+      "per_ml": {
+        "it10": 0.6,
+        "it11": 0.3,
+        "it13": 0.1
+      },
+      "_per_ml_note": "6:3:1 → นมผสม 1 มล. = Meiji 0.6 มล. + Carnation 0.3 มล. + Coffee-mate 0.1 ก."
     },
     "cream_cheese_foam": {
       "name": "ครีมชีสโฟม",
       "anchor_cream_cheese_g": 150,
-      "millac_gold_whip_ml": 150,
       "meiji_milk_ml": 300,
       "teapot_condensed_ml": 60,
-      "pink_salt_g": 2,
+      "pink_salt_g": 3.5,
       "yield_ml": 660,
       "cups": 13,
       "shelf_life_days": 1,
       "confirmed": "2026-11-10",
-      "method": "ครีมชีส+นมสด+นมข้นหวาน+เกลือ ปั่นเหลว → ตีวิป 3 นาที → รวมตี 1.30 นาที"
+      "method": "ครีมชีส+นมสด+นมข้นหวาน+เกลือ ปั่นเหลว → ตีวิป 3 นาที → รวมตี 1.30 นาที",
+      "millac_gold_whip_ml": 150,
+      "_salt_note": "สรุปแชท 23 พ.ย. ใช้เกลือชมพู 3.5 ก./ล็อต (เดิม 2 ก.)",
+      "batch_items": {
+        "it14": 150,
+        "it39": 150,
+        "it10": 300,
+        "it16": 78,
+        "it24": 3.5
+      },
+      "_batch_note": "นมข้นหวาน Teapot 60 มล. ≈ 78 ก. (คิดความหนาแน่น ~1.3) ยังไม่ได้ชั่งจริง"
     }
   },
   "cost_per_cup_thb": {
+    "_note": "สูตร v3.37 (2026-11-23) ราคาใบจริงจากตะกร้า · ชาใส = ค่าใบ + ไซรัปตามกลุ่ม + ฿0.3 · ชานม = ค่าใบ + ไซรัป 30 มล. ฿1.41 + ฿0.3 + นมผสม ฿6.25",
     "_excludes": "แก้ว+ฝา+หลอด 5.8 · ถุง 4 · ครีมชีส 50 ก. 7.74",
-    "tieguanyin": [
-      6.8,
-      14.3
-    ],
-    "jasmine01": [
-      7.1,
-      14.6
-    ],
-    "camellia": [
-      7.4,
-      14.9
-    ],
-    "dahongpao": [
-      7.7,
-      15.2
-    ],
-    "jasmine02": [
-      7.7,
-      15.2
-    ],
-    "khaohom": [
-      7.7,
-      15.2
-    ],
-    "osmanthus": [
-      12.2,
-      19.7
-    ],
     "_cols": [
+      "ค่าใบ 8 ก.",
       "ชาใส",
       "ชานม"
+    ],
+    "tieguanyin": [
+      5.36,
+      7.3,
+      13.3
+    ],
+    "jasmine01": [
+      5.16,
+      7.3,
+      13.1
+    ],
+    "camellia": [
+      5.84,
+      7.6,
+      13.8
+    ],
+    "khaohom": [
+      5.58,
+      7.3,
+      13.5
+    ],
+    "dahongpao": [
+      6.24,
+      8.2,
+      14.2
+    ],
+    "jasmine02": [
+      6.24,
+      8.2,
+      14.2
+    ],
+    "osmanthus": [
+      10.72,
+      12.4,
+      18.7
     ],
     "grape_blend": {
       "no_bag": 44.46,
       "with_bag": 48.46
-    }
+    },
+    "_grape_note": "ต้นทุนองุ่นปั่นยังเป็นตัวเลขชุด v1.0 (2026-10-29)"
   },
   "expected_cups_per_day": 230,
+  "break_even_cups_per_day": 70,
   "not_doing": [
     "กาแฟ",
     "มัทฉะ",

@@ -1,0 +1,1120 @@
+<meta name="claude:viewport-fit-sides" content="cover">
+<title>วัตถุดิบ KACHA</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<style>
+  /* layout: แอปหลังบ้านแบบแท็บ — มือถือใช้แถบแท็บล่าง, จอใหญ่ใช้แท็บบนหัว · สรุปก่อน รายละเอียดทีหลัง
+     ใช้โทนเดียวกับแอปกองกลาง (กระดาษ + เขียวชา) เพิ่มสีสถานะ: แดง=หมด/ค้างจ่าย, อำพัน=ใกล้สั่ง */
+  :root {
+    --paper: #f7f6f1; --card: #ffffff; --ink: #1f251e; --muted: #687064; --line: #e4e2d8; --soft: #f0efe8;
+    --tea: #1f7a54; --tea-soft: #e2efe6; --out: #b4472e; --out-soft: #f6e5df;
+    --warn: #9a6408; --warn-soft: #f6ecd4; --info: #2d5f8a; --info-soft: #e3ecf4;
+    --shadow: 0 1px 2px rgba(20,30,20,.05);
+    --sans: 'IBM Plex Sans Thai', 'Noto Sans Thai', system-ui, sans-serif;
+    --mono: 'IBM Plex Mono', ui-monospace, Menlo, monospace;
+    color-scheme: light;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --paper: #13130f; --card: #1c1c17; --ink: #ebe8dd; --muted: #9c9d90; --line: #313028; --soft: #24241d;
+      --tea: #52c08b; --tea-soft: #1a2c22; --out: #e57f66; --out-soft: #2e1f1a; --warn: #e3b25a; --warn-soft: #2e2615;
+      --info: #7fb2e0; --info-soft: #1a2633; --shadow: none; color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"] {
+    --paper: #13130f; --card: #1c1c17; --ink: #ebe8dd; --muted: #9c9d90; --line: #313028; --soft: #24241d;
+    --tea: #52c08b; --tea-soft: #1a2c22; --out: #e57f66; --out-soft: #2e1f1a; --warn: #e3b25a; --warn-soft: #2e2615;
+    --info: #7fb2e0; --info-soft: #1a2633; --shadow: none; color-scheme: dark;
+  }
+  * { box-sizing: border-box; }
+  [hidden] { display: none !important; }
+  html, body { background: var(--paper); }
+  body { margin: 0; color: var(--ink); font-family: var(--sans); font-size: 15px; line-height: 1.5; -webkit-font-smoothing: antialiased; }
+  body.noscroll { overflow: hidden; }
+  .num { font-family: var(--mono); font-variant-numeric: tabular-nums; }
+  button, input, select, textarea { font: inherit; color: inherit; }
+  :focus-visible { outline: 2px solid var(--tea); outline-offset: 2px; }
+
+  /* ---- หัว + แท็บ ---- */
+  body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 30; background: var(--paper); }
+  .top { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 20; background: var(--paper); border-bottom: 1px solid var(--line); }
+  .top-in { max-width: 1120px; margin: 0 auto; display: flex; align-items: center; gap: 14px;
+    padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 10px; }
+  .brand { font-weight: 700; letter-spacing: .6px; display: flex; align-items: baseline; gap: 8px; white-space: nowrap; }
+  .brand small { font-weight: 400; color: var(--muted); letter-spacing: 0; }
+  .topnav { display: none; gap: 4px; margin-left: 12px; }
+  .topnav a { text-decoration: none; color: var(--muted); padding: 7px 12px; border-radius: 999px; font-weight: 500; font-size: 14px; position: relative; }
+  .topnav a.on { background: var(--tea-soft); color: var(--tea); }
+  .spacer { flex: 1; }
+  .iconbtn { border: 1px solid var(--line); background: var(--card); color: var(--muted); border-radius: 999px; padding: 5px 12px; font-size: 12px; cursor: pointer; white-space: nowrap; }
+  .badge { display: inline-block; min-width: 18px; padding: 0 5px; border-radius: 999px; background: var(--out); color: #fff; font-size: 11px; line-height: 18px; text-align: center; font-family: var(--mono); margin-left: 4px; }
+  .tabbar { position: fixed; left: 0; right: 0; bottom: 0; z-index: 20; background: var(--card); border-top: 1px solid var(--line);
+    display: grid; grid-template-columns: repeat(5, 1fr);
+    padding-bottom: env(safe-area-inset-bottom, 0px); padding-left: env(safe-area-inset-left, 0px); padding-right: env(safe-area-inset-right, 0px); }
+  .tabbar a { text-decoration: none; color: var(--muted); display: flex; flex-direction: column; align-items: center; gap: 1px; padding: 8px 2px 7px; font-size: 11.5px; font-weight: 500; position: relative; }
+  .tabbar a .ic { font-size: 19px; line-height: 1.1; filter: grayscale(1); opacity: .75; }
+  .tabbar a.on { color: var(--tea); }
+  .tabbar a.on .ic { filter: none; opacity: 1; }
+  .tabbar .badge { position: absolute; top: 3px; left: 54%; }
+  @media (min-width: 860px) { .topnav { display: flex; } .tabbar { display: none; } }
+
+  .wrap { max-width: 1120px; margin: 0 auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
+    padding-block: 18px calc(88px + env(safe-area-inset-bottom, 0px)); display: flex; flex-direction: column; gap: 16px; }
+  @media (min-width: 860px) { .wrap { padding-block: 22px 56px; } }
+  .view { display: flex; flex-direction: column; gap: 16px; min-width: 0; }
+  h2 { font-size: 20px; margin: 0; letter-spacing: .2px; text-wrap: balance; }
+  h3 { font-size: 15.5px; margin: 0; }
+  .sub { color: var(--muted); font-size: 13px; }
+  .row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+  .between { justify-content: space-between; }
+
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 16px; box-shadow: var(--shadow); min-width: 0; }
+  .card > h3 { margin-bottom: 10px; }
+  .grid2 { display: grid; gap: 16px; grid-template-columns: 1fr; }
+  @media (min-width: 860px) { .grid2 { grid-template-columns: 1fr 1fr; align-items: start; } }
+
+  /* ---- ตัวเลขสรุป ---- */
+  .kpis { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+  @media (min-width: 860px) { .kpis { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+  .kpi { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 12px 14px; text-decoration: none; color: inherit; display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+  .kpi .k { font-size: 12.5px; color: var(--muted); }
+  .kpi .v { font-family: var(--mono); font-size: clamp(22px, 6vw, 28px); font-weight: 600; line-height: 1.2; font-variant-numeric: tabular-nums; }
+  .kpi .s { font-size: 12px; color: var(--muted); }
+  .kpi.red .v { color: var(--out); } .kpi.amber .v { color: var(--warn); } .kpi.green .v { color: var(--tea); }
+
+  /* ---- ชิปสถานะ ---- */
+  .chip { display: inline-flex; align-items: center; gap: 4px; padding: 1px 9px; border-radius: 999px; font-size: 12px; font-weight: 600; white-space: nowrap; background: var(--soft); color: var(--muted); }
+  .chip.red { background: var(--out-soft); color: var(--out); }
+  .chip.amber { background: var(--warn-soft); color: var(--warn); }
+  .chip.green { background: var(--tea-soft); color: var(--tea); }
+  .chip.blue { background: var(--info-soft); color: var(--info); }
+  .tag { display: inline-block; font-size: 11px; padding: 0 7px; border-radius: 6px; border: 1px dashed var(--warn); color: var(--warn); white-space: nowrap; }
+
+  /* ---- ปุ่ม ---- */
+  .btn { border: none; border-radius: 12px; padding: 11px 16px; font-weight: 600; cursor: pointer; background: var(--tea); color: #fff; min-height: 44px; }
+  .btn.ghost { background: transparent; color: var(--ink); border: 1px solid var(--line); font-weight: 500; }
+  .btn.red { background: var(--out); }
+  .btn.sm { padding: 6px 12px; min-height: 34px; font-size: 13px; border-radius: 10px; }
+  .btn[disabled] { opacity: .5; cursor: not-allowed; }
+  .btn:active { transform: translateY(1px); }
+  .linkbtn { border: none; background: none; color: var(--tea); cursor: pointer; padding: 4px 0; font-weight: 500; font-size: 13px; }
+  .seg { display: inline-flex; background: var(--soft); border-radius: 11px; padding: 3px; gap: 2px; flex-wrap: wrap; }
+  .seg button { border: none; background: transparent; padding: 6px 12px; border-radius: 9px; cursor: pointer; color: var(--muted); font-size: 13px; font-weight: 500; }
+  .seg button.on { background: var(--card); color: var(--ink); box-shadow: var(--shadow); }
+  .chips { display: flex; gap: 6px; flex-wrap: wrap; }
+  .chips button { border: 1px solid var(--line); background: var(--card); color: var(--muted); padding: 5px 12px; border-radius: 999px; cursor: pointer; font-size: 13px; }
+  .chips button.on { border-color: var(--tea); background: var(--tea-soft); color: var(--tea); font-weight: 600; }
+
+  /* ---- ฟอร์ม ---- */
+  label.f { display: flex; flex-direction: column; gap: 4px; font-size: 12.5px; color: var(--muted); font-weight: 500; min-width: 0; }
+  input[type=text], input[type=number], input[type=date], input[type=time], input[type=search], select, textarea {
+    padding: 10px 12px; border: 1px solid var(--line); border-radius: 10px; background: var(--paper); width: 100%; min-height: 44px; font-size: 16px; color: var(--ink); }
+  textarea { min-height: 70px; resize: vertical; line-height: 1.45; }
+  input:focus, select:focus, textarea:focus { outline: 2px solid var(--tea); outline-offset: -1px; }
+  .fgrid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .fgrid .full { grid-column: 1 / -1; }
+  @media (max-width: 420px) { .fgrid { grid-template-columns: 1fr; } }
+  .check { display: flex; align-items: center; gap: 8px; font-size: 14px; color: var(--ink); cursor: pointer; }
+  .check input { width: 20px; height: 20px; accent-color: var(--tea); }
+  .hint { font-size: 12px; color: var(--muted); }
+  .pick { position: relative; display: inline-flex; align-items: center; gap: 6px; border: 1px dashed var(--line); border-radius: 10px; padding: 10px 14px; cursor: pointer; color: var(--ink); font-size: 14px; background: var(--paper); }
+  .pick input[type=file] { position: absolute; width: 1px; height: 1px; opacity: 0; overflow: hidden; pointer-events: none; }
+
+  /* ---- ตาราง / รายการ ---- */
+  .tbl-wrap { overflow-x: auto; margin: 0 -4px; }
+  table { border-collapse: collapse; width: 100%; font-size: 13.5px; }
+  th { text-align: left; font-weight: 600; color: var(--muted); font-size: 12px; padding: 6px 8px; border-bottom: 1px solid var(--line); white-space: nowrap; }
+  td { padding: 8px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  td:first-child { min-width: 132px; }
+  td.r, th.r { text-align: right; font-family: var(--mono); font-variant-numeric: tabular-nums; white-space: nowrap; }
+  tr.total td { font-weight: 600; border-bottom: none; }
+  .list { display: flex; flex-direction: column; }
+  .li { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 4px 12px; padding: 11px 2px; border-bottom: 1px solid var(--line); align-items: center; }
+  .li:last-child { border-bottom: none; }
+  .li .nm { font-weight: 500; overflow-wrap: anywhere; }
+  .li .mt { font-size: 12.5px; color: var(--muted); }
+  .li .rt { text-align: right; display: flex; flex-direction: column; align-items: flex-end; gap: 3px; }
+  .li.tap { cursor: pointer; } .li.tap:hover { background: var(--soft); }
+  .empty { text-align: center; color: var(--muted); padding: 26px 12px; font-size: 14px; }
+  .empty b { display: block; color: var(--ink); margin-bottom: 4px; }
+
+  /* ---- สต็อก ---- */
+  .stock-row { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 6px 12px; padding: 12px 2px; border-bottom: 1px solid var(--line); cursor: pointer; align-items: center; }
+  .stock-row:hover { background: var(--soft); }
+  .bar { grid-column: 1 / -1; height: 6px; border-radius: 99px; background: var(--soft); overflow: hidden; }
+  .bar i { display: block; height: 100%; border-radius: 99px; background: var(--tea); }
+  .bar i.amber { background: var(--warn); } .bar i.red { background: var(--out); }
+  .qty { font-family: var(--mono); font-weight: 600; font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .qty small { font-weight: 400; color: var(--muted); }
+  .cat-h { font-size: 12px; color: var(--muted); font-weight: 600; letter-spacing: .5px; padding: 14px 2px 2px; }
+
+  /* ---- บิล ---- */
+  .bill { border: 1px solid var(--line); border-radius: 14px; background: var(--card); overflow: hidden; }
+  .bill-h { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 4px 12px; padding: 14px 16px; cursor: pointer; }
+  .bill-h .amt { font-family: var(--mono); font-weight: 600; font-size: 18px; text-align: right; white-space: nowrap; }
+  .bill-b { border-top: 1px solid var(--line); padding: 12px 16px 16px; display: flex; flex-direction: column; gap: 12px; }
+  .bill.paid .bill-h .amt { color: var(--muted); }
+  .pay { background: var(--soft); border-radius: 10px; padding: 10px 12px; display: flex; flex-direction: column; gap: 6px; font-size: 13.5px; }
+  .thumbs { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+  .thumb { width: 64px; height: 64px; object-fit: cover; border-radius: 8px; border: 1px solid var(--line); cursor: zoom-in; background: var(--card); }
+  .pdf { width: 64px; height: 64px; border-radius: 8px; border: 1px solid var(--line); display: grid; place-items: center; font-size: 12px; color: var(--muted); text-decoration: none; background: var(--card); }
+  .add-slip { display: inline-flex; align-items: center; height: 64px; padding: 0 12px; border: 1px dashed var(--line); border-radius: 8px; color: var(--muted); font-size: 12.5px; cursor: pointer; }
+  .add-slip:hover { color: var(--tea); border-color: var(--tea); }
+  .warnbox { background: var(--warn-soft); color: var(--warn); border-radius: 10px; padding: 8px 12px; font-size: 13px; }
+  .round-sum { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+  .round-sum > div { border: 1px solid var(--line); border-radius: 12px; padding: 8px 12px; background: var(--card); min-width: 0; }
+  .round-sum span { font-size: 12px; color: var(--muted); display: block; }
+  .round-sum b { font-family: var(--mono); font-size: 17px; }
+
+  /* ---- ยอดขาย ---- */
+  .menu-in { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 8px 12px; align-items: center; padding: 8px 0; border-bottom: 1px solid var(--line); }
+  .step { display: flex; align-items: center; gap: 4px; }
+  .step button { width: 44px; height: 44px; border-radius: 12px; border: 1px solid var(--line); background: var(--paper); font-size: 20px; cursor: pointer; color: var(--ink); }
+  .step input { width: 68px; text-align: center; font-family: var(--mono); padding: 8px 4px; }
+  .grade { display: inline-grid; place-items: center; width: 22px; height: 22px; border-radius: 6px; font-size: 12px; font-weight: 700; background: var(--soft); color: var(--muted); margin-right: 6px; font-family: var(--mono); }
+  .grade.A { background: var(--tea-soft); color: var(--tea); } .grade.B { background: var(--info-soft); color: var(--info); }
+  .grade.C { background: var(--warn-soft); color: var(--warn); }
+  .sticky-save { position: sticky; bottom: calc(64px + env(safe-area-inset-bottom, 0px)); background: var(--card); padding: 10px 0 2px; display: flex; gap: 10px; align-items: center; }
+  @media (min-width: 860px) { .sticky-save { bottom: 0; } }
+
+  /* ---- sheet (ฟอร์มลอย) ---- */
+  .sheet { position: fixed; inset: 0; z-index: 40; background: rgba(10,14,10,.45); display: flex; align-items: flex-end; justify-content: center; }
+  .sheet-in { background: var(--card); width: 100%; max-width: 620px; max-height: calc(100% - 24px - env(safe-area-inset-top, 0px)); overflow: auto; border-radius: 18px 18px 0 0;
+    padding: 16px max(16px, env(safe-area-inset-right, 0px)) calc(20px + env(safe-area-inset-bottom, 0px)) max(16px, env(safe-area-inset-left, 0px)); display: flex; flex-direction: column; gap: 14px; }
+  @media (min-width: 700px) { .sheet { align-items: center; } .sheet-in { border-radius: 18px; max-height: 90%; padding: 20px 22px; } }
+  .sheet-h { display: flex; align-items: center; justify-content: space-between; gap: 10px; position: sticky; top: -16px; background: var(--card); padding-top: 2px; z-index: 1; }
+  .sheet-h h3 { font-size: 17px; }
+  .x { border: none; background: var(--soft); width: 36px; height: 36px; border-radius: 50%; cursor: pointer; font-size: 16px; color: var(--muted); flex-shrink: 0; }
+  .line-ed { display: grid; grid-template-columns: minmax(0, 1fr) 76px 92px 36px; gap: 6px; align-items: end; }
+  .line-ed .x { width: 36px; height: 44px; border-radius: 10px; }
+  @media (max-width: 480px) { .line-ed { grid-template-columns: 1fr 1fr 36px; } .line-ed .li-item { grid-column: 1 / -1; } }
+  .actions { display: flex; gap: 10px; flex-wrap: wrap; }
+  .actions .btn { flex: 1; }
+
+  .lightbox { position: fixed; inset: 0; z-index: 50; background: rgba(0,0,0,.88); display: flex; align-items: center; justify-content: center; cursor: zoom-out;
+    padding: calc(16px + env(safe-area-inset-top, 0px)) max(16px, env(safe-area-inset-right, 0px)) calc(16px + env(safe-area-inset-bottom, 0px)) max(16px, env(safe-area-inset-left, 0px)); }
+  .lightbox img { max-width: 100%; max-height: 100%; border-radius: 8px; }
+  .toast { position: fixed; left: 50%; transform: translateX(-50%); z-index: 60; bottom: calc(80px + env(safe-area-inset-bottom, 0px)); max-width: calc(100% - 32px);
+    background: var(--ink); color: var(--paper); padding: 10px 16px; border-radius: 999px; font-size: 13.5px; box-shadow: 0 4px 16px rgba(0,0,0,.2); }
+  .banner { background: var(--out-soft); color: var(--out); border-radius: 10px; padding: 10px 14px; font-size: 13.5px; }
+  .note { font-size: 12.5px; color: var(--muted); white-space: pre-wrap; overflow-wrap: anywhere; }
+  details summary { cursor: pointer; color: var(--muted); font-size: 13px; }
+  @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+
+<header class="top">
+  <div class="top-in">
+    <div class="brand">KACHA <small>วัตถุดิบ · สต็อก · บิล</small></div>
+    <nav class="topnav" id="topnav"></nav>
+    <div class="spacer"></div>
+    <button class="iconbtn" id="themeBtn" type="button">โหมดสี</button>
+  </div>
+</header>
+
+<main class="wrap">
+  <div id="banner" class="banner" hidden></div>
+  <section class="view" id="v-home"></section>
+  <section class="view" id="v-stock" hidden></section>
+  <section class="view" id="v-buy" hidden></section>
+  <section class="view" id="v-bills" hidden></section>
+  <section class="view" id="v-sales" hidden></section>
+</main>
+
+<nav class="tabbar" id="tabbar"></nav>
+
+<div class="sheet" id="sheet" hidden>
+  <div class="sheet-in" role="dialog" aria-modal="true" aria-labelledby="sheetTitle">
+    <div class="sheet-h"><h3 id="sheetTitle"></h3><button class="x" id="sheetX" type="button" aria-label="ปิด">✕</button></div>
+    <div id="sheetBody" style="display:flex;flex-direction:column;gap:14px"></div>
+  </div>
+</div>
+<div class="lightbox" id="lightbox" hidden><img id="lightboxImg" alt="หลักฐานการจ่ายเงิน"></div>
+<input type="file" id="addSlipIn" accept="image/*,application/pdf" multiple style="position:absolute;width:1px;height:1px;opacity:0;pointer-events:none">
+<div class="toast" id="toast" hidden></div>
+
+<script>
+(function () {
+  "use strict";
+  var $ = function (id) { return document.getElementById(id); };
+  function esc(s) { return String(s == null ? "" : s).replace(/[&<>"']/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]; }); }
+  function copy(o) { var r = {}; if (o) for (var k in o) if (Object.prototype.hasOwnProperty.call(o, k)) r[k] = o[k]; return r; }
+  function deep(o) { return JSON.parse(JSON.stringify(o == null ? null : o)); }
+  function num(v) { var n = Number(String(v == null ? "" : v).replace(/,/g, "").trim()); return isFinite(n) ? n : NaN; }
+  function fmt(n, d) { if (n == null || !isFinite(n)) return "–"; return Number(n).toLocaleString("th-TH", { maximumFractionDigits: d == null ? 0 : d, minimumFractionDigits: 0 }); }
+  function baht(n) { return n == null || !isFinite(n) ? "–" : "฿" + fmt(n, Math.abs(n) < 100 && n % 1 ? 2 : 0); }
+  function today() { return new Date().toLocaleDateString("en-CA", { timeZone: "Asia/Bangkok" }); }
+  function nowTime() { return new Date().toLocaleTimeString("en-GB", { timeZone: "Asia/Bangkok", hour: "2-digit", minute: "2-digit" }); }
+  function addDays(iso, n) { var d = new Date(iso + "T00:00:00Z"); d.setUTCDate(d.getUTCDate() + n); return d.toISOString().slice(0, 10); }
+  function diffDays(a, b) { return Math.round((new Date(b + "T00:00:00Z") - new Date(a + "T00:00:00Z")) / 864e5); }
+  var TM = ["ม.ค.", "ก.พ.", "มี.ค.", "เม.ย.", "พ.ค.", "มิ.ย.", "ก.ค.", "ส.ค.", "ก.ย.", "ต.ค.", "พ.ย.", "ธ.ค."];
+  function thDate(iso, withYear) { if (!iso) return ""; var p = iso.split("-"); if (p.length !== 3) return iso; return Number(p[2]) + " " + TM[Number(p[1]) - 1] + (withYear ? " " + String(Number(p[0]) + 543).slice(2) : ""); }
+  function relDay(iso) { var d = diffDays(today(), iso); if (d === 0) return "วันนี้"; if (d === 1) return "พรุ่งนี้"; if (d === -1) return "เมื่อวาน"; return thDate(iso); }
+
+  // ---------- ข้อมูลกลาง (shared/) ----------
+  var SH = null, ITEMS = [], ITEM = {}, SUP = {}, SUPS = [], MENUS = [], MENU = {}, BASE = {};
+  function getJSON(p) {
+    return fetch(p).then(function (r) { if (!r.ok) throw new Error(p); return r.json(); })
+      .catch(function () { return fetch("../" + p).then(function (r) { if (!r.ok) throw new Error(p); return r.json(); }); });
+  }
+  function loadShared() {
+    return Promise.all(["bases", "menu", "ingredients", "suppliers"].map(function (n) { return getJSON("shared/" + n + ".json"); }))
+      .then(function (a) {
+        SH = { bases: a[0], menu: a[1], ing: a[2], sup: a[3] };
+        ITEMS = SH.ing.items.filter(function (x) { return x.active !== false; });
+        SH.ing.items.forEach(function (x) { ITEM[x.id] = x; });
+        SUPS = SH.sup.suppliers; SUPS.forEach(function (s) { SUP[s.id] = s; });
+        MENUS = SH.menu.menus; MENUS.forEach(function (m) { MENU[m.id] = m; });
+        SH.bases.bases.forEach(function (b) { BASE[b.id] = b; });
+      });
+  }
+  function unitPrice(id) { var it = ITEM[id]; return it && it.price_thb != null && it.packSize ? it.price_thb / it.packSize : null; }
+  function supName(id) { return id && SUP[id] ? SUP[id].name : "ยังไม่ได้เลือกร้าน"; }
+  function supOf(it) { return it.supplier && SUP[it.supplier] ? SUP[it.supplier] : null; }
+  function leadOf(it) { var s = supOf(it); return s && s.lead_days != null ? s.lead_days : SH.sup["default"].lead_days; }
+  function cycleOf(it) { if (it.cycle_days != null) return it.cycle_days; var s = supOf(it); return s && s.cycle_days != null ? s.cycle_days : SH.sup["default"].cycle_days; }
+  function qtyStr(it, q, short) {
+    if (q == null || !isFinite(q)) return "–";
+    if (it.packSize) {
+      var p = q / it.packSize;
+      return '<span class="qty">' + fmt(p, p < 10 ? 1 : 0) + " " + esc(it.packUnit || "แพ็ค") + "</span>" + (short ? "" : ' <span class="sub num">(' + fmt(q, q < 10 ? 1 : 0) + " " + esc(it.unit) + ")</span>");
+    }
+    return '<span class="qty">' + fmt(q, q < 10 ? 1 : 0) + " " + esc(it.unit) + "</span>";
+  }
+  function packWord(it) { return it.packSize ? (it.packUnit || "แพ็ค") : it.unit; }
+
+  // ---------- สถานะจาก db ----------
+  var dbNS = null, assetsNS = null, C = {};
+  var bills = [], moves = [], sales = {}, planDoc = {};
+  var loaded = { bills: false, moves: false, sales: false, settings: false }, connErr = null;
+  var view = "home", stockCat = "ทั้งหมด", stockQ = "", buyMode = "now", roundSel = null, openBill = {}, salesDate = null, salesDraft = null, calcSrc = "plan";
+
+  function P() {
+    var d = SH.menu.plan_default, p = planDoc || {};
+    return {
+      cups: p.cups != null ? p.cups : d.cups_per_day,
+      mode: p.mode || d.mode,
+      custom: p.custom || {},
+      cheese: p.cheese != null ? p.cheese : d.cheese_top_share,
+      safety: p.safety != null ? p.safety : d.safety_days,
+      round: p.round != null ? p.round : false,
+      openDate: p.openDate || "",
+      autoDeduct: p.autoDeduct != null ? p.autoDeduct : true
+    };
+  }
+
+  // ---------- คำนวณการใช้วัตถุดิบ ----------
+  function planCups(p) {
+    p = p || P();
+    var out = {};
+    if (p.mode === "custom") { MENUS.forEach(function (m) { out[m.id] = Number(p.custom[m.id]) || 0; }); return out; }
+    var w = SH.menu.grade_weights, sum = 0;
+    MENUS.forEach(function (m) { sum += p.mode === "equal" ? 1 : (w[m.grade] || 1); });
+    MENUS.forEach(function (m) { out[m.id] = p.cups * (p.mode === "equal" ? 1 : (w[m.grade] || 1)) / sum; });
+    return out;
+  }
+  // cups: {menuId: แก้ว} ของ 1 วัน → การใช้ของแต่ละรายการ (หน่วยตาม ingredients.json)
+  function usageFor(cups, opt) {
+    opt = opt || {};
+    var round = opt.round != null ? opt.round : P().round, share = opt.cheese != null ? opt.cheese : P().cheese;
+    var U = {}, BY = {}, mix = SH.menu.mix, baseMl = {}, baseBy = {}, milkBy = {}, cheeseBy = {}, milkMl = 0, cheeseCups = 0, total = 0;
+    function add(id, q, m) { if (!q || !ITEM[id]) return; U[id] = (U[id] || 0) + q; BY[id] = BY[id] || {}; BY[id][m] = (BY[id][m] || 0) + q; }
+    function spread(id, q, by, tot) { for (var m in by) if (by[m] > 0) add(id, q * by[m] / tot, m); }
+    MENUS.forEach(function (m) {
+      var n = Number(cups[m.id]) || 0; if (n <= 0) return;
+      var mx = mix[m.kind]; total += n;
+      baseMl[m.base] = (baseMl[m.base] || 0) + n * mx.base_ml;
+      baseBy[m.base] = baseBy[m.base] || {}; baseBy[m.base][m.id] = n * mx.base_ml;
+      var k; for (k in (mx.items || {})) add(k, n * mx.items[k], m.id);
+      for (k in mix.packaging_per_cup) add(k, n * mix.packaging_per_cup[k], m.id);
+      if (mx.milk_mix_ml) { milkMl += n * mx.milk_mix_ml; milkBy[m.id] = n * mx.milk_mix_ml; }
+      var ch = m.kind === "grape_blend" ? n * (mx.cream_cheese_cups || 0) : n * share;
+      if (ch > 0) { cheeseCups += ch; cheeseBy[m.id] = ch; }
+    });
+    var y = SH.bases.brew.manual.yield_ml, batches = {};
+    for (var b in baseMl) {
+      var bt = round ? Math.ceil(baseMl[b] / y - 1e-9) : baseMl[b] / y; batches[b] = bt;
+      var lv = (BASE[b] && BASE[b].batch_leaves) || {};
+      for (var id in lv) spread(id, bt * lv[id], baseBy[b], baseMl[b]);
+    }
+    var mm = SH.menu.preps.milk_mix.per_ml;
+    if (milkMl > 0) for (var i2 in mm) spread(i2, milkMl * mm[i2], milkBy, milkMl);
+    var cf = SH.menu.preps.cream_cheese_foam, cb = 0;
+    if (cheeseCups > 0) {
+      cb = round ? Math.ceil(cheeseCups / cf.cups - 1e-9) : cheeseCups / cf.cups;
+      for (var i3 in cf.batch_items) spread(i3, cb * cf.batch_items[i3], cheeseBy, cheeseCups);
+    }
+    return { U: U, BY: BY, baseMl: baseMl, batches: batches, milkMl: milkMl, cheeseCups: cheeseCups, cheeseBatches: cb, total: total };
+  }
+  function costOf(U) { var c = 0, miss = []; for (var id in U) { var up = unitPrice(id); if (up == null) miss.push(id); else c += U[id] * up; } return { cost: c, miss: miss }; }
+  function menuPrice(m) { var p = SH.menu.prices_thb[m.kind]; return p ? p.store : null; }
+
+  // ---------- สต็อก ----------
+  var M = null; // ผลคำนวณล่าสุด
+  function compute() {
+    var p = P(), t = today();
+    var plan = usageFor(planCups(p), { round: p.round });
+    var dayU = {};
+    function usageOn(d) { if (!dayU[d]) dayU[d] = usageFor(sales[d].cups || {}, { round: p.round }).U; return dayU[d]; }
+    // อัตราใช้จริง: เฉลี่ย 7 วันล่าสุดที่บันทึกยอด (ไม่นับวันนี้) ถ้ามี ≥ 3 วัน
+    var recent = Object.keys(sales).filter(function (d) { return d < t && d >= addDays(t, -7); }).sort();
+    var actual = null;
+    if (recent.length >= 3) {
+      actual = {};
+      recent.forEach(function (d) { var u = usageOn(d); for (var id in u) actual[id] = (actual[id] || 0) + u[id] / recent.length; });
+    }
+    var byItem = {};
+    moves.forEach(function (m) { (byItem[m.item] = byItem[m.item] || []).push(m); });
+    var onOrder = {}, orderBills = {};
+    bills.forEach(function (b) {
+      if (b.received || b.cancelled) return;
+      (b.lines || []).forEach(function (l) {
+        var it = ITEM[l.item]; if (!it) return;
+        var q = (Number(l.packs) || 0) * (it.packSize || 1);
+        onOrder[l.item] = (onOrder[l.item] || 0) + q;
+        (orderBills[l.item] = orderBills[l.item] || []).push(b.id);
+      });
+    });
+    var S = {};
+    ITEMS.forEach(function (it) {
+      var mv = (byItem[it.id] || []).slice().sort(function (a, b) { return (a.at || 0) - (b.at || 0); });
+      var last = null; mv.forEach(function (m) { if (m.kind === "count") last = m; });
+      var q = last ? Number(last.qty) || 0 : 0, since = last ? last.at : -1, known = !!last, firstIn = null;
+      mv.forEach(function (m) {
+        if (m.kind === "count" || m.at <= since) return;
+        if (m.kind === "in") { q += Number(m.qty) || 0; known = true; if (!firstIn || m.date < firstIn) firstIn = m.date; }
+        else q -= Number(m.qty) || 0;
+      });
+      // หักของที่ใช้ตามยอดขาย ตั้งแต่วันหลังนับ (หรือวันรับของครั้งแรก) ถึงวันนี้
+      var from = last ? addDays(last.eff || last.date, 1) : firstIn, used = 0;
+      if (from && from <= t) {
+        for (var d = from; d <= t; d = addDays(d, 1)) {
+          if (sales[d]) used += usageOn(d)[it.id] || 0;
+          else if (p.autoDeduct && p.openDate && d >= p.openDate && d < t) used += plan.U[it.id] || 0;
+        }
+      }
+      q -= used;
+      var rate = actual ? (actual[it.id] || 0) : (plan.U[it.id] || 0);
+      var src = actual ? "actual" : "plan";
+      var lead = leadOf(it), cyc = cycleOf(it), min = Number(it.minQty) || 0;
+      var rop = Math.max(rate * (lead + p.safety), min);
+      var oo = onOrder[it.id] || 0, pos = Math.max(q, 0) + oo;
+      var daysLeft = rate > 0 ? Math.max(q, 0) / rate : Infinity;
+      var daysToOrder = rate > 0 ? (pos - rop) / rate : (pos <= min && min > 0 ? 0 : Infinity);
+      var target = rop + rate * cyc, need = Math.max(0, target - pos);
+      var st;
+      if (it.self_made) st = "self";
+      else if (rate <= 0 && !min) st = "idle";
+      else if (known && q <= 0 && rate > 0) st = oo > 0 ? "out-wait" : "out";
+      else if (pos <= rop + 1e-9) st = "order";
+      else if (!known && oo > 0) st = "incoming";
+      else if (!known) st = "unknown";
+      else if (daysToOrder <= 3) st = "soon";
+      else st = "ok";
+      S[it.id] = { it: it, q: q, known: known, last: last, oo: oo, ooBills: orderBills[it.id] || [], rate: rate, src: src, planRate: plan.U[it.id] || 0,
+        lead: lead, cyc: cyc, rop: rop, daysLeft: daysLeft, daysToOrder: daysToOrder,
+        orderDate: isFinite(daysToOrder) ? addDays(t, Math.max(0, Math.floor(daysToOrder))) : null,
+        need: need, packs: it.packSize ? Math.ceil(need / it.packSize - 1e-9) : Math.ceil(need), roundPacks: it.packSize ? Math.ceil((rate * cyc) / it.packSize - 1e-9) : Math.ceil(rate * cyc), st: st };
+    });
+    // บิล
+    var B = bills.map(billInfo);
+    M = { p: p, plan: plan, actual: actual, recent: recent, S: S, B: B, t: t };
+    return M;
+  }
+  var ST = {
+    out: ["หมด", "red"], "out-wait": ["หมด · รอของ", "red"], order: ["ต้องสั่งเลย", "red"], soon: ["ใกล้สั่ง", "amber"],
+    ok: ["พอใช้", "green"], unknown: ["ยังไม่นับ", ""], incoming: ["รอของเข้า", "blue"], idle: ["ไม่ได้ใช้ในแผน", ""], self: ["ทำเอง", ""]
+  };
+  function stChip(s) { var x = ST[s.st]; return '<span class="chip ' + x[1] + '">' + x[0] + "</span>"; }
+
+  // ---------- บิล ----------
+  function billInfo(b) {
+    var linesSum = 0, priceMissing = false;
+    (b.lines || []).forEach(function (l) { if (l.price == null || l.price === "") priceMissing = true; else linesSum += (Number(l.packs) || 0) * Number(l.price); });
+    var calc = linesSum + (Number(b.shipping) || 0) - (Number(b.discount) || 0);
+    var amount = b.amount != null && b.amount !== "" ? Number(b.amount) : calc;
+    var paid = 0; (b.payments || []).forEach(function (x) { paid += Number(x.amount) || 0; });
+    var remain = Math.max(0, amount - paid);
+    var st = b.cancelled ? "cancel" : (paid >= amount - 0.5 && amount > 0 ? "paid" : paid > 0 ? "partial" : "unpaid");
+    var overdue = st !== "paid" && st !== "cancel" && b.dueDate && b.dueDate < today();
+    var lastPay = (b.payments || []).reduce(function (a, x) { return !a || (x.date || "") > (a.date || "") ? x : a; }, null);
+    return { b: b, linesSum: linesSum, calc: calc, amount: amount, paid: paid, remain: remain, st: st, overdue: overdue, priceMissing: priceMissing, mismatch: !priceMissing && (b.lines || []).length && Math.abs(calc - amount) > 1, lastPay: lastPay };
+  }
+  function billChip(x) {
+    if (x.st === "cancel") return '<span class="chip">ยกเลิก</span>';
+    if (x.st === "paid") return x.b.confirmed ? '<span class="chip green">จ่ายแล้ว</span>' : '<span class="chip blue">จ่ายแล้ว · รอร้านยืนยัน</span>';
+    if (x.st === "partial") return '<span class="chip amber">จ่ายบางส่วน</span>';
+    return '<span class="chip red">' + (x.overdue ? "เลยกำหนดจ่าย" : "ยังไม่จ่าย") + "</span>";
+  }
+  function billName(b) { return b.supplierName || supName(b.supplier); }
+
+  // ---------- เลย์เอาต์ / แท็บ ----------
+  var TABS = [["home", "หน้าหลัก", "🏠"], ["stock", "สต็อก", "📦"], ["buy", "ซื้อของ", "🛒"], ["bills", "บิล", "🧾"], ["sales", "ยอดขาย", "📈"]];
+  function badges() {
+    var b = {};
+    if (!M) return b;
+    var nOrder = 0; for (var id in M.S) if (/^(out|order)$/.test(M.S[id].st)) nOrder++;
+    var nUnpaid = M.B.filter(function (x) { return x.st === "unpaid" || x.st === "partial"; }).length;
+    if (nOrder) b.buy = nOrder; if (nUnpaid) b.bills = nUnpaid;
+    return b;
+  }
+  function renderNav() {
+    var bd = badges();
+    var h = TABS.map(function (t) { return '<a href="#' + t[0] + '" class="' + (view === t[0] ? "on" : "") + '">' + t[1] + (bd[t[0]] ? '<span class="badge">' + bd[t[0]] + "</span>" : "") + "</a>"; }).join("");
+    $("topnav").innerHTML = h;
+    $("tabbar").innerHTML = TABS.map(function (t) { return '<a href="#' + t[0] + '" class="' + (view === t[0] ? "on" : "") + '"><span class="ic" aria-hidden="true">' + t[2] + "</span>" + t[1] + (bd[t[0]] ? '<span class="badge">' + bd[t[0]] + "</span>" : "") + "</a>"; }).join("");
+  }
+  function route() {
+    var h = (location.hash || "").replace("#", "");
+    view = TABS.some(function (t) { return t[0] === h; }) ? h : "home";
+    TABS.forEach(function (t) { $("v-" + t[0]).hidden = t[0] !== view; });
+    render();
+    try { window.scrollTo(0, 0); } catch (e) {}
+  }
+  window.addEventListener("hashchange", route);
+  function allLoaded() { return loaded.bills && loaded.moves && loaded.sales && loaded.settings; }
+  function render() {
+    if (!SH) return;
+    compute(); renderNav();
+    var f = { home: renderHome, stock: renderStock, buy: renderBuy, bills: renderBills, sales: renderSales }[view];
+    f($("v-" + view));
+  }
+  function loadingNote() { return allLoaded() ? "" : '<div class="sub">' + (connErr ? esc(connErr) : "กำลังโหลดข้อมูลร้าน…") + "</div>"; }
+
+  // ---------- หน้าหลัก ----------
+  function renderHome(el) {
+    var t = M.t, unpaid = M.B.filter(function (x) { return x.st === "unpaid" || x.st === "partial"; });
+    var owe = unpaid.reduce(function (a, x) { return a + x.remain; }, 0);
+    var orderNow = [], soon = [], noCount = 0;
+    for (var id in M.S) { var s = M.S[id]; if (/^(out|out-wait|order)$/.test(s.st)) orderNow.push(s); else if (s.st === "soon") soon.push(s); else if (s.st === "unknown") noCount++; }
+    var sd = sales[t], cupsToday = sd ? sumCups(sd.cups) : null, planTotal = M.plan.total;
+    var h = '<div class="row between"><div><h2>สวัสดี วันนี้ ' + thDate(t, true) + "</h2>" + loadingNote() + "</div></div>";
+    h += '<div class="kpis">' +
+      '<a class="kpi ' + (owe > 0 ? "red" : "green") + '" href="#bills"><span class="k">บิลค้างจ่าย</span><span class="v">' + baht(owe) + '</span><span class="s">' + unpaid.length + " บิล</span></a>" +
+      '<a class="kpi ' + (orderNow.length ? "red" : "green") + '" href="#buy"><span class="k">ต้องสั่งตอนนี้</span><span class="v">' + orderNow.length + '</span><span class="s">รายการ</span></a>' +
+      '<a class="kpi ' + (soon.length ? "amber" : "") + '" href="#stock"><span class="k">ใกล้ต้องสั่ง (≤ 3 วัน)</span><span class="v">' + soon.length + '</span><span class="s">' + (noCount ? noCount + " รายการยังไม่นับ" : "รายการ") + "</span></a>" +
+      '<a class="kpi" href="#sales"><span class="k">ยอดขายวันนี้</span><span class="v">' + (cupsToday == null ? "–" : fmt(cupsToday)) + '</span><span class="s">แผน ' + fmt(planTotal) + " แก้ว/วัน</span></a></div>";
+    h += '<div class="grid2">';
+    // ต้องจ่าย
+    h += '<div class="card"><h3>บิลที่ต้องจ่าย</h3>';
+    if (!unpaid.length) h += '<div class="empty">' + (allLoaded() ? "ไม่มีบิลค้างจ่าย" : "กำลังโหลด…") + "</div>";
+    else h += '<div class="list">' + unpaid.sort(function (a, b) { return (a.b.dueDate || "9") < (b.b.dueDate || "9") ? -1 : 1; }).map(function (x) {
+      return '<a class="li tap" href="#bills" data-openbill="' + esc(x.b.id) + '" style="text-decoration:none;color:inherit"><div><div class="nm">' + esc(billName(x.b)) + '</div><div class="mt">' + esc(x.b.round || "") + (x.b.dueDate ? " · ครบกำหนด " + relDay(x.b.dueDate) : "") + (x.b.estimate ? ' <span class="tag">ยอดประมาณ</span>' : "") + '</div></div><div class="rt"><span class="qty">' + baht(x.remain) + "</span>" + billChip(x) + "</div></a>";
+    }).join("") + "</div>";
+    h += "</div>";
+    // ต้องสั่ง
+    h += '<div class="card"><h3>ของที่ต้องสั่ง</h3>';
+    var list = orderNow.concat(soon);
+    if (!list.length) h += '<div class="empty">ยังไม่มีของที่ต้องสั่งใน 3 วันนี้</div>';
+    else h += '<div class="list">' + list.slice(0, 10).map(function (s) {
+      return '<div class="li tap" data-item="' + s.it.id + '"><div><div class="nm">' + esc(s.it.name) + '</div><div class="mt">' + esc(supName(s.it.supplier)) + " · เหลือ " + (s.known ? qtyStr(s.it, Math.max(s.q, 0), true) : "ยังไม่นับ") + (s.oo ? " · รอของ " + qtyStr(s.it, s.oo, true) : "") + '</div></div><div class="rt">' + stChip(s) + (s.packs ? '<span class="sub">ซื้อ ' + fmt(s.packs) + " " + esc(packWord(s.it)) + "</span>" : "") + "</div></div>";
+    }).join("") + "</div>" + (list.length > 10 ? '<a class="linkbtn" href="#buy">ดูทั้งหมด ' + list.length + " รายการ →</a>" : "");
+    h += "</div>";
+    // นัดซื้อถัดไป
+    h += '<div class="card"><h3>รอบซื้อถัดไป แยกตามร้าน</h3>' + nextBuyTable() + "</div>";
+    // เบสวันนี้
+    h += '<div class="card"><h3>เตรียมเบสตามแผน (' + fmt(M.plan.total) + ' แก้ว/วัน)</h3>' + prepTable(M.plan) + "</div>";
+    h += "</div>";
+    el.innerHTML = h;
+  }
+  function sumCups(c) { var s = 0; for (var k in (c || {})) s += Number(c[k]) || 0; return s; }
+  function nextBuyTable() {
+    var g = {};
+    for (var id in M.S) {
+      var s = M.S[id]; if (!s.orderDate || s.st === "idle" || s.st === "self") continue;
+      var k = s.it.supplier || "_none";
+      if (!g[k] || s.orderDate < g[k].d) g[k] = { d: s.orderDate, n: 0 };
+    }
+    for (var id2 in M.S) { var s2 = M.S[id2], k2 = s2.it.supplier || "_none"; if (g[k2] && s2.orderDate && diffDays(g[k2].d, s2.orderDate) <= cycleOf(s2.it) / 2) g[k2].n++; }
+    var keys = Object.keys(g).sort(function (a, b) { return g[a].d < g[b].d ? -1 : 1; });
+    if (!keys.length) return '<div class="empty">ยังคำนวณไม่ได้ ต้องมีแผนยอดขายก่อน</div>';
+    return '<div class="list">' + keys.map(function (k) {
+      var sp = SUP[k], late = g[k].d <= M.t;
+      return '<div class="li"><div><div class="nm">' + esc(sp ? sp.name : "ยังไม่ได้เลือกร้าน") + '</div><div class="mt">' + (sp ? "สั่งทุก ~" + sp.cycle_days + " วัน · ของถึงใน " + sp.lead_days + " วัน" : "ตั้งร้านใน shared/ingredients.json") + '</div></div><div class="rt"><span class="chip ' + (late ? "red" : "") + '">' + (late ? "สั่งวันนี้" : "สั่ง " + relDay(g[k].d)) + '</span><span class="sub">' + g[k].n + " รายการ</span></div></div>";
+    }).join("") + '</div><div class="hint" style="margin-top:6px">วันสั่ง = วันที่ของจะเหลือถึงจุดสั่ง (ใช้ระหว่างรอของ + สำรอง ' + M.p.safety + " วัน) · lead/รอบสั่งเป็นค่าประมาณ ยังไม่ยืนยัน</div>";
+  }
+  function prepTable(u) {
+    var y = SH.bases.brew.manual, rows = "";
+    Object.keys(u.baseMl).forEach(function (b) {
+      var base = BASE[b], lv = base.batch_leaves || {}, lvs = [];
+      for (var id in lv) lvs.push(esc(shortName(id)) + " " + lv[id] + " ก.");
+      rows += "<tr><td>" + esc(base.name) + '<div class="sub">' + base.temp_c + "°C " + base.min + " นาที · " + lvs.join(" + ") + '</div></td><td class="r">' + fmt(u.baseMl[b]) + ' มล.</td><td class="r">' + fmt(u.batches[b], 1) + " ล็อต</td></tr>";
+    });
+    var cf = SH.menu.preps.cream_cheese_foam;
+    rows += '<tr><td>นมผสม (6:3:1)</td><td class="r">' + fmt(u.milkMl) + ' มล.</td><td class="r">–</td></tr>';
+    rows += '<tr><td>ครีมชีสโฟม<div class="sub">' + cf.cups + " แก้ว/ล็อต · ท็อปชาใส/ชานม " + Math.round(M.p.cheese * 100) + '% <span class="tag">ค่าสมมติ</span></div></td><td class="r">' + fmt(u.cheeseCups, 1) + ' แก้ว</td><td class="r">' + fmt(u.cheeseBatches, 1) + " ล็อต</td></tr>";
+    return '<div class="tbl-wrap"><table><thead><tr><th>เบส / ของเตรียม</th><th class="r">ต่อวัน</th><th class="r">ชง</th></tr></thead><tbody>' + rows + '</tbody></table></div><div class="hint" style="margin-top:6px">1 ล็อต = ใบ ' + y.leaf_g + " ก. น้ำร้อน " + y.hot_water_ml + " มล. น้ำแข็งน็อค " + y.knock_ice_g + " ก. → เบส " + fmt(y.yield_ml) + " มล. (" + y.cups + " แก้ว) · อายุเบส " + SH.bases.brew.shelf_life_h + " ชม.</div>";
+  }
+  function shortName(id) { var it = ITEM[id]; return it ? it.name.split(" ")[0] : id; }
+
+  // ---------- สต็อก ----------
+  function renderStock(el) {
+    var cats = ["ทั้งหมด", "ต้องสั่ง"]; ITEMS.forEach(function (it) { if (cats.indexOf(it.category) < 0) cats.push(it.category); });
+    var h = '<div class="row between"><div><h2>สต็อกร้าน</h2><div class="sub">เหลือเท่าไร พอใช้กี่วัน ต้องสั่งวันไหน · อัตราใช้คิดจาก' + (M.actual ? "ยอดขายจริงเฉลี่ย " + M.recent.length + " วัน" : "แผน " + fmt(M.plan.total) + " แก้ว/วัน") + "</div>" + loadingNote() + '</div><div class="row"><button class="btn sm" id="countAll" type="button">นับสต็อกทั้งร้าน</button></div></div>';
+    h += '<div class="row"><input type="search" id="stockQ" placeholder="ค้นหาของ…" value="' + esc(stockQ) + '" style="max-width:320px"></div>';
+    h += '<div class="chips" id="catChips">' + cats.map(function (c) { return '<button type="button" class="' + (c === stockCat ? "on" : "") + '" data-cat="' + esc(c) + '">' + esc(c) + "</button>"; }).join("") + "</div>";
+    var list = ITEMS.filter(function (it) {
+      var s = M.S[it.id];
+      if (stockCat === "ต้องสั่ง" && !/^(out|out-wait|order|soon)$/.test(s.st)) return false;
+      if (stockCat !== "ทั้งหมด" && stockCat !== "ต้องสั่ง" && it.category !== stockCat) return false;
+      if (stockQ && it.name.toLowerCase().indexOf(stockQ.toLowerCase()) < 0) return false;
+      return true;
+    });
+    var body = "", lastCat = null;
+    list.forEach(function (it) {
+      var s = M.S[it.id];
+      if (it.category !== lastCat) { body += '<div class="cat-h">' + esc(it.category) + "</div>"; lastCat = it.category; }
+      var dl = s.daysLeft, pct = isFinite(dl) ? Math.min(100, dl / Math.max(1, s.cyc + s.lead + M.p.safety) * 100) : 100;
+      var cls = /^(out|out-wait|order)$/.test(s.st) ? "red" : s.st === "soon" ? "amber" : "";
+      var left = s.known ? qtyStr(it, Math.max(s.q, 0)) : '<span class="sub">ยังไม่นับ</span>';
+      var meta = [];
+      if (s.rate > 0) meta.push("ใช้ ~" + fmt(s.rate, s.rate < 10 ? 1 : 0) + " " + esc(it.unit) + "/วัน");
+      if (s.known && isFinite(dl)) meta.push("พอ " + fmt(dl, dl < 10 ? 1 : 0) + " วัน");
+      if (s.oo) meta.push("รอของ " + fmt(s.oo / (it.packSize || 1), 1) + " " + esc(packWord(it)));
+      if (s.orderDate && s.st !== "idle" && s.st !== "self") meta.push(s.orderDate <= M.t ? "<b>สั่งวันนี้</b>" : "สั่งภายใน " + relDay(s.orderDate));
+      body += '<div class="stock-row" data-item="' + it.id + '"><div style="min-width:0"><div class="nm" style="font-weight:500">' + esc(it.name) + (it.unconfirmed ? ' <span class="tag">ยังไม่ยืนยัน</span>' : "") + '</div><div class="mt sub">' + esc(supName(it.supplier)) + (meta.length ? " · " + meta.join(" · ") : "") + '</div></div><div class="rt" style="text-align:right">' + left + "<div>" + stChip(s) + "</div></div>" +
+        (s.rate > 0 && s.known ? '<div class="bar"><i class="' + cls + '" style="width:' + Math.max(2, pct).toFixed(0) + '%"></i></div>' : "") + "</div>";
+    });
+    h += '<div class="card" style="padding-top:4px">' + (body || '<div class="empty">ไม่มีรายการ</div>') + "</div>";
+    h += '<div class="hint">แตะที่รายการเพื่อนับ / รับของเข้า / ตัดของเสีย และดูว่าเมนูไหนใช้เท่าไร · สต็อกคำนวณจาก: ยอดนับล่าสุด + ของรับเข้า − ของที่ใช้ตามยอดขายที่บันทึก' + (M.p.openDate ? " (วันที่ไม่ได้บันทึกยอด หักตามแผน)" : "") + "</div>";
+    el.innerHTML = h;
+    $("stockQ").addEventListener("input", function () { stockQ = this.value; var pos = this.selectionStart; renderStock(el); var q = $("stockQ"); q.focus(); try { q.setSelectionRange(pos, pos); } catch (e) {} });
+    $("catChips").addEventListener("click", function (e) { var b = e.target.closest("button"); if (!b) return; stockCat = b.getAttribute("data-cat"); renderStock(el); });
+    $("countAll").addEventListener("click", openCountAll);
+  }
+
+  function itemSheet(id) {
+    var it = ITEM[id], s = M.S[id]; if (!it) return;
+    var sp = supOf(it);
+    var h = '<div class="row between"><div>' + (s.known ? '<div style="font-size:24px">' + qtyStr(it, Math.max(s.q, 0)) + "</div>" : '<div class="sub">ยังไม่เคยนับ</div>') + "<div>" + stChip(s) + (s.orderDate && s.st !== "idle" ? ' <span class="sub">สั่งภายใน ' + relDay(s.orderDate) + "</span>" : "") + "</div></div></div>";
+    h += '<div class="tbl-wrap"><table><tbody>' +
+      "<tr><td>ร้าน</td><td>" + esc(sp ? sp.name + " · " + sp.channel : "ยังไม่ได้เลือกร้าน") + "</td></tr>" +
+      "<tr><td>แพ็ค</td><td>" + (it.packSize ? fmt(it.packSize) + " " + esc(it.unit) + "/" + esc(it.packUnit) : "ไม่ระบุ (นับเป็น " + esc(it.unit) + ")") + (it.price_thb != null ? " · " + baht(it.price_thb) : ' · <span class="tag">ยังไม่มีราคา</span>') + "</td></tr>" +
+      "<tr><td>อัตราใช้</td><td>" + (s.rate > 0 ? fmt(s.rate, 1) + " " + esc(it.unit) + "/วัน (" + (s.src === "actual" ? "ยอดขายจริง" : "แผน") + ")" : "ไม่ได้ใช้ในแผน") + "</td></tr>" +
+      "<tr><td>ของถึงใน / สั่งทุก</td><td>" + s.lead + " วัน / " + s.cyc + " วัน · สำรอง " + M.p.safety + " วัน</td></tr>" +
+      "<tr><td>จุดสั่ง</td><td>" + qtyStr(it, s.rop) + (it.minQty ? ' <span class="sub">(ขั้นต่ำ ' + fmt(it.minQty) + " " + esc(it.unit) + ")</span>" : "") + "</td></tr>" +
+      (s.oo ? "<tr><td>รอของเข้า</td><td>" + qtyStr(it, s.oo) + "</td></tr>" : "") +
+      (s.rate > 0 ? "<tr><td>ซื้อต่อรอบ</td><td>" + fmt(s.roundPacks) + " " + esc(packWord(it)) + " / " + s.cyc + " วัน</td></tr>" : "") +
+      "</tbody></table></div>";
+    if (it.note) h += '<div class="note">' + esc(it.note) + "</div>";
+    h += '<div class="actions"><button class="btn" type="button" data-act="count">นับสต็อก</button><button class="btn ghost" type="button" data-act="in">รับของเข้า</button><button class="btn ghost" type="button" data-act="out">ใช้ / ทิ้ง</button></div>';
+    var by = M.plan.BY[id];
+    if (by) {
+      h += "<details><summary>เมนูไหนใช้เท่าไร (ตามแผน ต่อวัน)</summary><div class='tbl-wrap'><table><tbody>" + Object.keys(by).sort(function (a, b) { return by[b] - by[a]; }).map(function (m) { return "<tr><td>" + esc(MENU[m].name) + '</td><td class="r">' + fmt(by[m], 1) + " " + esc(it.unit) + "</td></tr>"; }).join("") + "</tbody></table></div></details>";
+    }
+    var mv = moves.filter(function (m) { return m.item === id; }).sort(function (a, b) { return (b.at || 0) - (a.at || 0); }).slice(0, 20);
+    h += '<h3 style="margin-top:4px">ประวัติ</h3>';
+    h += mv.length ? '<div class="list">' + mv.map(function (m) {
+      var lbl = m.kind === "count" ? "นับได้" : m.kind === "in" ? "รับเข้า" : "ใช้/ทิ้ง";
+      return '<div class="li"><div><div class="nm">' + lbl + " " + qtyStr(it, Number(m.qty), true) + '</div><div class="mt">' + thDate(m.date, true) + (m.kind === "count" && m.eff && m.eff !== m.date ? " (ก่อนเปิดร้าน)" : "") + (m.note ? " · " + esc(m.note) : "") + '</div></div><div class="rt"><button class="linkbtn" type="button" data-delmove="' + esc(m.id) + '" style="color:var(--out)">ลบ</button></div></div>';
+    }).join("") + "</div>" : '<div class="sub">ยังไม่มีประวัติ</div>';
+    openSheet(it.name, h, function (b) {
+      b.addEventListener("click", function (e) {
+        var a = e.target.closest("[data-act]");
+        if (a) { moveForm(id, a.getAttribute("data-act")); return; }
+        var d = e.target.closest("[data-delmove]");
+        if (d) {
+          if (!d.classList.contains("cf")) { d.classList.add("cf"); d.textContent = "แตะอีกครั้งเพื่อลบ"; return; }
+          C.moves.doc(d.getAttribute("data-delmove")).delete().then(function () { toast("ลบแล้ว"); itemSheet(id); }).catch(writeErr);
+        }
+      });
+    });
+  }
+  function unitSelect(it, idp) {
+    return it.packSize ? '<select id="' + idp + '" style="width:auto"><option value="pack">' + esc(it.packUnit || "แพ็ค") + '</option><option value="unit">' + esc(it.unit) + "</option></select>" : '<span class="sub">' + esc(it.unit) + "</span>";
+  }
+  function toUnits(it, v, sel) { return it.packSize && (!sel || sel.value === "pack") ? v * it.packSize : v; }
+  function moveForm(id, kind) {
+    var it = ITEM[id], hr = Number(nowTime().slice(0, 2));
+    var title = kind === "count" ? "นับสต็อก · " : kind === "in" ? "รับของเข้า · " : "ใช้ / ทิ้ง · ";
+    var h = '<form id="mvF" class="fgrid">' +
+      '<label class="f full">จำนวน<div class="row" style="flex-wrap:nowrap"><input type="number" inputmode="decimal" step="any" min="0" id="mvQ" required>' + unitSelect(it, "mvU") + "</div></label>" +
+      '<label class="f">วันที่<input type="date" id="mvD" value="' + today() + '"></label>' +
+      (kind === "count" ? '<label class="f">นับตอน<select id="mvWhen"><option value="before"' + (hr < 15 ? " selected" : "") + '>ก่อนเปิดร้าน</option><option value="after"' + (hr >= 15 ? " selected" : "") + ">หลังปิดร้าน / ระหว่างวัน</option></select></label>" : '<label class="f">หมายเหตุ<input type="text" id="mvN" placeholder="' + (kind === "in" ? "เช่น ซื้อ Makro" : "เช่น หมดอายุ ทำหก") + '"></label>') +
+      (kind === "count" ? '<div class="hint full">นับก่อนเปิดร้าน = ยอดขายของวันนี้จะถูกหักจากยอดนี้ · นับหลังปิดร้าน = เริ่มหักจากพรุ่งนี้</div>' : "") +
+      '<div class="actions full"><button class="btn" type="submit">บันทึก</button><button class="btn ghost" type="button" id="mvBack">กลับ</button></div></form>';
+    openSheet(title + it.name, h, function () {
+      $("mvQ").focus();
+      $("mvBack").addEventListener("click", function () { itemSheet(id); });
+      $("mvF").addEventListener("submit", function (e) {
+        e.preventDefault();
+        var v = num($("mvQ").value); if (!(v >= 0)) return;
+        var date = $("mvD").value || today();
+        var rec = { item: id, kind: kind, qty: toUnits(it, v, $("mvU")), date: date, at: Date.now() };
+        if (kind === "count") rec.eff = $("mvWhen").value === "before" ? addDays(date, -1) : date;
+        else if ($("mvN").value.trim()) rec.note = $("mvN").value.trim();
+        C.moves.add(rec).then(function () { toast("บันทึกแล้ว"); itemSheet(id); }).catch(writeErr);
+      });
+    });
+  }
+  function openCountAll() {
+    var hr = Number(nowTime().slice(0, 2));
+    var rows = ITEMS.filter(function (it) { return !it.self_made; }).map(function (it) {
+      var s = M.S[it.id];
+      return '<div class="menu-in"><div style="min-width:0"><div style="font-weight:500">' + esc(it.name) + '</div><div class="sub">ระบบคิดว่ามี ' + (s.known ? qtyStr(it, Math.max(s.q, 0), true) : "–") + '</div></div><div class="row" style="flex-wrap:nowrap;gap:6px"><input type="number" inputmode="decimal" step="any" min="0" data-ci="' + it.id + '" style="width:92px" placeholder="–"><span class="sub" style="min-width:34px">' + esc(packWord(it)) + "</span></div></div>";
+    }).join("");
+    var h = '<div class="fgrid"><label class="f">วันที่นับ<input type="date" id="caD" value="' + today() + '"></label><label class="f">นับตอน<select id="caWhen"><option value="before"' + (hr < 15 ? " selected" : "") + '>ก่อนเปิดร้าน</option><option value="after"' + (hr >= 15 ? " selected" : "") + '>หลังปิดร้าน</option></select></label></div><div class="hint">กรอกเฉพาะรายการที่นับ ช่องว่าง = ข้าม · ของที่มีแพ็คให้กรอกเป็นแพ็ค ใส่ทศนิยมได้ เช่น 2.5 ถุง</div><div>' + rows + '</div><div class="sticky-save" style="bottom:-20px"><button class="btn" type="button" id="caSave" style="flex:1">บันทึกยอดนับ</button></div>';
+    openSheet("นับสต็อกทั้งร้าน", h, function (b) {
+      $("caSave").addEventListener("click", function () {
+        var date = $("caD").value || today(), eff = $("caWhen").value === "before" ? addDays(date, -1) : date, at = Date.now(), recs = [];
+        Array.prototype.forEach.call(b.querySelectorAll("[data-ci]"), function (inp) {
+          if (inp.value.trim() === "") return; var v = num(inp.value); if (!(v >= 0)) return;
+          var it = ITEM[inp.getAttribute("data-ci")];
+          recs.push({ item: it.id, kind: "count", qty: toUnits(it, v), date: date, eff: eff, at: at });
+        });
+        if (!recs.length) { toast("ยังไม่ได้กรอกยอดนับ"); return; }
+        this.disabled = true; var btn = this;
+        Promise.all(recs.map(function (r) { return C.moves.add(r); })).then(function () { closeSheet(); toast("บันทึกยอดนับ " + recs.length + " รายการ"); })
+          .catch(function (e) { btn.disabled = false; writeErr(e); });
+      });
+    });
+  }
+
+  // ---------- ซื้อของ ----------
+  function renderBuy(el) {
+    var groups = {};
+    for (var id in M.S) {
+      var s = M.S[id]; if (s.st === "self" || s.st === "idle") continue;
+      var show = buyMode === "now" ? /^(out|out-wait|order|soon)$/.test(s.st) && s.need > 0 : s.rate > 0 || s.it.minQty;
+      if (!show) continue;
+      var k = s.it.supplier || "_none"; (groups[k] = groups[k] || []).push(s);
+    }
+    var h = '<div><h2>ซื้อของ</h2><div class="sub">คิดจากอัตราใช้ ' + (M.actual ? "จริงเฉลี่ย " + M.recent.length + " วัน" : "ตามแผน " + fmt(M.plan.total) + " แก้ว/วัน") + " · ซื้อให้พอถึงรอบถัดไป + เวลารอของ + สำรอง " + M.p.safety + " วัน</div>" + loadingNote() + "</div>";
+    h += '<div class="seg" id="buySeg"><button type="button" data-m="now" class="' + (buyMode === "now" ? "on" : "") + '">ต้องสั่งตอนนี้</button><button type="button" data-m="cycle" class="' + (buyMode === "cycle" ? "on" : "") + '">ตารางซื้อประจำ</button></div>';
+    var keys = Object.keys(groups).sort(function (a, b) { return supOrder(a) - supOrder(b); });
+    if (!keys.length) h += '<div class="card"><div class="empty"><b>ยังไม่มีของที่ต้องสั่ง</b>ของทุกอย่างพอใช้ถึงรอบสั่งถัดไป หรือรอของเข้าอยู่</div></div>';
+    keys.forEach(function (k) {
+      var sp = SUP[k], arr = groups[k], tot = 0, miss = false;
+      var rows = arr.map(function (s) {
+        var it = s.it, packs = buyMode === "now" ? s.packs : s.roundPacks, cost = it.price_thb != null && it.packSize ? packs * it.price_thb : null;
+        if (cost == null) miss = true; else tot += cost;
+        return "<tr><td>" + esc(it.name) + '<div class="sub">' + (buyMode === "now" ? "เหลือ " + (s.known ? qtyStr(it, Math.max(s.q, 0), true) : "ยังไม่นับ") + (s.oo ? " · รอของ " + qtyStr(it, s.oo, true) : "") : "ใช้ ~" + fmt(s.rate, 1) + " " + esc(it.unit) + "/วัน · หมดรอบละ " + fmt(s.rate * s.cyc / (it.packSize || 1), 1) + " " + esc(packWord(it))) + "</div></td>" +
+          '<td class="r">' + fmt(packs) + " " + esc(packWord(it)) + '</td><td class="r">' + (cost == null ? '<span class="tag">ไม่มีราคา</span>' : baht(cost)) + "</td>" + (buyMode === "now" ? "<td>" + stChip(s) + "</td>" : "") + "</tr>";
+      }).join("");
+      var monthly = buyMode === "cycle" && sp ? tot * 30 / sp.cycle_days : null;
+      h += '<div class="card"><div class="row between" style="margin-bottom:8px"><div><h3>' + esc(sp ? sp.name : "ยังไม่ได้เลือกร้าน") + '</h3><div class="sub">' + (sp ? esc(sp.channel) + " · สั่งทุก ~" + sp.cycle_days + " วัน · ของถึงใน " + sp.lead_days + " วัน · จ่าย " + esc(sp.pay) : "ระบุร้านใน shared/ingredients.json") + "</div></div>" +
+        (buyMode === "now" && k !== "_none" ? '<button class="btn sm" type="button" data-mkbill="' + esc(k) + '">สร้างบิลจากรายการนี้</button>' : "") + "</div>" +
+        '<div class="tbl-wrap"><table><thead><tr><th>ของ</th><th class="r">' + (buyMode === "now" ? "ซื้อ" : "ต่อรอบ") + '</th><th class="r">ประมาณ</th>' + (buyMode === "now" ? "<th></th>" : "") + "</tr></thead><tbody>" + rows +
+        '<tr class="total"><td>รวม' + (miss ? ' <span class="sub">(ไม่รวมของที่ยังไม่มีราคา)</span>' : "") + '</td><td></td><td class="r">' + baht(tot) + "</td>" + (buyMode === "now" ? "<td></td>" : "") + "</tr>" +
+        (monthly != null ? '<tr><td class="sub">เฉลี่ยต่อ 30 วัน</td><td></td><td class="r sub">' + baht(monthly) + "</td></tr>" : "") + "</tbody></table></div></div>";
+    });
+    h += '<div class="hint">จำนวนซื้อ = ใช้ต่อวัน × (สั่งทุกกี่วัน + เวลารอของ + สำรอง) − (ที่เหลือ + ที่สั่งไว้แล้วยังไม่มา) ปัดขึ้นเป็นแพ็ค · ร้าน เวลารอของ และรอบสั่ง ตั้งใน shared/suppliers.json (ค่าประมาณ ยังไม่ยืนยัน)</div>';
+    el.innerHTML = h;
+    $("buySeg").addEventListener("click", function (e) { var b = e.target.closest("button"); if (!b) return; buyMode = b.getAttribute("data-m"); renderBuy(el); });
+    el.querySelectorAll("[data-mkbill]").forEach(function (b) {
+      b.addEventListener("click", function () {
+        var k = b.getAttribute("data-mkbill");
+        var lines = groups[k].filter(function (s) { return s.packs > 0; }).map(function (s) { return { item: s.it.id, packs: s.packs, price: s.it.price_thb }; });
+        billForm(null, { supplier: k, lines: lines, round: defaultRound(), orderDate: today() });
+      });
+    });
+  }
+  function supOrder(k) { var i = SUPS.findIndex(function (s) { return s.id === k; }); return i < 0 ? 99 : i; }
+  function defaultRound() { var t = today(); return "รอบ " + thDate(t, true); }
+
+  // ---------- บิล ----------
+  function rounds() { var r = []; M.B.forEach(function (x) { var k = x.b.round || "ไม่ระบุรอบ"; if (r.indexOf(k) < 0) r.push(k); }); return r; }
+  function renderBills(el) {
+    var rs = rounds();
+    if (roundSel && rs.indexOf(roundSel) < 0 && roundSel !== "all") roundSel = null;
+    var sel = roundSel || "all";
+    var arr = M.B.filter(function (x) { return sel === "all" || (x.b.round || "ไม่ระบุรอบ") === sel; });
+    var tot = 0, paid = 0, remain = 0;
+    arr.forEach(function (x) { if (x.st === "cancel") return; tot += x.amount; paid += Math.min(x.paid, x.amount); remain += x.remain; });
+    var h = '<div class="row between"><div><h2>บิลที่ต้องจ่าย</h2><div class="sub">แยกตามรอบสั่ง · แนบสลิป/ใบเสร็จเป็นหลักฐาน</div>' + loadingNote() + '</div><button class="btn" type="button" id="newBill">+ บิลใหม่</button></div>';
+    if (rs.length) h += '<div class="chips" id="roundChips"><button type="button" data-r="all" class="' + (sel === "all" ? "on" : "") + '">ทุกรอบ</button>' + rs.map(function (r) { return '<button type="button" data-r="' + esc(r) + '" class="' + (sel === r ? "on" : "") + '">' + esc(r) + "</button>"; }).join("") + "</div>";
+    h += '<div class="round-sum"><div><span>ยอดบิลรวม</span><b>' + baht(tot) + '</b></div><div><span>จ่ายแล้ว</span><b style="color:var(--tea)">' + baht(paid) + '</b></div><div><span>ค้างจ่าย</span><b style="color:' + (remain > 0 ? "var(--out)" : "var(--ink)") + '">' + baht(remain) + "</b></div></div>";
+    if (!arr.length) {
+      h += '<div class="card"><div class="empty"><b>' + (allLoaded() ? "ยังไม่มีบิล" : "กำลังโหลดบิล…") + "</b>" + (allLoaded() ? 'กด "+ บิลใหม่" หรือสร้างจากหน้าซื้อของ' + (bills.length ? "" : '<div style="margin-top:12px"><button class="btn ghost" type="button" id="importSeed">นำเข้าบิลสั่งของเปิดร้าน (23 พ.ย.)</button></div>') : "") + "</div></div>";
+    }
+    var order = { unpaid: 0, partial: 0, paid: 1, cancel: 2 };
+    arr.sort(function (a, b) { return order[a.st] - order[b.st] || (b.b.orderDate || "").localeCompare(a.b.orderDate || "") || (b.b.createdAt || 0) - (a.b.createdAt || 0); });
+    h += '<div style="display:flex;flex-direction:column;gap:10px">' + arr.map(billCard).join("") + "</div>";
+    el.innerHTML = h;
+    $("newBill").addEventListener("click", function () { billForm(null, { round: sel !== "all" ? sel : defaultRound(), orderDate: today(), lines: [] }); });
+    var rc = $("roundChips"); if (rc) rc.addEventListener("click", function (e) { var b = e.target.closest("button"); if (!b) return; roundSel = b.getAttribute("data-r"); renderBills(el); });
+    var imp = $("importSeed"); if (imp) imp.addEventListener("click", importSeed);
+    el.querySelectorAll(".thumb").forEach(function (img) { img.addEventListener("error", function () { img.replaceWith(Object.assign(document.createElement("span"), { className: "pdf", textContent: "โหลดรูปไม่ได้" })); }); });
+  }
+  function billCard(x) {
+    var b = x.b, open = !!openBill[b.id];
+    var h = '<div class="bill ' + (x.st === "paid" || x.st === "cancel" ? "paid" : "") + '" id="bill-' + esc(b.id) + '">';
+    h += '<div class="bill-h" data-toggle="' + esc(b.id) + '"><div style="min-width:0"><div style="font-weight:600;overflow-wrap:anywhere">' + esc(billName(b)) + '</div><div class="sub">' + esc(b.round || "") + (b.orderDate ? " · สั่ง " + thDate(b.orderDate) : "") + (b.ref ? " · " + esc(b.ref) : "") + "</div>" +
+      '<div class="row" style="gap:6px;margin-top:4px">' + billChip(x) + (b.received ? '<span class="chip green">ของเข้าแล้ว</span>' : x.st !== "cancel" && (b.lines || []).length ? '<span class="chip">ยังไม่ได้รับของ</span>' : "") + (b.estimate ? '<span class="tag">ยอดประมาณ</span>' : "") + "</div></div>" +
+      '<div><div class="amt">' + baht(x.st === "paid" ? x.amount : x.remain) + '</div><div class="sub" style="text-align:right">' + (x.st === "paid" ? "จ่าย " + (x.lastPay ? thDate(x.lastPay.date) : "") : x.paid ? "จาก " + baht(x.amount) : b.dueDate ? "ครบ " + relDay(b.dueDate) : "") + "</div></div></div>";
+    if (open) {
+      h += '<div class="bill-b">';
+      if ((b.lines || []).length) {
+        h += '<div class="tbl-wrap"><table><thead><tr><th>รายการ</th><th class="r">จำนวน</th><th class="r">ราคา</th><th class="r">รวม</th></tr></thead><tbody>' + b.lines.map(function (l) {
+          var it = ITEM[l.item];
+          return "<tr><td>" + esc(it ? it.name : l.name || l.item) + '</td><td class="r">' + fmt(l.packs) + " " + esc(it ? packWord(it) : "") + '</td><td class="r">' + (l.price == null ? '<span class="tag">ยังไม่รู้</span>' : baht(l.price)) + '</td><td class="r">' + (l.price == null ? "–" : baht(l.packs * l.price)) + "</td></tr>";
+        }).join("") +
+          (Number(b.shipping) ? '<tr><td>ค่าส่ง</td><td></td><td></td><td class="r">' + baht(Number(b.shipping)) + "</td></tr>" : "") +
+          (Number(b.discount) ? '<tr><td>ส่วนลด</td><td></td><td></td><td class="r">−' + baht(Number(b.discount)) + "</td></tr>" : "") +
+          '<tr class="total"><td>ยอดที่ต้องจ่าย</td><td></td><td></td><td class="r">' + baht(x.amount) + "</td></tr></tbody></table></div>";
+        if (x.mismatch) h += '<div class="warnbox">ยอดตามรายการ + ค่าส่ง − ส่วนลด = ' + baht(x.calc) + " ไม่ตรงกับยอดจ่าย " + baht(x.amount) + " (ต่าง " + baht(Math.abs(x.amount - x.calc)) + ")</div>";
+        if (x.priceMissing) h += '<div class="warnbox">มีรายการที่ยังไม่รู้ราคา ยอดจ่ายเป็นตัวเลขประมาณ</div>';
+      }
+      if (b.note) h += '<div class="note">' + esc(b.note) + "</div>";
+      if (b.link) h += '<a class="linkbtn" href="' + esc(b.link) + '" target="_blank" rel="noopener">เปิดหน้าบิลของร้าน ↗</a>';
+      h += "<div><h3 style='margin-bottom:6px'>การจ่ายเงิน</h3>";
+      h += (b.payments || []).length ? (b.payments || []).map(function (p, i) {
+        var slips = (p.slips || []).map(function (s) {
+          return s.pdf ? '<a class="pdf" href="/_blob/' + esc(s.id) + '" target="_blank" rel="noopener">PDF</a>' : '<img class="thumb" src="/_blob/' + esc(s.id) + '" data-full="' + esc(s.id) + '" alt="สลิป" loading="lazy">';
+        }).join("");
+        return '<div class="pay"><div class="row between"><b class="num">' + baht(Number(p.amount)) + '</b><span class="sub">' + thDate(p.date, true) + (p.time ? " " + esc(p.time) : "") + "</span></div>" +
+          '<div class="sub">' + esc(p.method || "") + (p.ref ? " · " + esc(p.ref) : "") + (p.payer ? " · จ่ายโดย " + esc(p.payer) : "") + (p.note ? " · " + esc(p.note) : "") + "</div>" +
+          '<div class="thumbs">' + slips + (assetsNS ? '<label class="add-slip" for="addSlipIn" data-slip="' + esc(b.id) + ":" + i + '">+ แนบสลิป</label>' : "") + (!slips ? '<span class="sub">ยังไม่มีหลักฐาน</span>' : "") + "</div>" +
+          '<div><button class="linkbtn" type="button" data-delpay="' + esc(b.id) + ":" + i + '" style="color:var(--out)">ลบการจ่ายนี้</button></div></div>';
+      }).join("") : '<div class="sub">ยังไม่ได้จ่าย</div>';
+      h += "</div>";
+      h += '<div class="actions">' + (x.st !== "paid" && x.st !== "cancel" ? '<button class="btn" type="button" data-pay="' + esc(b.id) + '">บันทึกการจ่าย + สลิป</button>' : "") +
+        (x.st === "paid" && !b.confirmed ? '<button class="btn ghost" type="button" data-confirm="' + esc(b.id) + '">ร้านยืนยันยอดแล้ว</button>' : "") +
+        (!b.received && (b.lines || []).length && x.st !== "cancel" ? '<button class="btn ghost" type="button" data-recv="' + esc(b.id) + '">รับของแล้ว</button>' : "") +
+        '<button class="btn ghost" type="button" data-edit="' + esc(b.id) + '">แก้ไข</button></div>';
+      h += "</div>";
+    }
+    return h + "</div>";
+  }
+  function findBill(id) { for (var i = 0; i < bills.length; i++) if (bills[i].id === id) return bills[i]; return null; }
+  function saveBill(b) { var body = deep(b); delete body.id; return C.bills.doc(b.id).set(body); }
+
+  function billForm(id, init) {
+    var b = id ? deep(findBill(id)) : init;
+    var supOpts = SUPS.map(function (s) { return '<option value="' + s.id + '"' + (b.supplier === s.id ? " selected" : "") + ">" + esc(s.name) + "</option>"; }).join("") + '<option value=""' + (!b.supplier ? " selected" : "") + ">อื่นๆ (พิมพ์ชื่อ)</option>";
+    var itemOpts = function (sel) {
+      return '<option value="">— เลือกของ —</option>' + ITEMS.filter(function (it) { return !it.self_made; }).map(function (it) { return '<option value="' + it.id + '"' + (sel === it.id ? " selected" : "") + ">" + esc(it.name) + "</option>"; }).join("");
+    };
+    var lineRow = function (l) {
+      return '<div class="line-ed"><label class="f li-item">ของ<select data-l="item">' + itemOpts(l.item) + '</select></label><label class="f">จำนวน<input type="number" inputmode="decimal" step="any" min="0" data-l="packs" value="' + (l.packs != null ? l.packs : "") + '"></label><label class="f">ราคา/หน่วย<input type="number" inputmode="decimal" step="any" min="0" data-l="price" value="' + (l.price != null ? l.price : "") + '" placeholder="?"></label><button class="x" type="button" data-rmline aria-label="ลบบรรทัด">✕</button></div>';
+    };
+    var rl = rounds().map(function (r) { return '<option value="' + esc(r) + '">'; }).join("");
+    var h = '<form id="bF" class="fgrid">' +
+      '<label class="f">ร้าน<select id="bSup">' + supOpts + "</select></label>" +
+      '<label class="f">ชื่อที่แสดง (ไม่บังคับ)<input type="text" id="bSupName" value="' + esc(b.supplierName || "") + '" placeholder="เช่น Shopee รวม 3 ร้าน"></label>' +
+      '<label class="f">รอบ<input type="text" id="bRound" list="roundList" value="' + esc(b.round || "") + '"><datalist id="roundList">' + rl + "</datalist></label>" +
+      '<label class="f">เลขบิล / อ้างอิง<input type="text" id="bRef" value="' + esc(b.ref || "") + '"></label>' +
+      '<label class="f">วันที่สั่ง<input type="date" id="bDate" value="' + esc(b.orderDate || today()) + '"></label>' +
+      '<label class="f">ครบกำหนดจ่าย<input type="date" id="bDue" value="' + esc(b.dueDate || "") + '"></label>' +
+      '<div class="full"><div class="sub" style="font-weight:500;margin-bottom:4px">รายการของ <span class="hint">(จำนวนเป็นแพ็ค เช่น ถุง/ขวด · ของไม่มีแพ็คใส่เป็นหน่วย)</span></div><div id="bLines" style="display:flex;flex-direction:column;gap:8px">' + (b.lines || []).map(lineRow).join("") + '</div><button class="linkbtn" type="button" id="addLine">+ เพิ่มรายการ</button></div>' +
+      '<label class="f">ค่าส่ง (฿)<input type="number" inputmode="decimal" step="any" id="bShip" value="' + (b.shipping || "") + '"></label>' +
+      '<label class="f">ส่วนลด (฿)<input type="number" inputmode="decimal" step="any" id="bDisc" value="' + (b.discount || "") + '"></label>' +
+      '<label class="f">ยอดที่ต้องจ่าย (฿)<input type="number" inputmode="decimal" step="any" id="bAmt" value="' + (b.amount != null ? b.amount : "") + '"><span class="hint" id="bCalc"></span></label>' +
+      '<label class="check" style="align-self:end;padding-bottom:10px"><input type="checkbox" id="bEst"' + (b.estimate ? " checked" : "") + "> ยอดประมาณ (ยังไม่ยืนยัน)</label>" +
+      '<label class="f full">ลิงก์บิลของร้าน<input type="text" id="bLink" value="' + esc(b.link || "") + '" placeholder="https://"></label>' +
+      '<label class="f full">หมายเหตุ<textarea id="bNote">' + esc(b.note || "") + "</textarea></label>" +
+      '<div class="actions full"><button class="btn" type="submit">' + (id ? "บันทึกการแก้ไข" : "สร้างบิล") + "</button>" + (id ? '<button class="btn ghost" type="button" id="bCancel">' + (b.cancelled ? "ยกเลิกการยกเลิก" : "ยกเลิกบิล") + '</button><button class="btn ghost" type="button" id="bDel" style="color:var(--out)">ลบบิล</button>' : "") + "</div></form>";
+    openSheet(id ? "แก้ไขบิล" : "บิลใหม่", h, function (box) {
+      var amtDirty = b.amount != null && id;
+      function readLines() {
+        return Array.prototype.map.call($("bLines").children, function (r) {
+          var it = r.querySelector('[data-l="item"]').value, pk = num(r.querySelector('[data-l="packs"]').value), pr = r.querySelector('[data-l="price"]').value.trim();
+          return { item: it, packs: isFinite(pk) ? pk : 0, price: pr === "" ? null : num(pr) };
+        }).filter(function (l) { return l.item; });
+      }
+      function recalc() {
+        var s = 0, miss = false; readLines().forEach(function (l) { if (l.price == null) miss = true; else s += l.packs * l.price; });
+        s += (num($("bShip").value) || 0) - (num($("bDisc").value) || 0);
+        $("bCalc").textContent = "ตามรายการ " + baht(s) + (miss ? " (บางรายการยังไม่มีราคา)" : "");
+        if (!amtDirty) $("bAmt").value = Math.round(s * 100) / 100 || "";
+      }
+      $("bAmt").addEventListener("input", function () { amtDirty = this.value !== ""; });
+      box.addEventListener("input", function (e) { if (e.target.id !== "bAmt") recalc(); });
+      box.addEventListener("change", function (e) {
+        if (e.target.getAttribute("data-l") === "item") {
+          var it = ITEM[e.target.value], pr = e.target.closest(".line-ed").querySelector('[data-l="price"]');
+          if (it && pr.value === "" && it.price_thb != null) pr.value = it.price_thb;
+          recalc();
+        }
+      });
+      $("addLine").addEventListener("click", function () { $("bLines").insertAdjacentHTML("beforeend", lineRow({})); });
+      $("bLines").addEventListener("click", function (e) { var r = e.target.closest("[data-rmline]"); if (r) { r.closest(".line-ed").remove(); recalc(); } });
+      recalc();
+      if ($("bCancel")) $("bCancel").addEventListener("click", function () { var cur = findBill(id); var nb = deep(cur); nb.cancelled = !cur.cancelled; saveBill(nb).then(function () { closeSheet(); toast(nb.cancelled ? "ยกเลิกบิลแล้ว" : "เปิดบิลอีกครั้ง"); }).catch(writeErr); });
+      if ($("bDel")) $("bDel").addEventListener("click", function () {
+        var btn = this; if (!btn.classList.contains("cf")) { btn.classList.add("cf"); btn.textContent = "แตะอีกครั้งเพื่อลบ"; return; }
+        var cur = findBill(id), ids = [];
+        (cur.payments || []).forEach(function (p) { (p.slips || []).forEach(function (s) { ids.push(s.id); }); });
+        C.bills.doc(id).delete().then(function () { closeSheet(); toast("ลบบิลแล้ว"); if (assetsNS) ids.forEach(function (a) { assetsNS["delete"](a).catch(function () {}); }); }).catch(writeErr);
+      });
+      $("bF").addEventListener("submit", function (e) {
+        e.preventDefault();
+        var nb = id ? deep(findBill(id)) : { payments: [], received: false, confirmed: false, createdAt: Date.now() };
+        nb.supplier = $("bSup").value || null;
+        nb.supplierName = $("bSupName").value.trim() || null;
+        if (!nb.supplier && !nb.supplierName) { $("bSupName").focus(); toast("ใส่ชื่อร้าน"); return; }
+        nb.round = $("bRound").value.trim() || defaultRound();
+        nb.ref = $("bRef").value.trim(); nb.orderDate = $("bDate").value || today(); nb.dueDate = $("bDue").value || null;
+        nb.lines = readLines(); nb.shipping = num($("bShip").value) || 0; nb.discount = num($("bDisc").value) || 0;
+        var a = num($("bAmt").value); nb.amount = isFinite(a) && $("bAmt").value !== "" ? a : null;
+        nb.estimate = $("bEst").checked; nb.link = $("bLink").value.trim() || null; nb.note = $("bNote").value.trim();
+        if (!nb.supplierName) delete nb.supplierName;
+        if (!id) nb.id = "b" + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+        saveBill(nb).then(function () { closeSheet(); openBill[nb.id] = true; roundSel = nb.round; toast(id ? "แก้ไขแล้ว" : "สร้างบิลแล้ว"); if (view !== "bills") location.hash = "#bills"; }).catch(writeErr);
+      });
+    });
+  }
+
+  function payForm(id) {
+    var x = billInfo(findBill(id)), files = [];
+    var h = '<div class="sub">' + esc(billName(x.b)) + " · ค้างจ่าย " + baht(x.remain) + '</div><form id="pF" class="fgrid">' +
+      '<label class="f">ยอดที่จ่าย (฿)<input type="number" inputmode="decimal" step="any" id="pAmt" value="' + (Math.round(x.remain * 100) / 100) + '" required></label>' +
+      '<label class="f">วิธีจ่าย<select id="pMethod"><option>โอน</option><option>QR พร้อมเพย์</option><option>เงินสด</option><option>บัตร</option><option>Shopee / แอป</option></select></label>' +
+      '<label class="f">วันที่<input type="date" id="pDate" value="' + today() + '"></label>' +
+      '<label class="f">เวลา<input type="time" id="pTime" value="' + nowTime() + '"></label>' +
+      '<label class="f">เลขอ้างอิง<input type="text" id="pRef" placeholder="เลขที่รายการ / Payment ID"></label>' +
+      '<label class="f">จ่ายโดย<input type="text" id="pPayer" placeholder="เช่น กองกลาง, Boon"></label>' +
+      '<label class="f full">หมายเหตุ<input type="text" id="pNote" placeholder="เช่น โอนเข้าบัญชีไหน"></label>' +
+      '<div class="full">' + (assetsNS ? '<label class="pick" for="pFiles">📎 แนบสลิป / ใบเสร็จ (รูปหรือ PDF)<input type="file" id="pFiles" accept="image/*,application/pdf" multiple></label><div class="thumbs" id="pPrev" style="margin-top:8px"></div>' : '<div class="hint">แนบรูปได้เฉพาะคนที่มีสิทธิ์แก้ไขแอปนี้</div>') + "</div>" +
+      '<div class="actions full"><button class="btn" type="submit" id="pSave">บันทึกการจ่าย</button></div></form>';
+    openSheet("บันทึกการจ่าย", h, function () {
+      if ($("pFiles")) $("pFiles").addEventListener("change", function () {
+        files = files.concat(Array.prototype.slice.call(this.files || []).filter(okFile)); this.value = "";
+        $("pPrev").innerHTML = files.map(function (f) { return f.type.indexOf("image/") === 0 ? '<img class="thumb" src="' + URL.createObjectURL(f) + '" alt="">' : '<span class="pdf">PDF</span>'; }).join("");
+      });
+      $("pF").addEventListener("submit", function (e) {
+        e.preventDefault();
+        var a = num($("pAmt").value); if (!(a > 0)) { $("pAmt").focus(); return; }
+        var btn = $("pSave"); btn.disabled = true;
+        uploadAll(files, function (msg) { btn.textContent = msg; }).then(function (slips) {
+          var nb = deep(findBill(id));
+          nb.payments = nb.payments || [];
+          nb.payments.push({ amount: a, date: $("pDate").value || today(), time: $("pTime").value || "", method: $("pMethod").value, ref: $("pRef").value.trim(), payer: $("pPayer").value.trim(), note: $("pNote").value.trim(), slips: slips, at: Date.now() });
+          return saveBill(nb).then(function () { closeSheet(); openBill[id] = true; toast("บันทึกการจ่ายแล้ว" + (slips.length ? " · แนบ " + slips.length + " ไฟล์" : "")); });
+        }).catch(function (err) { btn.disabled = false; btn.textContent = "บันทึกการจ่าย"; writeErr(err); });
+      });
+    });
+  }
+  function okFile(f) {
+    var ok = (f.type.indexOf("image/") === 0 || f.type === "application/pdf") && f.size <= 20 * 1024 * 1024;
+    if (!ok) toast("ข้ามไฟล์ " + f.name + " (ต้องเป็นรูปหรือ PDF ไม่เกิน 20MB)", 3000);
+    return ok;
+  }
+  function uploadAll(files, progress) {
+    var out = [], i = 0;
+    if (!files.length || !assetsNS) return Promise.resolve(out);
+    return new Promise(function (res, rej) {
+      (function next() {
+        if (i >= files.length) return res(out);
+        progress("กำลังอัปโหลด " + (i + 1) + "/" + files.length + "…");
+        assetsNS.upload(files[i]).then(function (r) { out.push({ id: r.id, pdf: files[i].type === "application/pdf" }); i++; next(); })
+          .catch(function (e) { out.forEach(function (s) { assetsNS["delete"](s.id).catch(function () {}); }); rej(e); });
+      })();
+    });
+  }
+  function receiveForm(id) {
+    var b = findBill(id);
+    var rows = (b.lines || []).map(function (l, i) {
+      var it = ITEM[l.item]; if (!it) return "";
+      return '<div class="menu-in"><div style="min-width:0"><div style="font-weight:500">' + esc(it.name) + '</div><div class="sub">สั่ง ' + fmt(l.packs) + " " + esc(packWord(it)) + (it.packSize ? " · " + fmt(it.packSize) + " " + esc(it.unit) + "/" + esc(it.packUnit) : "") + '</div></div><div class="row" style="flex-wrap:nowrap;gap:6px"><input type="number" inputmode="decimal" step="any" min="0" data-rv="' + i + '" value="' + l.packs + '" style="width:84px"><span class="sub">' + esc(packWord(it)) + "</span></div></div>";
+    }).join("");
+    var h = '<div class="sub">' + esc(billName(b)) + ' · กรอกจำนวนที่ได้รับจริง ระบบจะเพิ่มเข้าสต็อก</div><label class="f">วันที่รับ<input type="date" id="rvD" value="' + today() + '"></label><div>' + rows + '</div><div class="actions"><button class="btn" type="button" id="rvSave">รับเข้าสต็อก</button></div>';
+    openSheet("รับของ", h, function (box) {
+      $("rvSave").addEventListener("click", function () {
+        var date = $("rvD").value || today(), at = Date.now(), recs = [];
+        Array.prototype.forEach.call(box.querySelectorAll("[data-rv]"), function (inp) {
+          var l = b.lines[Number(inp.getAttribute("data-rv"))], it = ITEM[l.item], v = num(inp.value);
+          if (it && v > 0) recs.push({ item: it.id, kind: "in", qty: v * (it.packSize || 1), date: date, at: at, billId: id, note: "รับจากบิล " + billName(b) });
+        });
+        this.disabled = true; var btn = this;
+        Promise.all(recs.map(function (r) { return C.moves.add(r); })).then(function () {
+          var nb = deep(findBill(id)); nb.received = true; nb.receivedDate = date; return saveBill(nb);
+        }).then(function () { closeSheet(); toast("รับของเข้าสต็อก " + recs.length + " รายการ"); }).catch(function (e) { btn.disabled = false; writeErr(e); });
+      });
+    });
+  }
+  function importSeed() {
+    var btn = $("importSeed"); if (btn) { btn.disabled = true; btn.textContent = "กำลังนำเข้า…"; }
+    getJSON("seed.json").catch(function () { return getJSON("stock/seed.json"); }).then(function (seed) {
+      return Promise.all(seed.bills.map(function (b) { var body = deep(b); delete body.id; body.createdAt = Date.now(); return C.bills.doc(b.id).set(body); }));
+    }).then(function () { toast("นำเข้าบิลเปิดร้านแล้ว"); }).catch(function (e) { if (btn) { btn.disabled = false; btn.textContent = "นำเข้าบิลสั่งของเปิดร้าน (23 พ.ย.)"; } writeErr(e); });
+  }
+  // คลิกในหน้าบิล
+  document.addEventListener("click", function (e) {
+    var t;
+    if ((t = e.target.closest("[data-openbill]"))) { openBill[t.getAttribute("data-openbill")] = true; return; }
+    if ((t = e.target.closest("[data-item]")) && !$("sheet").contains(t)) { itemSheet(t.getAttribute("data-item")); return; }
+    if ((t = e.target.closest("[data-toggle]"))) { var id = t.getAttribute("data-toggle"); openBill[id] = !openBill[id]; render(); return; }
+    if ((t = e.target.closest("[data-pay]"))) { payForm(t.getAttribute("data-pay")); return; }
+    if ((t = e.target.closest("[data-recv]"))) { receiveForm(t.getAttribute("data-recv")); return; }
+    if ((t = e.target.closest("[data-edit]"))) { billForm(t.getAttribute("data-edit")); return; }
+    if ((t = e.target.closest("[data-confirm]"))) { var nb = deep(findBill(t.getAttribute("data-confirm"))); nb.confirmed = true; saveBill(nb).then(function () { toast("บันทึกว่าร้านยืนยันยอดแล้ว"); }).catch(writeErr); return; }
+    if ((t = e.target.closest("[data-slip]"))) { slipTarget = t.getAttribute("data-slip"); return; }
+    if ((t = e.target.closest("[data-delpay]"))) {
+      if (!t.classList.contains("cf")) { t.classList.add("cf"); t.textContent = "แตะอีกครั้งเพื่อลบ"; return; }
+      var p = t.getAttribute("data-delpay").split(":"), b = deep(findBill(p[0])), gone = b.payments.splice(Number(p[1]), 1)[0];
+      saveBill(b).then(function () { toast("ลบการจ่ายแล้ว"); if (assetsNS && gone) (gone.slips || []).forEach(function (s) { assetsNS["delete"](s.id).catch(function () {}); }); }).catch(writeErr);
+      return;
+    }
+    if ((t = e.target.closest(".thumb[data-full]"))) { $("lightboxImg").src = "/_blob/" + t.getAttribute("data-full"); $("lightbox").hidden = false; }
+  });
+  var slipTarget = null;
+  $("addSlipIn").addEventListener("change", function () {
+    var fs = Array.prototype.slice.call(this.files || []).filter(okFile); this.value = "";
+    var tg = slipTarget; slipTarget = null; if (!fs.length || !tg) return;
+    var p = tg.split(":");
+    uploadAll(fs, function (m) { toast(m); }).then(function (slips) {
+      var b = deep(findBill(p[0])), pay = b.payments[Number(p[1])]; pay.slips = (pay.slips || []).concat(slips);
+      return saveBill(b).then(function () { toast("แนบสลิปแล้ว " + slips.length + " ไฟล์", 2500); });
+    }).catch(writeErr);
+  });
+  $("lightbox").addEventListener("click", function () { $("lightbox").hidden = true; $("lightboxImg").src = ""; });
+
+  // ---------- ยอดขาย + แผน + คำนวณ ----------
+  function renderSales(el) {
+    if (!salesDate) salesDate = today();
+    var rec = sales[salesDate];
+    if (!salesDraft || salesDraft.date !== salesDate) salesDraft = { date: salesDate, cups: copy(rec ? rec.cups : {}) };
+    var p = M.p, pc = planCups(p);
+    var h = '<div><h2>ยอดขาย และการคำนวณ</h2><div class="sub">บันทึกยอดขายรายวันต่อเมนู → ระบบหักวัตถุดิบออกจากสต็อกให้ และใช้คิดอัตราใช้จริง</div>' + loadingNote() + "</div>";
+    h += '<div class="grid2"><div class="card"><div class="row between" style="margin-bottom:6px"><h3>บันทึกยอดขาย</h3><input type="date" id="sDate" value="' + salesDate + '" style="width:auto"></div>' +
+      '<div class="sub" style="margin-bottom:4px">' + (rec ? "บันทึกไว้แล้ว แก้ได้" : "ยังไม่ได้บันทึกวันนี้") + " · ดูยอดจากเครื่อง POS แล้วกรอกจำนวนแก้ว</div>";
+    h += MENUS.map(function (m) {
+      return '<div class="menu-in"><div style="min-width:0"><span class="grade ' + m.grade + '">' + m.grade + "</span>" + esc(m.name) + '<div class="sub">แผน ~' + fmt(pc[m.id], 1) + ' แก้ว</div></div><div class="step"><button type="button" data-dec="' + m.id + '" aria-label="ลด">−</button><input type="number" inputmode="numeric" min="0" data-cup="' + m.id + '" value="' + (salesDraft.cups[m.id] != null ? salesDraft.cups[m.id] : "") + '" placeholder="0"><button type="button" data-inc="' + m.id + '" aria-label="เพิ่ม">+</button></div></div>';
+    }).join("");
+    h += '<div class="sticky-save"><div style="flex:1"><div class="sub">รวม</div><b class="num" id="sTotal" style="font-size:20px">' + fmt(sumCups(salesDraft.cups)) + ' แก้ว</b></div><button class="btn" type="button" id="sSave">บันทึกยอดขาย</button></div></div>';
+    // แผน
+    h += '<div style="display:flex;flex-direction:column;gap:16px"><div class="card"><h3>แผนการขาย (ใช้คิดสั่งของ)</h3><div class="fgrid">' +
+      '<label class="f full">แก้ว/วัน<div class="row" style="flex-wrap:nowrap"><input type="number" inputmode="numeric" id="pCups" value="' + p.cups + '" style="max-width:120px">' + SH.menu.plan_default.cups_presets.map(function (c) { return '<button class="btn ghost sm" type="button" data-preset="' + c + '">' + c + "</button>"; }).join("") + "</div>" +
+      '<span class="hint">' + SH.menu.break_even_cups_per_day + " = ขั้นต่ำไม่ขาดทุน · " + SH.menu.expected_cups_per_day + " = ยอดคาดการณ์ (ยังไม่ยืนยัน)</span></label>" +
+      '<label class="f full">แบ่งยอดให้แต่ละเมนู<select id="pMode"><option value="grade"' + (p.mode === "grade" ? " selected" : "") + ">ตามเกรดคาดขายดี (A4 B3 C2 D1)</option><option value=\"equal\"" + (p.mode === "equal" ? " selected" : "") + ">เท่ากันทุกเมนู</option><option value=\"custom\"" + (p.mode === "custom" ? " selected" : "") + ">กรอกเองทีละเมนู (ใช้ยอดในฟอร์มซ้าย)</option></select></label>" +
+      '<label class="f">ท็อปครีมชีส (% ของชาใส/ชานม)<input type="number" inputmode="decimal" id="pCheese" value="' + Math.round(p.cheese * 100) + '"><span class="hint">' + (SH.menu.plan_default.cheese_top_share_confirmed ? "" : '<span class="tag">ค่าสมมติ</span>') + "</span></label>" +
+      '<label class="f">สำรองกันขาด (วัน)<input type="number" inputmode="numeric" id="pSafety" value="' + p.safety + '"></label>' +
+      '<label class="f">วันเปิดร้าน<input type="date" id="pOpen" value="' + esc(p.openDate) + '"><span class="hint">ตั้งแล้วจะหักสต็อกตามแผนในวันที่ลืมบันทึกยอด</span></label>' +
+      '<div style="display:flex;flex-direction:column;gap:8px;justify-content:center"><label class="check"><input type="checkbox" id="pAuto"' + (p.autoDeduct ? " checked" : "") + '> หักตามแผนถ้าไม่ได้บันทึกยอด</label><label class="check"><input type="checkbox" id="pRound"' + (p.round ? " checked" : "") + "> คิดเบสเป็นล็อต (เศษทิ้งเมื่อครบ 24 ชม.)</label></div>" +
+      '<div class="actions full"><button class="btn" type="button" id="pSave">บันทึกแผน</button></div></div></div>';
+    // ประวัติ 14 วัน
+    var days = Object.keys(sales).sort().reverse().slice(0, 14);
+    h += '<div class="card"><h3>ยอดขายย้อนหลัง</h3>' + (days.length ? '<div class="tbl-wrap"><table><thead><tr><th>วันที่</th><th class="r">แก้ว</th><th class="r">เทียบแผน</th><th class="r">ต้นทุนวัตถุดิบ</th></tr></thead><tbody>' + days.map(function (d) {
+      var c = sumCups(sales[d].cups), u = usageFor(sales[d].cups, { round: p.round }), co = costOf(u.U).cost;
+      return '<tr><td><button class="linkbtn" type="button" data-sday="' + d + '">' + thDate(d, true) + '</button></td><td class="r">' + fmt(c) + '</td><td class="r">' + (M.plan.total ? fmt(c / M.plan.total * 100) + "%" : "–") + '</td><td class="r">' + baht(co) + "</td></tr>";
+    }).join("") + "</tbody></table></div>" : '<div class="empty">ยังไม่มียอดขาย เริ่มบันทึกได้จากฟอร์มด้านซ้าย</div>') + "</div></div></div>";
+    // คำนวณละเอียด
+    var src = calcSrc === "day" && rec ? "day" : calcSrc === "actual" && M.actual ? "actual" : "plan";
+    var cups = src === "day" ? rec.cups : src === "actual" ? avgCups() : pc;
+    var u = usageFor(cups, { round: p.round });
+    h += '<div class="card"><div class="row between" style="margin-bottom:8px"><h3>คำนวณละเอียด</h3><div class="seg" id="calcSeg"><button type="button" data-c="plan" class="' + (src === "plan" ? "on" : "") + '">ตามแผน</button><button type="button" data-c="actual" class="' + (src === "actual" ? "on" : "") + '"' + (M.actual ? "" : " disabled") + '>เฉลี่ย 7 วัน</button><button type="button" data-c="day" class="' + (src === "day" ? "on" : "") + '"' + (rec ? "" : " disabled") + ">วันที่ " + thDate(salesDate) + "</button></div></div>" + calcDetail(cups, u) + "</div>";
+    el.innerHTML = '<div id="salesRoot" style="display:flex;flex-direction:column;gap:16px;min-width:0">' + h + "</div>";
+    bindSales($("salesRoot"), el);
+  }
+  function avgCups() {
+    var o = {}; M.recent.forEach(function (d) { var c = sales[d].cups || {}; for (var k in c) o[k] = (o[k] || 0) + (Number(c[k]) || 0) / M.recent.length; }); return o;
+  }
+  function calcDetail(cups, u) {
+    var h = '<div class="tbl-wrap"><table><thead><tr><th>เมนู</th><th class="r">แก้ว/วัน</th><th class="r">ต้นทุน/แก้ว</th><th class="r">ราคาขาย</th><th class="r">กำไรต้น</th></tr></thead><tbody>';
+    var tc = 0, tr = 0, tcost = 0;
+    MENUS.forEach(function (m) {
+      var n = Number(cups[m.id]) || 0, one = {}; one[m.id] = 1;
+      var cu = costOf(usageFor(one, { round: false }).U), price = menuPrice(m);
+      tc += n; tcost += n * cu.cost; if (price) tr += n * price;
+      h += '<tr><td><span class="grade ' + m.grade + '">' + m.grade + "</span>" + esc(m.name) + '</td><td class="r">' + fmt(n, 1) + '</td><td class="r">' + baht(cu.cost) + (cu.miss.length ? "*" : "") + '</td><td class="r">' + (price ? baht(price) : '<span class="tag">ยังไม่ตั้ง</span>') + '</td><td class="r">' + (price ? baht(price - cu.cost) : "–") + "</td></tr>";
+    });
+    h += '<tr class="total"><td>รวมต่อวัน</td><td class="r">' + fmt(tc, 1) + '</td><td class="r">' + baht(tcost) + '</td><td class="r">' + baht(tr) + '</td><td class="r">' + baht(tr - tcost) + "</td></tr></tbody></table></div>";
+    h += '<div class="hint">ต้นทุน/แก้วคิดจากราคาใน shared/ingredients.json ไม่รวมเศษเบสทิ้ง · * = มีวัตถุดิบที่ยังไม่มีราคา (นม ครีมชีส บุก องุ่นสด แก้ว หลอด) ตัวเลขจึงต่ำกว่าจริง · ราคาขายหน้าร้าน ไม่หัก GP เดลิเวอรี ' + SH.menu.delivery_gp_pct + "% · องุ่นปั่นยังไม่ตั้งราคา (รายได้รวมจึงไม่นับ)</div>";
+    h += '<h3 style="margin:16px 0 6px">วัตถุดิบที่ใช้</h3><div class="tbl-wrap"><table><thead><tr><th>ของ</th><th class="r">ต่อวัน</th><th class="r">7 วัน</th><th class="r">30 วัน</th><th class="r">ค่าของ 30 วัน</th></tr></thead><tbody>';
+    var ids = Object.keys(u.U).sort(function (a, b) { return ITEMS.indexOf(ITEM[a]) - ITEMS.indexOf(ITEM[b]); }), t30 = 0;
+    ids.forEach(function (id) {
+      var it = ITEM[id], q = u.U[id], up = unitPrice(id), c30 = up == null ? null : q * 30 * up; if (c30) t30 += c30;
+      h += "<tr><td>" + esc(it.name) + '</td><td class="r">' + fmt(q, q < 10 ? 1 : 0) + " " + esc(it.unit) + '</td><td class="r">' + (it.packSize ? fmt(q * 7 / it.packSize, 1) + " " + esc(it.packUnit) : fmt(q * 7) + " " + esc(it.unit)) + '</td><td class="r">' + (it.packSize ? fmt(q * 30 / it.packSize, 1) + " " + esc(it.packUnit) : fmt(q * 30) + " " + esc(it.unit)) + '</td><td class="r">' + (c30 == null ? '<span class="tag">ไม่มีราคา</span>' : baht(c30)) + "</td></tr>";
+    });
+    h += '<tr class="total"><td>รวม (เฉพาะที่มีราคา)</td><td></td><td></td><td></td><td class="r">' + baht(t30) + "</td></tr></tbody></table></div>";
+    h += '<h3 style="margin:16px 0 6px">ชงเบสและของเตรียมต่อวัน</h3>' + prepTable(u);
+    return h;
+  }
+  function bindSales(root, el) {
+    function upd() { $("sTotal").textContent = fmt(sumCups(salesDraft.cups)) + " แก้ว"; }
+    $("sDate").addEventListener("change", function () { salesDate = this.value || today(); salesDraft = null; renderSales(el); });
+    root.addEventListener("input", function (e) {
+      var id = e.target.getAttribute && e.target.getAttribute("data-cup"); if (!id) return;
+      var v = num(e.target.value); if (e.target.value === "") delete salesDraft.cups[id]; else if (v >= 0) salesDraft.cups[id] = Math.round(v); upd();
+    });
+    root.querySelectorAll("[data-inc],[data-dec]").forEach(function (b) {
+      b.addEventListener("click", function () {
+        var id = b.getAttribute("data-inc") || b.getAttribute("data-dec"), d = b.hasAttribute("data-inc") ? 1 : -1;
+        var v = Math.max(0, (Number(salesDraft.cups[id]) || 0) + d); salesDraft.cups[id] = v;
+        root.querySelector('[data-cup="' + id + '"]').value = v; upd();
+      });
+    });
+    $("sSave").addEventListener("click", function () {
+      var c = {}; for (var k in salesDraft.cups) if (Number(salesDraft.cups[k]) > 0) c[k] = Number(salesDraft.cups[k]);
+      var btn = this; btn.disabled = true;
+      C.sales.doc(salesDate).set({ date: salesDate, cups: c, at: Date.now() }).then(function () { btn.disabled = false; toast("บันทึกยอดขาย " + thDate(salesDate) + " แล้ว · " + fmt(sumCups(c)) + " แก้ว"); })
+        .catch(function (e) { btn.disabled = false; writeErr(e); });
+    });
+    root.querySelectorAll("[data-preset]").forEach(function (b) { b.addEventListener("click", function () { $("pCups").value = b.getAttribute("data-preset"); }); });
+    root.querySelectorAll("[data-sday]").forEach(function (b) { b.addEventListener("click", function () { salesDate = b.getAttribute("data-sday"); salesDraft = null; calcSrc = "day"; renderSales(el); window.scrollTo(0, 0); }); });
+    $("calcSeg").addEventListener("click", function (e) { var b = e.target.closest("button"); if (!b || b.disabled) return; calcSrc = b.getAttribute("data-c"); renderSales(el); });
+    $("pSave").addEventListener("click", function () {
+      var d = { cups: Math.max(0, num($("pCups").value) || 0), mode: $("pMode").value, cheese: Math.max(0, Math.min(100, num($("pCheese").value) || 0)) / 100,
+        safety: Math.max(0, num($("pSafety").value) || 0), openDate: $("pOpen").value || "", autoDeduct: $("pAuto").checked, round: $("pRound").checked, at: Date.now() };
+      if (d.mode === "custom") { d.custom = {}; MENUS.forEach(function (m) { d.custom[m.id] = Number(salesDraft.cups[m.id]) || 0; }); d.cups = sumCups(d.custom); }
+      else if (planDoc && planDoc.custom) d.custom = planDoc.custom;
+      C.settings.doc("plan").set(d).then(function () { toast("บันทึกแผนแล้ว · " + fmt(d.cups) + " แก้ว/วัน"); }).catch(writeErr);
+    });
+  }
+
+  // ---------- sheet / toast / errors ----------
+  var lastFocus = null;
+  function openSheet(title, html, mount) {
+    if ($("sheet").hidden) lastFocus = document.activeElement;
+    $("sheetTitle").textContent = title; $("sheetBody").innerHTML = html;
+    var nb = $("sheetBody").cloneNode(true); $("sheetBody").replaceWith(nb); // ล้าง listener เก่า
+    $("sheet").hidden = false; document.body.classList.add("noscroll");
+    if (mount) mount(nb);
+  }
+  function closeSheet() { $("sheet").hidden = true; document.body.classList.remove("noscroll"); $("sheetBody").innerHTML = ""; if (lastFocus && lastFocus.focus) try { lastFocus.focus(); } catch (e) {} }
+  $("sheetX").addEventListener("click", closeSheet);
+  $("sheet").addEventListener("click", function (e) { if (e.target === $("sheet")) closeSheet(); });
+  document.addEventListener("keydown", function (e) { if (e.key === "Escape") { if (!$("lightbox").hidden) $("lightbox").hidden = true; else if (!$("sheet").hidden) closeSheet(); } });
+  var toastT = null;
+  function toast(msg, ms) { var el = $("toast"); el.textContent = msg; el.hidden = false; clearTimeout(toastT); toastT = setTimeout(function () { el.hidden = true; }, ms || 2200); }
+  function banner(msg) { var b = $("banner"); b.textContent = msg; b.hidden = !msg; }
+  function writeErr(err) {
+    var c = err && err.code;
+    if (!C.bills) { banner("ยังเชื่อมต่อฐานข้อมูลไม่ได้ เปิดหน้านี้ผ่าน claude.ai และล็อกอินก่อน"); return; }
+    banner(c === "not_granted" || c === "invalid_argument" ? "บัญชีนี้ไม่มีสิทธิ์แก้ข้อมูล ขอสิทธิ์แก้ไขจากเจ้าของแอป" :
+      c === "too_large" ? "ไฟล์ใหญ่เกินไป (เกิน 20MB)" : c === "unsupported_type" ? "ชนิดไฟล์ไม่รองรับ ใช้รูปหรือ PDF" : "บันทึกไม่สำเร็จ ลองใหม่อีกครั้ง");
+    try { console.error(err); } catch (e) {}
+  }
+
+  // ---------- theme ----------
+  try { var th = localStorage.getItem("kacha-stock-theme"); if (th) document.documentElement.setAttribute("data-theme", th); } catch (e) {}
+  $("themeBtn").addEventListener("click", function () {
+    var cur = document.documentElement.getAttribute("data-theme"), dark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+    var next = cur ? (cur === "dark" ? "light" : "dark") : (dark ? "light" : "dark");
+    document.documentElement.setAttribute("data-theme", next);
+    try { localStorage.setItem("kacha-stock-theme", next); } catch (e) {}
+  });
+
+  // ---------- เชื่อม db ----------
+  function snapDocs(snap) { return snap.docs.map(function (d) { var o = copy(d.data()); o.id = d.id; return o; }); }
+  var renderT = null;
+  // ข้อมูลเปลี่ยน → วาดใหม่ แต่ถ้ากำลังพิมพ์อยู่ในหน้านั้น อัปเดตแค่แถบแท็บ (ไม่ล้างช่องที่กรอกค้าง)
+  function soon() {
+    clearTimeout(renderT);
+    renderT = setTimeout(function () {
+      var a = document.activeElement, typing = a && /^(INPUT|SELECT|TEXTAREA)$/.test(a.tagName) && $("v-" + view).contains(a) && a.type !== "search";
+      if (typing) { compute(); renderNav(); } else render();
+    }, 30);
+  }
+  function connect() {
+    if (!window.claude || !window.claude.use) { connErr = "เปิดหน้านี้ผ่าน claude.ai เพื่อบันทึกข้อมูล (ตอนนี้แสดงแค่การคำนวณจากแผน)"; for (var k in loaded) loaded[k] = true; render(); return; }
+    var slow = setTimeout(function () { if (!allLoaded()) { connErr = "ยังโหลดข้อมูลไม่ได้ ลองรีเฟรช หรือเช็กว่าล็อกอิน claude.ai แล้ว"; render(); } }, 10000);
+    window.claude.use("db").then(function (db) {
+      if (!db) { clearTimeout(slow); connErr = "เชื่อมฐานข้อมูลไม่ได้ (ต้องล็อกอิน claude.ai) · ตอนนี้แสดงแค่การคำนวณจากแผน"; for (var k in loaded) loaded[k] = true; render(); return; }
+      dbNS = db;
+      C = { bills: db.collection("bills"), moves: db.collection("moves"), sales: db.collection("sales"), settings: db.collection("settings") };
+      function onErr(name) { return function (e) { clearTimeout(slow); loaded[name] = true; connErr = "อ่านข้อมูลไม่สำเร็จ (" + (e && e.code || "error") + ")"; render(); }; }
+      C.bills.onSnapshot(function (s) { bills = snapDocs(s); loaded.bills = true; soon(); }, onErr("bills"));
+      C.moves.onSnapshot(function (s) { moves = snapDocs(s); loaded.moves = true; soon(); }, onErr("moves"));
+      C.sales.onSnapshot(function (s) { var o = {}; snapDocs(s).forEach(function (d) { o[d.id] = d; }); sales = o; loaded.sales = true; soon(); }, onErr("sales"));
+      C.settings.onSnapshot(function (s) { var p = null; snapDocs(s).forEach(function (d) { if (d.id === "plan") p = d; }); planDoc = p || {}; loaded.settings = true; if (allLoaded()) { clearTimeout(slow); connErr = null; } soon(); }, onErr("settings"));
+    }).catch(function () { clearTimeout(slow); connErr = "เชื่อมฐานข้อมูลไม่ได้"; for (var k in loaded) loaded[k] = true; render(); });
+    window.claude.use("assets").then(function (a) { assetsNS = a || null; if (SH) render(); }).catch(function () {});
+  }
+
+  loadShared().then(function () { route(); connect(); }).catch(function (e) {
+    banner("โหลดข้อมูลกลางของร้าน (shared/*.json) ไม่ได้ · " + (e && e.message || ""));
+  });
+})();
+</script>

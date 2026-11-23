@@ -1,38 +1,41 @@
 {
-  "_note": "รายการวัตถุดิบ/บรรจุภัณฑ์กลาง · id ตรงกับแอปสต็อก (collection items) · type fresh=ของสด dry=ของแห้ง · price_thb = ราคาต่อแพ็ค (null = ยังไม่มีข้อมูล) · ราคาใบชาจาก CLAUDE.md 12 ต.ค. 2026 (Mengyuan คิดจาก 330/500ก.) · ดึงจากแอปสต็อก 2026-11-10",
+  "_note": "รายการวัตถุดิบ/บรรจุภัณฑ์กลาง · id ตรงกับแอปสต็อก · type fresh=ของสด dry=ของแห้ง · price_thb = ราคาต่อแพ็ค (null = ยังไม่มีข้อมูล) · packSize = จำนวนหน่วย (unit) ต่อแพ็ค · minQty = สต็อกขั้นต่ำ (หน่วย unit) · supplier = id ใน suppliers.json · active:false = เลิกใช้ · อัปเดตราคาใบชาและร้าน 2026-11-23 จากตะกร้าสั่งของเปิดร้าน",
   "items": [
     {
       "id": "it01",
-      "name": "Sisli ชาเขียวมะลิ",
+      "name": "Sisli ชาเขียวมะลิใส (A19 ซีซือหลี่)",
       "category": "ใบชา",
       "type": "dry",
       "unit": "ก.",
       "packSize": 500,
       "packUnit": "ถุง",
       "minQty": 170,
-      "price_thb": 310
+      "price_thb": 350,
+      "supplier": "chaiwala"
     },
     {
       "id": "it02",
-      "name": "TDA ชาเขียวมะลิ",
+      "name": "TEA(มะลิ) Zen ใบชาเขียวมะลิ",
       "category": "ใบชา",
       "type": "dry",
       "unit": "ก.",
       "packSize": 500,
       "packUnit": "ถุง",
       "minQty": 170,
-      "price_thb": null
+      "price_thb": 295,
+      "supplier": "tea_corp"
     },
     {
       "id": "it03",
-      "name": "TDA ชาข้าวหอม",
+      "name": "TEA(ข้าวหอม) Zen ชาข้าวหอม",
       "category": "ใบชา",
       "type": "dry",
       "unit": "ก.",
       "packSize": 500,
       "packUnit": "ถุง",
       "minQty": 170,
-      "price_thb": null
+      "price_thb": 349,
+      "supplier": "tea_corp"
     },
     {
       "id": "it04",
@@ -43,18 +46,20 @@
       "packSize": 500,
       "packUnit": "ถุง",
       "minQty": 170,
-      "price_thb": null
+      "price_thb": 410,
+      "supplier": "yiwulong"
     },
     {
       "id": "it05",
-      "name": "Chaiwala ชาอู่หลงคามิเลีย",
+      "name": "Chaiwala อู่หลงคาเมลเลีย",
       "category": "ใบชา",
       "type": "dry",
       "unit": "ก.",
       "packSize": 500,
       "packUnit": "ถุง",
       "minQty": 170,
-      "price_thb": 370
+      "price_thb": 350,
+      "supplier": "chaiwala"
     },
     {
       "id": "it06",
@@ -65,51 +70,84 @@
       "packSize": 250,
       "packUnit": "ถุง",
       "minQty": 0,
-      "price_thb": 165
+      "price_thb": 165,
+      "active": false,
+      "note": "เลิกใช้ เปลี่ยนเป็น Overlord (it37) 2026-11-23",
+      "supplier": null
     },
     {
-      "id": "it36",
-      "name": "Homglai ชาหอมหมื่นลี้",
+      "id": "it37",
+      "name": "Overlord ทิกวนอิม Yushan Lanyin",
       "category": "ใบชา",
       "type": "dry",
       "unit": "ก.",
       "packSize": 500,
       "packUnit": "ถุง",
       "minQty": 0,
-      "price_thb": 670
+      "price_thb": 335,
+      "supplier": "kaishi",
+      "note": "ราคาหลังโค้ดส่วนลด ฿50"
+    },
+    {
+      "id": "it36",
+      "name": "หอมไกล ใบหอมหมื่นลี้ homglaiOsm",
+      "category": "ใบชา",
+      "type": "dry",
+      "unit": "ก.",
+      "packSize": 500,
+      "packUnit": "ถุง",
+      "minQty": 0,
+      "price_thb": 670,
+      "supplier": "homglai"
+    },
+    {
+      "id": "it38",
+      "name": "Chaiwala ซิ่นหยาง ลี่ลี่เซียง เขียวมะลิ",
+      "category": "ใบชา",
+      "type": "dry",
+      "unit": "ก.",
+      "packSize": 500,
+      "packUnit": "ถุง",
+      "minQty": 0,
+      "price_thb": 390,
+      "supplier": "chaiwala",
+      "note": "ใช้กับองุ่นปั่น (มะลิองุ่น)"
     },
     {
       "id": "it08",
-      "name": "Chaiwala ต้าหงเผา",
+      "name": "Chaiwala ซิ่นหยาง ลี่ลี่เซียง ต้าหงเผา",
       "category": "ใบชา",
       "type": "dry",
       "unit": "ก.",
       "packSize": 500,
       "packUnit": "ถุง",
       "minQty": 220,
-      "price_thb": 390
+      "price_thb": 390,
+      "supplier": "chaiwala"
     },
     {
       "id": "it10",
-      "name": "Meiji นมสด",
+      "name": "Meiji นมสด 2 ล.",
       "category": "นม/ครีม",
       "type": "fresh",
       "unit": "มล.",
       "packSize": 2000,
       "packUnit": "กล่อง",
       "minQty": 700,
-      "price_thb": null
+      "price_thb": null,
+      "supplier": "makro"
     },
     {
       "id": "it11",
-      "name": "Carnation นมข้นจืด",
+      "name": "Carnation Extra นมข้นจืด 1 ล.",
       "category": "นม/ครีม",
       "type": "fresh",
       "unit": "มล.",
       "packSize": 1000,
-      "packUnit": "กระป๋อง",
+      "packUnit": "กล่อง",
       "minQty": 500,
-      "price_thb": null
+      "price_thb": null,
+      "supplier": "makro"
     },
     {
       "id": "it12",
@@ -120,29 +158,34 @@
       "packSize": 1000,
       "packUnit": "กระป๋อง",
       "minQty": 300,
-      "price_thb": null
+      "price_thb": null,
+      "active": false,
+      "note": "ไม่ได้ใช้ในสูตรปัจจุบัน (ใช้ Carnation)",
+      "supplier": null
     },
     {
       "id": "it13",
-      "name": "Coffeemate ครีมเทียม",
+      "name": "Coffee-mate ครีมเทียม 1 กก.",
       "category": "นม/ครีม",
       "type": "fresh",
       "unit": "ก.",
       "packSize": 1000,
       "packUnit": "ถุง",
       "minQty": 150,
-      "price_thb": null
+      "price_thb": null,
+      "supplier": "makro"
     },
     {
       "id": "it14",
-      "name": "Anchor ครีมชีส",
+      "name": "Anchor ครีมชีส 1 กก.",
       "category": "นม/ครีม",
       "type": "fresh",
       "unit": "ก.",
       "packSize": 1000,
       "packUnit": "ก้อน",
       "minQty": 200,
-      "price_thb": null
+      "price_thb": null,
+      "supplier": "makro"
     },
     {
       "id": "it15",
@@ -153,51 +196,75 @@
       "packSize": 1000,
       "packUnit": "กล่อง",
       "minQty": 300,
-      "price_thb": null
+      "price_thb": null,
+      "active": false,
+      "note": "เปลี่ยนเป็น Millac Gold (it39) ตามสูตรครีมชีส 2026-11-10",
+      "supplier": null
+    },
+    {
+      "id": "it39",
+      "name": "Millac Gold วิปปิ้งครีม 1 ล.",
+      "category": "นม/ครีม",
+      "type": "fresh",
+      "unit": "มล.",
+      "packSize": 1000,
+      "packUnit": "กล่อง",
+      "minQty": 0,
+      "price_thb": null,
+      "supplier": "makro"
     },
     {
       "id": "it16",
-      "name": "Teapot นมข้นหวาน",
+      "name": "Teapot นมข้นหวาน 2 กก.",
       "category": "นม/ครีม",
       "type": "fresh",
       "unit": "ก.",
-      "packSize": 380,
-      "packUnit": "กระป๋อง",
+      "packSize": 2000,
+      "packUnit": "ถุง",
       "minQty": 100,
-      "price_thb": null
+      "price_thb": null,
+      "supplier": "makro",
+      "note": "ขนาดแพ็คจากลิสต์ Makro 23 พ.ย. ยังไม่ยืนยันว่าเป็นถุงหรือกระป๋อง"
     },
     {
       "id": "it17",
-      "name": "บุกไข่มุกใส Dingfong",
+      "name": "บุกไข่มุกใส ติ่งฟง 600 ก.",
       "category": "ท็อปปิ้ง/ผลไม้",
       "type": "fresh",
       "unit": "ก.",
-      "packSize": 500,
+      "packSize": 400,
       "packUnit": "ถุง",
       "minQty": 0,
-      "price_thb": null
+      "price_thb": null,
+      "supplier": "homglai",
+      "note": "ถุงละ 600 ก. รวมน้ำเชื่อม · เนื้อบุก ~400 ก./ถุง (Boon) ให้ชั่งจริงตอนของมา · ไม่เปิดเก็บได้ 1 ปี เปิดแล้ว ~1 เดือน",
+      "unconfirmed": true
     },
     {
       "id": "it18",
-      "name": "องุ่น",
+      "name": "องุ่นสด",
       "category": "ท็อปปิ้ง/ผลไม้",
       "type": "fresh",
-      "unit": "กก.",
-      "packSize": null,
-      "packUnit": "",
+      "unit": "ก.",
+      "packSize": 1000,
+      "packUnit": "กก.",
       "minQty": 0,
-      "price_thb": null
+      "price_thb": null,
+      "supplier": "market",
+      "note": "ซื้อที่ตลาด ใกล้วันเปิด"
     },
     {
       "id": "it19",
-      "name": "Synova ไซรัปองุ่นม่วง",
+      "name": "SYNOVA ไซรัปองุ่น 1 ล.",
       "category": "ท็อปปิ้ง/ผลไม้",
       "type": "fresh",
       "unit": "มล.",
       "packSize": 1000,
       "packUnit": "ขวด",
-      "minQty": 0,
-      "price_thb": null
+      "minQty": 2000,
+      "price_thb": 278,
+      "supplier": "synova",
+      "note": "สั่งเพิ่มเมื่อเหลือ 2 ขวด"
     },
     {
       "id": "it20",
@@ -208,18 +275,22 @@
       "packSize": 1000,
       "packUnit": "ขวด",
       "minQty": 0,
-      "price_thb": null
+      "price_thb": null,
+      "active": false,
+      "note": "รวมเป็นรายการเดียว it19 (ยังไม่แยกม่วง/เขียว)",
+      "supplier": null
     },
     {
       "id": "it34",
-      "name": "NatureTaste ไซรัปองุ่นม่วง",
+      "name": "Nature Taste ไซรัปองุ่น 840 มล.",
       "category": "ท็อปปิ้ง/ผลไม้",
       "type": "fresh",
       "unit": "มล.",
       "packSize": 840,
       "packUnit": "ขวด",
       "minQty": 0,
-      "price_thb": null
+      "price_thb": 175,
+      "supplier": "naturetaste"
     },
     {
       "id": "it35",
@@ -230,18 +301,23 @@
       "packSize": 840,
       "packUnit": "ขวด",
       "minQty": 0,
-      "price_thb": null
+      "price_thb": null,
+      "active": false,
+      "note": "รวมเป็นรายการเดียว it34 (ยังไม่แยกม่วง/เขียว)",
+      "supplier": null
     },
     {
       "id": "it22",
-      "name": "มิตรผล น้ำเชื่อมสูตรละลายเร็ว",
+      "name": "มิตรผล น้ำเชื่อมสูตรละลายเร็ว 800 มล.",
       "category": "ไซรัป/ผง/อื่นๆ",
       "type": "dry",
       "unit": "มล.",
       "packSize": 800,
       "packUnit": "ถุง",
       "minQty": 0,
-      "price_thb": 37.5
+      "price_thb": 37.5,
+      "supplier": "makro",
+      "note": "ไม่ต้องแช่เย็น สั่งก่อนได้ · ใช้ ~3 ขวด/วัน"
     },
     {
       "id": "it23",
@@ -252,7 +328,10 @@
       "packSize": null,
       "packUnit": "",
       "minQty": 0,
-      "price_thb": null
+      "price_thb": null,
+      "active": false,
+      "note": "ไม่อยู่ในสูตรปัจจุบัน",
+      "supplier": null
     },
     {
       "id": "it24",
@@ -263,7 +342,9 @@
       "packSize": null,
       "packUnit": "",
       "minQty": 0,
-      "price_thb": null
+      "price_thb": null,
+      "note": "ใช้ในครีมชีสโฟม 3.5 ก./ล็อต · ยังไม่ได้สั่ง (ตกหล่นจากลิสต์ Makro)",
+      "supplier": null
     },
     {
       "id": "it25",
@@ -274,18 +355,22 @@
       "packSize": null,
       "packUnit": "",
       "minQty": 0,
-      "price_thb": null
+      "price_thb": null,
+      "self_made": true,
+      "note": "มีเครื่องทำน้ำแข็งเอง",
+      "supplier": null
     },
     {
       "id": "it26",
-      "name": "แก้ว 16oz",
+      "name": "แก้ว 16 oz",
       "category": "บรรจุภัณฑ์",
       "type": "dry",
       "unit": "ใบ",
       "packSize": null,
       "packUnit": "",
       "minQty": 0,
-      "price_thb": null
+      "price_thb": null,
+      "supplier": null
     },
     {
       "id": "it27",
@@ -296,7 +381,10 @@
       "packSize": null,
       "packUnit": "",
       "minQty": 0,
-      "price_thb": null
+      "price_thb": null,
+      "active": false,
+      "note": "นับรวมใน it26",
+      "supplier": null
     },
     {
       "id": "it28",
@@ -307,7 +395,8 @@
       "packSize": null,
       "packUnit": "",
       "minQty": 0,
-      "price_thb": null
+      "price_thb": null,
+      "supplier": null
     },
     {
       "id": "it29",
@@ -318,7 +407,8 @@
       "packSize": null,
       "packUnit": "",
       "minQty": 0,
-      "price_thb": null
+      "price_thb": null,
+      "supplier": null
     },
     {
       "id": "it30",
@@ -329,7 +419,9 @@
       "packSize": null,
       "packUnit": "",
       "minQty": 0,
-      "price_thb": null
+      "price_thb": null,
+      "note": "มี 3 แบบ สามรู · ปลายแหลม · ไข่มุก (ยังนับรวม)",
+      "supplier": null
     },
     {
       "id": "it31",
@@ -339,8 +431,10 @@
       "unit": "ม้วน",
       "packSize": null,
       "packUnit": "",
-      "minQty": 0,
-      "price_thb": null
+      "minQty": 1,
+      "price_thb": null,
+      "note": "ใช้ทุกเมนู ไม่ใช้ฝาโดม · ยังไม่รู้ว่า 1 ม้วนซีลได้กี่แก้ว",
+      "supplier": null
     },
     {
       "id": "it32",
@@ -351,18 +445,20 @@
       "packSize": null,
       "packUnit": "",
       "minQty": 0,
-      "price_thb": null
+      "price_thb": null,
+      "supplier": null
     },
     {
       "id": "it33",
-      "name": "สติกเกอร์",
+      "name": "สติกเกอร์ป้ายวันที่",
       "category": "บรรจุภัณฑ์",
       "type": "dry",
       "unit": "ดวง",
       "packSize": null,
       "packUnit": "",
       "minQty": 0,
-      "price_thb": null
+      "price_thb": null,
+      "supplier": null
     }
   ]
 }
