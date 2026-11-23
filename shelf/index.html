@@ -309,7 +309,7 @@
         <button type="button" class="sm-btn" id="calToday">วันนี้</button>
       </div>
       <div class="cal-grid" id="calGrid"></div>
-      <p class="help">ตัวเลขในแต่ละวันคือจำนวนฉลากที่หมดอายุวันนั้น สีแดงคือเลยกำหนดแล้วแต่ยังไม่ได้กดว่าทิ้งหรือใช้หมด บันทึกนี้เก็บอยู่ในเครื่องที่กดปริ้น</p>
+      <p class="help">ของที่ฉลากเขียนว่าหมดอายุกะไหน ให้ทิ้งตอนเริ่มกะนั้น ตัวเลขในแต่ละวันคือจำนวนฉลากที่หมดอายุวันนั้น สีแดงคือเลยกำหนดแล้วแต่ยังไม่ได้กดว่าทิ้งหรือใช้หมด บันทึกนี้เก็บอยู่ในเครื่องที่กดปริ้น</p>
     </section>
     <div class="cal-lists" id="calLists"></div>
   </div>
@@ -443,7 +443,7 @@
   const mode = () => (BT && S.cfg.mode !== 'system') ? 'niimbot' : 'system';
 
   const S = {
-    groups: {}, order: [], items: new Map(),   // ข้อมูลจาก shared/
+    groups: {}, order: [], items: new Map(), shifts: [],   // ข้อมูลจาก shared/
     queue: new Map(),                          // id -> { n, hours (กรอกเองเมื่อ shared ยังไม่มีตัวเลข), val, unit }
     customSeq: 0, tab: 'all', q: '', changed: null,
     madeAt: null,                              // null = ใช้เวลาปัจจุบัน
@@ -492,6 +492,8 @@
     extra(shelf.toppings, 'topping');
     extra(shelf.opened, 'opened');
     S.order = ['base', 'prep', 'topping', 'opened'];
+    S.shifts = (shelf.shifts || []).map(x => { const [hh, mm] = String(x.start).split(':').map(Number); return { name: x.name, min: hh * 60 + (mm || 0) }; })
+      .filter(x => x.name && x.min >= 0).sort((a, b) => a.min - b.min);
     S.local = S.local.filter(x => x && S.order.includes(x.group) && x.name && x.hours > 0);
     S.local.forEach(addLocal);
   }
@@ -503,6 +505,9 @@
   const fmtTime = d => `${pad2(d.getHours())}:${pad2(d.getMinutes())}`;
   const fmtLocal = d => `${d.getFullYear()}-${pad2(d.getMonth() + 1)}-${pad2(d.getDate())}T${fmtTime(d)}`;
   const fmtDur = h => (h >= 48 && h % 24 === 0) ? `${h / 24} วัน` : `${+h.toFixed(1)} ชม.`;
+  // ชื่อกะของเวลาหนึ่งๆ (ก่อนกะแรกของวันนับเป็นกะแรก) · ถ้า shared/ ไม่มีกะ คืน null แล้วใช้เวลาจริงแทน
+  const shiftOf = d => { if (!S.shifts.length) return null; const m = d.getHours() * 60 + d.getMinutes(); let r = S.shifts[0]; for (const x of S.shifts) if (m >= x.min) r = x; return r.name; };
+  const SHORT_LIFE_H = 12;   // ของอายุสั้นกว่านี้ ฉลากบอกเวลาหมดอายุจริงด้วย เพราะกะเดียวหยาบเกินไป
   const madeDate = () => S.madeAt ? new Date(S.madeAt) : new Date();
   const hoursOf = id => { const it = S.items.get(id); return it.hours ?? S.queue.get(id)?.hours ?? null; };
   const total = () => [...S.queue.values()].reduce((a, q) => a + q.n, 0);
@@ -519,39 +524,60 @@
     c.textBaseline = 'alphabetic';
     const pad = Math.round(1.5 * dpm), inW = W - pad * 2;
 
-    // ย่อขนาดตัวอักษรจนพอดีความกว้าง แล้ววางกึ่งกลางแนวตั้งของแถว
+    // ย่อขนาดตัวอักษรจนพอดีทั้งกว้างและสูง แล้ววางกึ่งกลางแนวตั้งของแถว
+    const fit = (text, weight, maxPx, rowH, maxW) => {
+      let px = Math.round(maxPx), m;
+      for (;;) {
+        c.font = `${weight} ${px}px ${FONT}`; m = c.measureText(text);
+        if ((m.width <= maxW && m.actualBoundingBoxAscent + m.actualBoundingBoxDescent <= rowH) || px <= 8) return { px, m };
+        px--;
+      }
+    };
     const put = (text, weight, maxPx, x, top, rowH, maxW, color = '#000', align = 'left') => {
-      let px = Math.round(maxPx);
-      do { c.font = `${weight} ${px}px ${FONT}`; } while (c.measureText(text).width > maxW && --px > 8);
-      const m = c.measureText(text), asc = m.actualBoundingBoxAscent, desc = m.actualBoundingBoxDescent;
-      c.fillStyle = color; c.textAlign = align;
-      c.fillText(text, x, top + (rowH - asc - desc) / 2 + asc);
+      const { px, m } = fit(text, weight, maxPx, rowH, maxW), asc = m.actualBoundingBoxAscent, desc = m.actualBoundingBoxDescent;
+      c.font = `${weight} ${px}px ${FONT}`; c.fillStyle = color; c.textAlign = align;
+      const base = top + (rowH - asc - desc) / 2 + asc;
+      c.fillText(text, x, base);
+      put.base = base;
       return m.width;
     };
 
     const made = madeDate(), hrs = hoursOf(id);
     const exp = hrs > 0 ? new Date(made.getTime() + hrs * 3600e3) : null;
+    const when = (d, withTime) => { const sh = shiftOf(d); return `${fmtDate(d)} ${sh ? sh : fmtTime(d)}${sh && withTime ? ' ' + fmtTime(d) : ''}`; };
+    const line = Math.max(2, Math.round(0.35 * dpm)), ip = Math.round(1.2 * dpm);
 
-    // แถว 1: ชื่อ + ประเภท
-    const r1 = H * 0.34;
-    const tagW = put(g.name, 600, H * 0.085, W - pad, pad, H * 0.12, inW * 0.4, '#000', 'right');
-    put(it.name.trim() || '—', 700, H * 0.2, pad, pad * 0.6, r1 - pad * 0.6, inW - tagW - pad);
+    // แถว 1: ชื่อ ตัวใหญ่ที่สุด + ป้ายหมวดในกรอบ มุมขวาบน
+    const r1 = Math.round(H * 0.42), tagH = Math.round(H * 0.2);
+    c.font = `700 ${Math.round(tagH * 0.72)}px ${FONT}`;
+    const tagW = Math.min(inW * 0.38, c.measureText(g.name).width + ip * 2);
+    c.lineWidth = line; c.strokeStyle = '#000';
+    c.strokeRect(W - pad - tagW + line / 2, pad * 0.6 + line / 2, tagW - line, tagH - line);
+    put(g.name, 700, tagH * 0.72, W - pad - tagW / 2, pad * 0.6, tagH, tagW - ip * 1.5, '#000', 'center');
+    const name = it.name.trim() || '—';
+    const beside = fit(name, 700, H * 0.38, r1 - pad * 0.3, inW - tagW - ip).px;          // ข้างป้ายหมวด
+    const belowTop = pad * 0.6 + tagH, below = fit(name, 700, H * 0.38, r1 - belowTop, inW).px;   // ใต้ป้ายหมวด เต็มความกว้าง
+    if (below > beside * 1.15) put(name, 700, below, pad, belowTop, r1 - belowTop, inW);
+    else put(name, 700, beside, pad, pad * 0.3, r1 - pad * 0.3, inW - tagW - ip);
 
-    // แถว 2: เวลาที่ทำ + อายุ
-    const madeTxt = `${g.verb} ${fmtDate(made)} ${fmtTime(made)}` + (S.shift.active ? ` · ${S.shift.active}` : '');
+    // แถว 2: ทำวันไหน กะไหน ใครทำ + อายุ
+    const r2 = Math.round(H * 0.2);
+    const madeTxt = `${g.verb} ${when(made)}` + (S.shift.active ? ` · ${S.shift.active}` : '');
     const durTxt = hrs > 0 ? `อายุ ${fmtDur(hrs)}` : '';
-    c.font = `600 ${Math.round(H * 0.095)}px ${FONT}`;
-    const durW = durTxt ? c.measureText(durTxt).width : 0;
-    if (durTxt) put(durTxt, 600, H * 0.095, W - pad, r1, H * 0.2, inW * 0.4, '#000', 'right');
-    put(madeTxt, 500, H * 0.105, pad, r1, H * 0.2, inW - durW - pad);
+    c.font = `600 ${Math.round(H * 0.1)}px ${FONT}`;
+    const durW = durTxt ? Math.min(inW * 0.35, c.measureText(durTxt).width) : 0;
+    if (durTxt) put(durTxt, 600, H * 0.1, W - pad, r1, r2, inW * 0.35, '#000', 'right');
+    put(madeTxt, 600, H * 0.115, pad, r1, r2, inW - durW - ip);
 
-    // ช่องวันเวลาหมดอายุ: พื้นดำตัวขาว หรือ กรอบตัวดำ (ใช้ความร้อนหัวพิมพ์น้อยกว่ามาก)
-    const by = Math.round(H * 0.56), bh = H - pad - by, ip = Math.round(1.2 * dpm);
+    // ช่องวันหมดอายุ: กรอบตัวดำ หรือ พื้นดำตัวขาว
+    const by = r1 + r2 + Math.round(H * 0.02), bh = H - pad * 0.6 - by;
     const frame = S.cfg.bar !== 'solid', ink = frame ? '#000' : '#fff';
     c.fillStyle = '#000'; c.fillRect(pad, by, inW, bh);
     if (frame) { const t = Math.max(3, Math.round(0.5 * dpm)); c.fillStyle = '#fff'; c.fillRect(pad + t, by + t, inW - t * 2, bh - t * 2); }
-    put('หมดอายุ', 600, H * 0.085, pad + ip, by + bh * 0.04, bh * 0.3, inW - ip * 2, ink);
-    put(exp ? `${fmtDate(exp)}  ${fmtTime(exp)}` : 'ยังไม่ได้ใส่อายุ', 700, H * 0.21, pad + ip, by + bh * 0.3, bh * 0.68, inW - ip * 2, ink);
+    const lab = fit('หมดอายุ', 700, bh * 0.36, bh, inW * 0.3), labW = lab.m.width;
+    put(exp ? when(exp, hrs < SHORT_LIFE_H) : 'ยังไม่ได้ใส่อายุ', 700, bh * 0.66, pad + ip * 2 + labW, by, bh, inW - labW - ip * 3, ink);
+    c.font = `700 ${lab.px}px ${FONT}`; c.textAlign = 'left'; c.fillStyle = ink;
+    c.fillText('หมดอายุ', pad + ip, put.base);
 
     // ตัดเป็นขาว/ดำล้วน ขอบตัวหนังสือจะคมเมื่อปริ้นความร้อน
     const img = c.getImageData(0, 0, W, H), d = img.data;
@@ -763,7 +789,7 @@
       : left < 6 * 3600e3 ? `<span class="st soon">อีก ${left < 3600e3 ? Math.max(1, Math.round(left / 60000)) + ' นาที' : Math.round(left / 3600e3) + ' ชม.'}</span>` : '';
     const sure = S.sure === 'log:' + x.k, g = S.groups[x.group];
     return `<div class="lg-row${x.done ? ' done' : ''}">
-      <div class="lg-time">${fmtTime(exp)}${showDate ? `<small>${esc(fmtDate(exp))}</small>` : ''}</div>
+      <div class="lg-time">${esc(shiftOf(exp) || fmtTime(exp))}<small>${showDate ? esc(fmtDate(exp)) + ' ' : ''}${fmtTime(exp)}</small></div>
       <div class="m-main"><div class="m-name">${esc(x.name)}${x.n > 1 ? ` ×${x.n}` : ''}</div>
         <div class="m-sub"><span>${esc(g ? g.verb : 'ทำ')} ${esc(fmtDate(made))} ${fmtTime(made)}${x.by ? ' · ' + esc(x.by) : ''}</span>${st}</div></div>
       <div class="lg-acts">
