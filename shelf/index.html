@@ -381,10 +381,13 @@
     <div class="field" id="niimBox">
       <span class="lbl">เครื่อง Niimbot</span>
       <p class="help" id="niimState"></p>
+      <p class="help" id="rollState" hidden></p>
       <div class="who-row">
         <button type="button" class="sm-btn" id="niimBtn"></button>
         <label for="density">ความเข้ม</label>
         <select id="density"><option value="1">1 จางสุด</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5 เข้มสุด</option></select>
+        <label for="ltype">ชนิดม้วน</label>
+        <select id="ltype"><option value="auto">อ่านจากม้วน</option><option value="1">มีช่องว่างระหว่างดวง</option><option value="2">มีแถบดำด้านหลัง</option><option value="5">ใส</option></select>
       </div>
     </div>
     <div class="field">
@@ -651,6 +654,15 @@
     $('niimState').textContent = on ? `เชื่อมต่อแล้ว: ${N.name}${meta ? ` (รุ่น ${meta.model})` : ' (ไม่รู้จักรุ่นนี้ จะลองปริ้นแบบ B1)'}` : 'ยังไม่ได้เชื่อมต่อ กด "ปริ้น" หรือปุ่มด้านล่างเพื่อเลือกเครื่อง';
     $('niimBtn').textContent = on ? 'ตัดการเชื่อมต่อ' : 'เชื่อมต่อเครื่องปริ้น';
     $('density').value = String(S.cfg.density || 3);
+    $('ltype').value = String(S.cfg.ltype || 'auto');
+    const r = on && N.roll;
+    $('rollState').hidden = !r;
+    if (r) {
+      const size = r.w && r.h ? `${+r.w.toFixed(1)}×${+r.h.toFixed(1)} มม.` : 'เครื่องไม่บอกขนาด';
+      const diff = r.w && r.h && (Math.abs(r.w - S.cfg.w) > 1.5 || Math.abs(r.h - S.cfg.h) > 1.5);
+      $('rollState').innerHTML = `ม้วนในเครื่อง: ${esc(size)} · ${esc(LTYPE_NAME[r.type] || 'ไม่รู้ชนิด')}${r.left != null ? ` · เหลือราว ${r.left} ดวง` : ''}${r.rfid ? '' : ' · ม้วนไม่มีชิป'}`
+        + (diff ? ` <span class="badge">ไม่ตรงกับขนาดที่ตั้งไว้ ${S.cfg.w}×${S.cfg.h} มม.</span> <button type="button" class="ghost-btn" data-rollsize="1">ใช้ขนาดของม้วน</button>` : '');
+    }
     const bar = S.cfg.bar === 'solid' ? 'solid' : 'frame';
     $('bars').innerHTML = [['frame', 'กรอบ ตัวดำ'], ['solid', 'พื้นดำ ตัวขาว']].map(([id, name]) => `<button type="button" data-bar="${id}" class="${bar === id ? 'on' : ''}" aria-pressed="${bar === id}">${name}</button>`).join('');
   }
@@ -886,17 +898,50 @@
     await loadNiim();
     if (!N.client) {
       N.client = new niimbluelib.NiimbotBluetoothClient();
-      N.client.on('disconnect', () => { N.name = ''; renderSettings(); });
+      N.client.on('disconnect', () => { N.name = ''; N.roll = null; renderSettings(); });
       N.client.on('printprogress', e => { if (S.busy) $('status').textContent = `กำลังปริ้นดวงที่ ${Math.min(e.page, e.pagesTotal)} จาก ${e.pagesTotal}`; });
     }
     if (!N.client.isConnected()) {
       $('status').textContent = 'เลือกเครื่อง Niimbot ในหน้าต่างที่ขึ้นมา';
       const info = await N.client.connect();
       N.name = info.deviceName || 'Niimbot';
+      await readRoll().catch(() => {});
     }
     renderSettings();
   }
-  const niimErr = (what, e) => e && e.name === 'NotFoundError' ? 'ยังไม่ได้เลือกเครื่องปริ้น กดอีกครั้งเพื่อเลือก' : `${what}ไม่สำเร็จ: ${(e && e.message) || e}`;
+  // รหัส error ที่เครื่อง Niimbot ส่งกลับมา (PrinterErrorCode ใน niimbluelib)
+  const NIIM_ERR = {
+    1: 'ฝาเครื่องเปิดอยู่ ปิดฝาให้สนิทแล้วลองใหม่',
+    2: 'ไม่มีสติกเกอร์ในเครื่อง ใส่ม้วนแล้วลองใหม่',
+    3: 'แบตเครื่องปริ้นอ่อน ชาร์จก่อนแล้วลองใหม่',
+    7: 'หัวพิมพ์ร้อนเกิน พักเครื่องสักครู่แล้วลองใหม่',
+    8: 'สติกเกอร์ออกผิดปกติ เช็กว่าใส่ม้วนถูกด้าน ปิดฝาสนิท และขนาดกับชนิดม้วนในหน้าตั้งค่าตรงกับม้วนที่ใส่',
+    9: 'เครื่องปริ้นยังทำงานอยู่ รอสักครู่แล้วลองใหม่',
+    16: 'ม้วนสติกเกอร์ไม่ตรงกับเครื่อง',
+  };
+  const niimErr = (what, e) => {
+    if (e && e.name === 'NotFoundError') return 'ยังไม่ได้เลือกเครื่องปริ้น กดอีกครั้งเพื่อเลือก';
+    const id = e && e.reasonId, msg = NIIM_ERR[id];
+    return `${what}ไม่สำเร็จ: ${msg ? `${msg} (รหัส ${id})` : (e && e.message) || e}`;
+  };
+  const LTYPE_NAME = { 1: 'มีช่องว่างระหว่างดวง', 2: 'มีแถบดำด้านหลัง', 3: 'ม้วนต่อเนื่อง', 5: 'ใส' };
+
+  // อ่านข้อมูลม้วนที่ใส่อยู่จากเครื่อง (RFID ของม้วน + ขนาดที่เครื่องวัดได้) · อ่านไม่ได้ก็ไม่เป็นไร
+  async function readRoll() {
+    const c = N.client; let info = {};
+    try { info = await c.fetchRfidInfo(); } catch { info = c.getRfidInfo() || {}; }
+    const tag = info.labelRfidInfo || {}, paper = info.paperInfo || {};
+    const r = {
+      type: tag.tagPresent && tag.consumablesType ? tag.consumablesType : (paper.valid && paper.paperType) || 0,
+      w: paper.valid && paper.paperWidth > 0 ? paper.paperWidth : 0,
+      h: paper.valid && paper.paperHeight > 0 ? paper.paperHeight : 0,
+      hPx: paper.valid && paper.paperHeightPixel > 0 ? paper.paperHeightPixel : 0,
+      left: tag.tagPresent && tag.allPaper > 0 ? tag.allPaper - tag.usedPaper : null,
+      rfid: !!tag.tagPresent,
+    };
+    N.roll = r; renderSettings();
+    return r;
+  }
 
   async function niimPrint() {
     S.busy = true; redraw();
@@ -906,12 +951,17 @@
       const dir = meta.printDirection || 'top', head = meta.printheadPixels || 384;   // ค่าของ B1 ถ้าเครื่องไม่บอกรุ่น
       const entries = [...S.queue.entries()], total = entries.reduce((a, [, e]) => a + e.n, 0);
       const density = Math.max(meta.densityMin || 1, Math.min(meta.densityMax || 5, S.cfg.density || meta.densityDefault || 3));
-      const task = c.protocol.newPrintTask(c.getPrintTaskType() || 'B1', { totalPages: total, density, labelType: L.LabelType.WithGaps, statusPollIntervalMs: 100, statusTimeoutMs: 8000 });
+      const roll = await readRoll();
+      // ชนิดม้วน: ตั้งเองในหน้าตั้งค่า > อ่านจากม้วน > มีช่องว่าง
+      const labelType = S.cfg.ltype && S.cfg.ltype !== 'auto' ? Number(S.cfg.ltype) : roll.type || L.LabelType.WithGaps;
+      // ไม่วาดฉลากสูงกว่าดวงที่เครื่องวัดได้ ไม่งั้นเครื่องจะดันกระดาษเกินดวง
+      const maxH = roll.hPx ? roll.hPx : undefined;
+      const task = c.protocol.newPrintTask(c.getPrintTaskType() || 'B1', { totalPages: total, density, labelType, statusPollIntervalMs: 100, statusTimeoutMs: 8000 });
       $('status').textContent = `กำลังส่งฉลาก ${total} ดวงไปที่ ${N.name}`;
       try {
         await task.printInit();
         for (const [id, e] of entries) {
-          const cv = drawLabel(document.createElement('canvas'), id, Object.assign({ dpi: meta.dpi || 203 }, dir === 'top' ? { maxW: head } : { maxH: head }));
+          const cv = drawLabel(document.createElement('canvas'), id, Object.assign({ dpi: meta.dpi || 203 }, dir === 'top' ? { maxW: head, maxH } : { maxH: head, maxW: maxH }));
           await task.printPage(L.ImageEncoder.encodeCanvas(cv, L.PageColorType.SingleColor, dir), e.n);
           await task.waitForPageFinished();
         }
@@ -981,6 +1031,7 @@
     else if (d.size) { const [a, b] = d.size.split('x').map(Number); setCfg({ w: a, h: b }); }
     else if (d.mode) setCfg({ mode: d.mode });
     else if (d.bar) setCfg({ bar: d.bar });
+    else if (d.rollsize && N.roll) setCfg({ w: Math.round(N.roll.w), h: Math.round(N.roll.h) });
     else if (d.day) { S.calDay = d.day; S.sure = null; const [y, m] = d.day.split('-').map(Number); S.calMonth = new Date(y, m - 1, 1); renderCal(); }
     else if (d.ldone) { const x = S.log.find(i => i.k === d.ldone); if (x) { x.done = x.done ? null : Date.now(); S.sure = null; saveLog(); renderCal(); } }
     else if (d.ldel) {
@@ -1023,6 +1074,7 @@
   });
   $('dpi').addEventListener('change', () => setCfg({ dpi: Number($('dpi').value) }));
   $('density').addEventListener('change', () => setCfg({ density: Number($('density').value) }));
+  $('ltype').addEventListener('change', () => setCfg({ ltype: $('ltype').value }));
   $('niimBtn').addEventListener('click', async () => {
     try { if (N.client && N.client.isConnected()) await N.client.disconnect(); else await niimConnect(); }
     catch (e) { $('niimState').textContent = niimErr('เชื่อมต่อ', e); return; }
